@@ -21,6 +21,7 @@ import SimpleAssetTable from './components/tables/SimpleAssetTable.js'
 import SimplePoolTable from './components/tables/SimplePoolTable.js'
 import SimpleInvestorTable from './components/tables/SimpleInvestorTable.js'
 import SimpleSecurityTable from './components/tables/SimpleSecurityTable.js'
+import SimpleOriginatorTable from './components/tables/SimpleOriginatorTable.js'
 
 
 import FormDialog from './components/forms/FormDialog.js'
@@ -109,16 +110,16 @@ function refreshState() {
   fetch('http://localhost:3001/chaincode', config)
     .then(response => response.json())
     .then((json) =>{
-      console.log("returned")
+      console.log("in refresh state method")
       // const element = GenerateCards(JSON.parse(json))
       // ReactDOM.render(element, document.getElementById('test'));
       // console.log("this")
       // console.log(this)
       var stateObjects = JSON.parse(json)
-      console.log(stateObjects)
+      // console.log(stateObjects)
       // TODO, use react "set state" properly
-      console.log("setting state")
-      console.log({"objects": JSON.parse(json)})
+      // console.log("setting state")
+      // console.log({"objects": JSON.parse(json)})
       // this.setState({"objects": JSON.parse(json)})
       localStorage.setItem('objects', json)
       // console.log("this.props")
@@ -128,18 +129,24 @@ function refreshState() {
       return JSON.parse(json)
   }).catch( (err) => {
       console.log("fetch failed")
+      console.log(err)
   });
 }
 
 class App extends Component {
 
-  // TODO, hacky way to rerender every 5 seconds, should rerender on change
+  // TODO, super hacky way to rerender every 5 seconds, should rerender on change
   componentDidMount() {
       setInterval(() => {
-          this.setState(() => {
-              console.log('setting state');
-              return { unseen: "does not display" }
-          });
+          console.log("component mounting in interval")
+          this.setState({ objects: refreshState() })
+          // refreshState()
+          // this.setState(() => {
+          //     // objects: this.handleRefresh()
+          //
+          //     // console.log('refreshing state');
+          //     // return { unseen: "does not display" }
+          // });
       }, 5000);
   }
 
@@ -149,8 +156,8 @@ class App extends Component {
     this.setState({ value });
   };
   handleRefresh = () =>  {
-    console.log("refreshing")
-    console.log(this.state.objects)
+    console.log("handleRefresh")
+    // console.log(this.state.objects)
     this.setState({ objects: refreshState() });
   };
   state = {
@@ -166,7 +173,8 @@ class App extends Component {
     return (
       <div className="App">
 
-        <div className="foo">
+        {/*
+        <div>
           <AppBar position="static">
             <Tabs value={value} onChange={this.handleChange}>
               <Tab label="Assets" />
@@ -177,11 +185,58 @@ class App extends Component {
           {value === 0 && <TabContainer><SimpleAssetTable></SimpleAssetTable></TabContainer>}
           {value === 1 && <TabContainer><SimplePoolTable></SimplePoolTable></TabContainer>}
         </div>
+        */}
 
-        <SimplePoolTable></SimplePoolTable>
-        <SimpleInvestorTable></SimpleInvestorTable>
-        <SimpleSecurityTable></SimpleSecurityTable>
+        <div>
+        <AppBar label="Originators" position="static" style={{position:'static',width:'90%', align: 'middle', margin: 'auto', padding: '10px'}} >
+            <Typography variant="title" color="inherit">
+              Originators
+            </Typography>
+          </AppBar>
+          <SimpleOriginatorTable></SimpleOriginatorTable>
+        </div>
 
+        <div style={{padding: '25px'}}>
+        <AppBar label="Assets" position="static" style={{position:'static',width:'90%', align: 'middle', margin: 'auto', padding: '10px'}} >
+            <Typography variant="title" color="inherit">
+              Assets
+            </Typography>
+          </AppBar>
+          <SimpleAssetTable></SimpleAssetTable>
+        </div>
+
+        <div>
+
+        <div style={{padding: '25px', width: '45%', float:'left'}}>
+          <AppBar label="Asset Pools" position="static" style={{position:'static',width:'90%', align: 'middle', margin: 'auto', padding: '10px'}} >
+            <Typography variant="title" color="inherit">
+              Asset Pools
+            </Typography>
+          </AppBar>
+          <SimplePoolTable></SimplePoolTable>
+        </div>
+
+
+        <div style={{padding: '25px', width: '45%', float: 'right'}}>
+          <AppBar label="Investors" position="static" style={{position:'static',width:'90%', align: 'middle', margin: 'auto', padding: '10px'}} >
+            <Typography variant="title" color="inherit">
+              Investors
+            </Typography>
+          </AppBar>
+          <SimpleInvestorTable></SimpleInvestorTable>
+        </div>
+
+        </div>
+        <div>
+        <AppBar label="Securities" position="static" style={{position:'static',width:'90%', align: 'middle', margin: 'auto', padding: '10px'}} >
+            <Typography variant="title" color="inherit">
+              Securities
+            </Typography>
+          </AppBar>
+          <SimpleSecurityTable></SimpleSecurityTable>
+        </div>
+
+        {/*
         <p id="test"> </p>
         <div id="CardContainer">
           <Card style={cardStyle} className="foo">
@@ -206,9 +261,6 @@ class App extends Component {
             </CardActions>
           </Card>
         </div>
-
-        <Button size="small" onClick={ this.handleRefresh }>Refresh</Button>
-
 
         <p> Form Dialog</p>
         <FormDialog> </FormDialog>
@@ -243,7 +295,8 @@ class App extends Component {
         <p> Set Originator</p>
         <SetOriginatorForm> </SetOriginatorForm>
 
-
+        */}
+        <Button size="small" onClick={ this.handleRefresh }>Refresh</Button>
       </div>
     );
   }

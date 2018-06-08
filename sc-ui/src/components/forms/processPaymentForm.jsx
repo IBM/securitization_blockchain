@@ -6,6 +6,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import refreshState from '../helpers/refreshState.js';
 
 class ProcessPaymentForm extends React.Component {
   constructor(props) {
@@ -67,7 +68,14 @@ class ProcessPaymentForm extends React.Component {
       })
     }
     console.log(config.body)
-    fetch('http://localhost:3001/chaincode', config)
+    fetch('http://localhost:3001/chaincode', config).then ( () =>
+      {
+        console.log("closing payment form")
+        refreshState()
+        this.setState({ open: false });
+      }
+    )
+
     // event.preventDefault();
   }
 
@@ -88,7 +96,7 @@ class ProcessPaymentForm extends React.Component {
   render() {
     return (
       <div>
-          <Button color="primary" variant="contained" onClick={this.handleClickOpen}>Process Payment</Button>
+          <Button style={{'float':'right', 'padding':'15px'}} color="primary" variant="contained" size="small" onClick={this.handleClickOpen}>Process Payment</Button>
           <Dialog
             open={this.state.open}
             onClose={this.handleClose}

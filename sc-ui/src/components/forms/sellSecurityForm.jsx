@@ -1,72 +1,137 @@
 import React from 'react';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import refreshState from '../helpers/refreshState.js';
 
-class SellSecurityForm extends React.Component {
+class BuySecurityForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      investorId: '',
-      securityId: ''
+      investor_id: '',
+      security_id: ''
     };
 
-    this.handleinvestorIdChange = this.handleinvestorIdChange.bind(this);
-    this.handlesecurityIdChange = this.handlesecurityIdChange.bind(this);
+    // this.handleChange = this.handleChange.bind(this);
+    this.handleIdChange = this.handleIdChange.bind(this);
+    this.handlePaymentAmountChange = this.handlePaymentAmountChange.bind(this);
 
     this.handleSubmit = this.handleSubmit.bind(this);
   }
+  // handleChange(event) {
+  //   console.log(event.target)
+  //   this.setState({
+  //     id: event.target.id,
+  //     interestrate: event.target.interestrate,
+  //     balance: event.target.balance
+  //   });
+  //   //this.setState(event.target.id)
+  // }
 
-  handleinvestorIdChange(event) {
+  handleIdChange(event) {
     console.log(event.target)
     this.setState({
-      investorId: event.target.value
+      asset_id: event.target.value
     });
   }
 
-  handlesecurityIdChange(event) {
+  handlePaymentAmountChange(event) {
     console.log(event.target)
     this.setState({
-      securityId: event.target.value
+      paymentAmount: event.target.value
     });
   }
 
-  handleSubmit(event) {
-    console.log('creating asset with id: ' + JSON.stringify(this.state));
-    let config = {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
-      },
-      body: JSON.stringify({
-        params: {
-          ctorMsg: {
-            function: 'sell_security',
-            args: Object.values(this.state)
+  handleSubmit = () =>  {
+    // console.log("event")
+    // console.log(event)
+    console.log('buying security: ' + JSON.stringify(this.state));
+      var config = {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
+        },
+        body: JSON.stringify({
+          params: {
+            ctorMsg: {
+              function: 'sell_security',
+              // or set_originator
+              args: [this.state.investor_id, this.state.security_id]
+            }
           }
-        }
-      })
-    }
-    console.log(config.body)
-    fetch('http://localhost:3001/chaincode', config)
-
-    event.preventDefault();
+        })
+      }
+      console.log(config.body)
+      fetch('http://localhost:3001/chaincode', config)
+    // event.preventDefault();
+    // event.preventDefault()
+      this.setState({ open: false });
   }
+
+  handleClickOpen = () => {
+    this.setState({ open: true });
+  };
+
+  // onChange = () => {
+  //   this.setState(this.state)
+  // }
+
+  handleClose = () => {
+    this.setState({ open: false });
+    refreshState()
+  };
+
+  handleChange = name => event => {
+    this.setState({
+      [name]: event.target.value,
+    });
+  };
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
-        <label>
-          Investor Id:
-          <input type="text" name="id" value={this.state.investorId} onChange={this.handleinvestorIdChange} />
-        </label>
-        <label>
-          Security Id:
-          <input type="text" name="interestrate" value={this.state.securityId} onChange={this.handlesecurityIdChange}  />
-        </label>
-
-        <input type="submit" value="Submit" />
-      </form>
+      <div>
+          <Button style={{'float':'right', 'padding':'15px'}} color="primary" size="small" variant="contained" onClick={this.handleClickOpen}>Sell Security</Button>
+          <Dialog
+            open={this.state.open}
+            onClose={this.handleClose}
+            aria-labelledby="form-dialog-title"
+          >
+          <DialogTitle id="form-dialog-title">Sell Security</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="investor_id"
+              label="Investor ID"
+              onChange={this.handleChange('investor_id')}
+              fullWidth
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="security_id"
+              label="Security ID"
+              onChange={this.handleChange('security_id')}
+              fullWidth
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleClose} color="primary">
+              Cancel
+            </Button>
+            <Button class="triggerRefresh" onClick={this.handleSubmit} color="primary">
+              Buy
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
     );
   }
 }
-export default SellSecurityForm;
+export default BuySecurityForm;

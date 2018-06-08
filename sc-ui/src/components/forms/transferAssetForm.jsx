@@ -69,7 +69,9 @@ class TransferAssetForm extends React.Component {
         })
       }
       console.log(config.body)
-      fetch('http://localhost:3001/chaincode', config)
+      fetch('http://localhost:3001/chaincode', config).then( () => {
+        refreshState()
+      })
     // event.preventDefault();
     }
 
@@ -129,7 +131,7 @@ class TransferAssetForm extends React.Component {
   render() {
     return (
       <div>
-          <Button color="primary" variant="contained" onClick={this.handleClickOpen}>Transfer Asset</Button>
+          <Button style={{'float':'right', 'padding':'15px'}} color="primary" variant="contained" size="small" onClick={this.handleClickOpen}>Transfer Asset</Button>
           <Dialog
             open={this.state.open}
             onClose={this.handleClose}

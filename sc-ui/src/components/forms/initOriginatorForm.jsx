@@ -1,24 +1,27 @@
 import React from 'react';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import InputAdornment from '@material-ui/core/InputAdornment';
+
 
 class InitOriginatorForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      originatorId: ''
+      id: '',
+      processingfee: '',
+      company: ''
     };
-
-    this.handleOriginatorIdChange = this.handleOriginatorIdChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
+    // this.handleChange = this.handleChange.bind(this);
   }
-
-  handleOriginatorIdChange(event) {
-    console.log(event.target)
-    this.setState({
-      originator_id: event.target.value
-    });
-  }
-
-  handleSubmit(event) {
+  handleSubmit = () =>  {
+    // console.log("event")
+    // console.log(event)
     console.log('creating originator with id: ' + JSON.stringify(this.state));
     let config = {
       method: 'POST',
@@ -31,26 +34,82 @@ class InitOriginatorForm extends React.Component {
         params: {
           ctorMsg: {
             function: 'init_originator',
-            args: Object.values(this.state)
+            args: [this.state.id, this.state.company, this.state.processingfee]
+            //args: Object.values(this.state)
           }
         }
       })
     }
     console.log(config.body)
     fetch('http://localhost:3001/chaincode', config)
-
-    event.preventDefault();
+    this.setState({ open: false });
+    // event.preventDefault();
   }
+
+  handleClickOpen = () => {
+    this.setState({ open: true });
+  };
+
+  handleClose = () => {
+    this.setState({ open: false });
+  };
+
+  handleChange = name => event => {
+    this.setState({
+      [name]: event.target.value,
+    });
+  };
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
-        <label>
-          Id:
-          <input type="text" name="originator_id" value={this.state.originatorId} onChange={this.handleOriginatorIdChange} />
-        </label>
-        <input type="submit" value="Submit" />
-      </form>
+      <div>
+          <Button color="primary" variant="contained" onClick={this.handleClickOpen}>Create Originator</Button>
+          <Dialog
+            open={this.state.open}
+            onClose={this.handleClose}
+            aria-labelledby="form-dialog-title"
+          >
+          <DialogTitle id="form-dialog-title">Create New Originator</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="id"
+              required
+
+              label="Originator ID"
+              onChange={this.handleChange('id')}
+              fullWidth
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              required
+              id="processingfee"
+              label="Processing Fee (percentage)"
+              onChange={this.handleChange('processingfee')}
+              fullWidth
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="company"
+              label="Company"
+              onChange={this.handleChange('company')}
+              fullWidth
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleClose} color="primary" variant="contained">
+              Cancel
+            </Button>
+            <Button onClick={this.handleSubmit} color="primary" variant="contained">
+              Create
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+
     );
   }
 }

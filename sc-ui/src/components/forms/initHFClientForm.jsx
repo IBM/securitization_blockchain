@@ -7,12 +7,18 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
-class InitAssetPoolForm extends React.Component {
+class InitHFCForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      id: ''
+      api_endpoint: '',
+      chaincode_id: '',
+      secure_context: '',
+      key: '',
+      secret: '',
+      network_id: ''
     };
+
     // this.handleChange = this.handleChange.bind(this);
     this.handleIdChange = this.handleIdChange.bind(this);
     this.handleInterestRateChange = this.handleInterestRateChange.bind(this);
@@ -52,8 +58,8 @@ class InitAssetPoolForm extends React.Component {
   handleSubmit = () =>  {
     // console.log("event")
     // console.log(event)
-    console.log('creating asset pool with id: ' + JSON.stringify(this.state));
-    let config = {
+    console.log('creating asset with id: ' + JSON.stringify(this.state));
+    var config = {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -63,15 +69,41 @@ class InitAssetPoolForm extends React.Component {
       body: JSON.stringify({
         params: {
           ctorMsg: {
-            function: 'init_asset_pool',
-            args: [this.state.id]
+            function: 'init_asset',
+            // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
+            args: [this.state.id, this.state.balance, this.state.interestrate, this.state.remainingpayments, this.state.underwriting]
             //args: Object.values(this.state)
           }
         }
       })
     }
     console.log(config.body)
-    fetch('http://localhost:3001/chaincode', config)
+    fetch('http://localhost:3001/chaincode', config).then ( () =>
+
+      setTimeout( () => {
+        {
+          var config_value = {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
+            },
+            body: JSON.stringify({
+              params: {
+                ctorMsg: {
+                  function: 'value_asset',
+                  // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
+                  args: [this.state.id]
+                  //args: Object.values(this.state)
+                }
+              }
+            })
+          }
+          fetch('http://localhost:3001/chaincode', config_value)
+        }
+      }, 2000)
+    )
     this.setState({ open: false });
     // event.preventDefault();
   }
@@ -120,22 +152,67 @@ class InitAssetPoolForm extends React.Component {
   render() {
     return (
       <div>
-          <Button color="primary" variant="contained" onClick={this.handleClickOpen}>Create Asset Pool</Button>
+          <Button style={{'float':'right', 'padding':'15px'}} color="secondary" size="small" variant="contained" onClick={this.handleClickOpen}>Create New Asset</Button>
           <Dialog
             open={this.state.open}
             onClose={this.handleClose}
             aria-labelledby="form-dialog-title"
           >
-          <DialogTitle id="form-dialog-title">Create New Asset Pool</DialogTitle>
+          <DialogTitle id="form-dialog-title">Create Asset</DialogTitle>
           <DialogContent>
             <TextField
+              required
               autoFocus
               margin="dense"
               id="id"
-              label="Asset Pool ID"
+              label="Asset ID"
               onChange={this.handleChange('id')}
               fullWidth
             />
+            <TextField
+              required
+              autoFocus
+              margin="dense"
+              id="interestrate"
+              label="Interest Rate"
+              onChange={this.handleChange('interestrate')}
+              fullWidth
+            />
+            <TextField
+              required
+              autoFocus
+              margin="dense"
+              id="balance"
+              label="Balance"
+              onChange={this.handleChange('balance')}
+              fullWidth
+            />
+            <TextField
+              required
+              autoFocus
+              margin="dense"
+              id="remainingpayments"
+              label="Number of Monthly Payments Remaining"
+              onChange={this.handleChange('remainingpayments')}
+              fullWidth
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="monthlypayment"
+              label="Monthly Payment"
+              onChange={this.handleChange('monthlypayment')}
+              fullWidth
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="underwriting"
+              label="Underwriting Information"
+              onChange={this.handleChange('underwriting')}
+              fullWidth
+            />
+
           </DialogContent>
           <DialogActions>
             <Button onClick={this.handleClose} color="primary">
@@ -151,4 +228,4 @@ class InitAssetPoolForm extends React.Component {
     );
   }
 }
-export default InitAssetPoolForm;
+export default InitHFCForm;

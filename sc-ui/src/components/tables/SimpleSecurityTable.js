@@ -14,6 +14,9 @@ import FormDialog from '../forms/FormDialog.js'
 import InitAssetForm from '../forms/initAssetForm.jsx'
 import TransferAssetForm from '../forms/transferAssetForm.jsx'
 import ProcessPaymentForm from '../forms/processPaymentForm.jsx'
+import BuySecurityForm from '../forms/buySecurityForm.jsx'
+import InitSecurityForm from '../forms/initSecurityForm.jsx'
+import SellSecurityForm from '../forms/sellSecurityForm.jsx'
 
 
 const styles = theme => ({
@@ -28,9 +31,9 @@ const styles = theme => ({
 });
 
 let id = 0;
-function createData( id, rating, couponrate, value, monthsuntilmaturity, maturity, investor ) {
+function createData( id, rating, couponrate, pool, value, monthsuntilmaturity, maturity, investor ) {
   // id += 1;
-  return { id, rating, couponrate, value, monthsuntilmaturity, maturity, investor };
+  return { id, rating, couponrate, pool, value, monthsuntilmaturity, maturity, investor };
 }
 
 
@@ -45,17 +48,20 @@ function createData( id, rating, couponrate, value, monthsuntilmaturity, maturit
 
 function generateData() {
   var securities = JSON.parse(localStorage.getItem('objects')).securities
-  console.log(securities)
+  // console.log(securities)
   var data = []
+  if (!securities || securities.length == 0) {
+    return data
+  }
   for (var idx in securities) {
     data.push(
       createData(
-        securities[idx].id, securities[idx].rating, securities[idx].couponrate, securities[idx].value, securities[idx].monthsuntilmaturity, securities[idx].maturity, securities[idx].investor
+        securities[idx].id, securities[idx].rating, securities[idx].couponrate, securities[idx].pool, securities[idx].value, securities[idx].monthsuntilmaturity, securities[idx].maturity, securities[idx].investor
       )
     )
     if (idx == (securities.length -1)) {
-      console.log("data")
-      console.log(data)
+      // console.log("data")
+      // console.log(data)
       return data
     }
   }
@@ -71,12 +77,14 @@ function SimpleSecurityTable(props) {
         <TableHead>
           <TableRow>
             <TableCell> Security ID</TableCell>
-            <TableCell> Rating</TableCell>
+            <TableCell> Pool</TableCell>
             <TableCell> Coupon Rate</TableCell>
-            <TableCell> Value</TableCell>
+            <TableCell> Investor </TableCell>
+            {/*<TableCell> Value (Expected Payout)</TableCell>
             <TableCell> Months Until Maturity </TableCell>
             <TableCell> Maturity </TableCell>
-            <TableCell> Investor </TableCell>
+            <TableCell> Rating</TableCell>*/}
+
           </TableRow>
         </TableHead>
         <TableBody>
@@ -84,19 +92,19 @@ function SimpleSecurityTable(props) {
             return (
               <TableRow key={n.id}>
                 <TableCell component="th" scope="row">{n.id}</TableCell>
-                <TableCell numeric>{n.rating}</TableCell>
-                <TableCell numeric>{n.couponrate}</TableCell>
-                <TableCell >{n.monthsuntilmaturity}</TableCell>
-                <TableCell>{n.maturity}</TableCell>
+                <TableCell>{n.pool}</TableCell>
+                <TableCell>{n.couponrate.toFixed(2) * 100}%</TableCell>
                 <TableCell>{n.investor}</TableCell>
+                {/*<TableCell>{n.value}</TableCell>
+                <TableCell >{n.monthsuntilmaturity}</TableCell>
+                 <TableCell>{n.maturity}</TableCell>
+                <TableCell>{n.rating}</TableCell>*/}
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
       <InitSecurityForm ></InitSecurityForm>
-      // <BuySecurityForm ></BuySecurityForm>
-      // <SellSecurityForm ></SellSecurityForm>
     </Paper>
 
   );

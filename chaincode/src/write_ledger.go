@@ -24,7 +24,11 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	// "reflect"
+	"reflect"
+	"math"
+	"time"
+	// "encoding/gob"
+	// "bytes"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	pb "github.com/hyperledger/fabric/protos/peer"
@@ -76,43 +80,19 @@ func write(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 //     id      ,  authed_by_company
 // "m999999999", "united marbles"
 // ============================================================================================================================
-// func delete_marble(stub shim.ChaincodeStubInterface, args []string) (pb.Response) {
-// 	fmt.Println("starting delete_marble")
-//
-// 	if len(args) != 2 {
-// 		return shim.Error("Incorrect number of arguments. Expecting 2")
-// 	}
-//
-// 	// input sanitation
-// 	err := sanitize_arguments(args)
-// 	if err != nil {
-// 		return shim.Error(err.Error())
-// 	}
-//
-// 	id := args[0]
-// 	authed_by_company := args[1]
-//
-// 	// get the marble
-// 	marble, err := get_asset(stub, id)
-// 	if err != nil{
-// 		fmt.Println("Failed to find marble by id " + id)
-// 		return shim.Error(err.Error())
-// 	}
-//
-// 	// check authorizing company (see note in set_owner() about how this is quirky)
-// 	if marble.Owner.Company != authed_by_company{
-// 		return shim.Error("The company '" + authed_by_company + "' cannot authorize deletion for '" + marble.Owner.Company + "'.")
-// 	}
-//
-// 	// remove the marble
-// 	err = stub.DelState(id)                                                 //remove the key from chaincode state
-// 	if err != nil {
-// 		return shim.Error("Failed to delete state")
-// 	}
-//
-// 	fmt.Println("- end delete_marble")
-// 	return shim.Success(nil)
-// }
+func delete(stub shim.ChaincodeStubInterface, args []string) (pb.Response) {
+	fmt.Println("starting delete")
+
+	id := args[0]
+
+	err := stub.DelState(id)                                                 //remove the key from chaincode state
+	if err != nil {
+		return shim.Error("Failed to delete state")
+	}
+
+	fmt.Println("- end delete")
+	return shim.Success(nil)
+}
 
 // ============================================================================================================================
 // Init Asset - create a new asset, store into chaincode state
@@ -131,7 +111,7 @@ func init_asset(stub shim.ChaincodeStubInterface, args []string) (pb.Response) {
 	var err error
 	fmt.Println("starting init_asset")
 
-	if len(args) != 4 {
+	if len(args) != 5 {
 		return shim.Error("Incorrect number of arguments. Expecting 5")
 	}
 
@@ -141,13 +121,16 @@ func init_asset(stub shim.ChaincodeStubInterface, args []string) (pb.Response) {
 		return shim.Error(err.Error())
 	}
 
-	id := args[0]
+	asset_id := args[0]
 	// initial_amount := args[1] //strings.ToLower(args[1])
 	balance := args[1]
 	// state := args[2]
 	interest := args[2]
 	// underwriting, err := json.Marshal(args[5])  //make(map(args[5]))
-	underwriting := args[3]  //make(map(args[5]))
+	// monthlyPayment := args[3]
+  remainingpayments := args[3]
+	underwriting := args[4]  //make(map(args[5]))
+
 	state := "active"
 	// originator := ""
 	// if len(args) > 5 {
@@ -155,9 +138,9 @@ func init_asset(stub shim.ChaincodeStubInterface, args []string) (pb.Response) {
 	// }
 
 	// size, err := strconv.Atoi(args[2])
-	if err != nil {
-		return shim.Error("Failure parsing underwriting information")
-	}
+	// if err != nil {
+	// 	return shim.Error("Failure parsing underwriting information")
+	// }
 
 	//check if new owner exists
 	// owner, err := get_owner(stub, owner_id)
@@ -180,19 +163,25 @@ func init_asset(stub shim.ChaincodeStubInterface, args []string) (pb.Response) {
 	// }
 
 	//build the marble json string manually
+	monthlyPayment := calculate_monthly_payment(balance, interest,  remainingpayments)
 	str := `{
 		"docType":"asset",
-		"id": "` + id + `",
+		"id": "` + asset_id + `",
 		"state": "` + state + `",
 		"interest": "` + interest + `",
 		"balance": "` + balance + `",
+		"remainingpayments": "` + remainingpayments + `",
 		"underwriting":"` + underwriting + `"
 	}`
-	err = stub.PutState(id, []byte(str))                         //store marble with id as key
+	err = stub.PutState(asset_id, []byte(str))                         //store marble with id as key
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+
 	fmt.Println("- end init_asset")
+
+	// calculate payoff amount
+	// value_asset(stub, []string{asset_id})
 	return shim.Success(nil)
 }
 
@@ -250,9 +239,9 @@ func init_originator(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 	var originator Originator
 	originator.ObjectType = "asset_originator"
 	originator.Id =  args[0]
-	originator.Username = strings.ToLower(args[1])
-	originator.Company = args[2]
-	originator.ProcessingFee = args[3]
+	// originator.Username = strings.ToLower(args[1])
+	originator.Company = args[1]
+	originator.ProcessingFee = args[2]
 
 	// originator.Enabled = true
 	fmt.Println(originator)
@@ -322,6 +311,8 @@ func set_originator(stub shim.ChaincodeStubInterface, args []string) pb.Response
 	asset := Asset{}
 	err = json.Unmarshal(assetAsBytes, &asset)           //un stringify it aka JSON.parse()
 	if err != nil {
+		// fmt.Printf("%+v\n", security)
+		fmt.Println(string(assetAsBytes))
 		return shim.Error(err.Error())
 	}
 	originatorAsBytes, err := stub.GetState(originator_id)
@@ -331,11 +322,26 @@ func set_originator(stub shim.ChaincodeStubInterface, args []string) pb.Response
 	originator := Originator{}
 	json.Unmarshal(originatorAsBytes, &originator)           //un stringify it aka JSON.parse()
 
-  fmt.Println("asset")
-	fmt.Println(asset)
-  fmt.Println("originator")
-	fmt.Println(originator)
+	fmt.Println("asset.Id")
+	fmt.Println(asset.Id)
+	fmt.Println("originator.Assets")
+	fmt.Println(originator.Assets)
+	fmt.Println("checking for asset")
+	assetInArray, _ := InArray(asset.Id , originator.Assets)
+	fmt.Println("assetInArray")
+	fmt.Println(assetInArray)
 
+
+	if !assetInArray {
+		fmt.Println("adding asset to originator array")
+		// return shim.Error("security already purchased")
+		originator.Assets = append( originator.Assets, asset.Id )
+		originatorAsBytes, _ := json.Marshal(originator)           //convert to array of bytes
+		err = stub.PutState(originator_id, originatorAsBytes)     //rewrite the marble with id as key
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+	}
 	// check authorizing company
 	// if res.Owner.Company != authed_by_company{
 	// 	return shim.Error("The company '" + authed_by_company + "' cannot authorize transfers for '" + res.Owner.Company + "'.")
@@ -345,8 +351,8 @@ func set_originator(stub shim.ChaincodeStubInterface, args []string) pb.Response
 	asset.Originator = originator                   //change the owner
 	// res.Owner.Username = owner.Username
 	// res.Owner.Company = owner.Company
-	jsonAsBytes, _ := json.Marshal(asset)           //convert to array of bytes
-	err = stub.PutState(asset_id, jsonAsBytes)     //rewrite the marble with id as key
+	assetAsBytes, _ = json.Marshal(asset)           //convert to array of bytes
+	err = stub.PutState(asset_id, assetAsBytes)     //rewrite the marble with id as key
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -455,15 +461,29 @@ func pool_asset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	}
 	pool := Pool{}
 	json.Unmarshal(poolAsBytes, &pool)           //un stringify it aka JSON.parse()
-	pool.Assets = append(pool.Assets, asset_id)
+
+	assetInArray, _ := InArray(asset.Id , pool.Assets)
+	if !assetInArray {
+		fmt.Println("adding asset to pool")
+		pool.Assets = append(pool.Assets, asset.Id)
+		poolAsBytes, _ = json.Marshal(pool)           //convert to array of bytes
+		err = stub.PutState(pool_id, poolAsBytes)     //rewrite the marble with id as key
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+	} else {
+		fmt.Println("asset already in pool, skipping")
+	}
+	// pool.Assets = append(pool.Assets, asset_id)
 	// assetArray := []string{asset_id}  //[]string{pool_id, resPool.Assets}
 	// resPool.Assets = assetArray
   // updatedAssets := [string]{resPool.Assets, pool_id}
-	poolAsBytes, _ = json.Marshal(pool)           //convert to array of bytes
-	err = stub.PutState(pool_id, poolAsBytes)     //rewrite the marble with id as key
-	if err != nil {
-		return shim.Error(err.Error())
-	}
+	// poolAsBytes, _ = json.Marshal(pool)           //convert to array of bytes
+	// err = stub.PutState(pool_id, poolAsBytes)     //rewrite the marble with id as key
+	// if err != nil {
+	// 	return shim.Error(err.Error())
+	// }
+
 	fmt.Println("- end pool_asset")
 	return shim.Success(nil)
 }
@@ -533,7 +553,7 @@ func rate_asset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
 // sell_securities (investor, amount)
 
-// value_securities (investor, pool, amount)
+// function value_securities (investor, pool, amount)
 
 // process_payment (asset)
 // each time a payment is processed, security value should drop?
@@ -575,30 +595,49 @@ func process_payment(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 
 	// updated := balance - principalPayment
 	updatedBalance := balance - principalPayment
+
   // updatedBalance := strconv.FormatFloat((balance - principalPayment), 'f', 2, 64)
+
+	fmt.Println("initial asset.Balance")
+	fmt.Println(asset.Balance)
+
 	asset.Balance = strconv.FormatFloat(updatedBalance, 'f', 2, 64)
+	// asset.Balance = updatedBalance
+	// investorBalance = strconv.FormatFloat(investor.Balance, 'f', 2, 64)
+
+
+	fmt.Println("updated asset.Balance")
+	fmt.Println(asset.Balance)
+	fmt.Println("asset")
+	fmt.Printf("%+v\n", asset)
 
 	fmt.Println("processingFee")
 	fmt.Println(processingFee)
 	fmt.Println("paymentAmount")
 	fmt.Println(paymentAmount)
 
+	assetAsBytes, err = json.Marshal(asset)
 
-	fmt.Println("asset.Balance")
-	fmt.Println(asset.Balance)
-	fmt.Println("asset")
-	fmt.Printf("%+v\n", asset)
+	if err != nil {
+		fmt.Println("Failed to Marshal asset")
+		fmt.Println(err)
+		return shim.Error("Failed to Marshal asset")
+	}
+	fmt.Println("Marshal assetAsBytes")
+	fmt.Println(string(assetAsBytes))
 
-	jsonAsBytes, _ := json.Marshal(asset)
-	err = stub.PutState(asset.Id, jsonAsBytes)
-
+	err = stub.PutState(asset.Id, assetAsBytes)
+	if err != nil {
+		return shim.Error("Failed to save asset")
+		fmt.Println("Failed to save asset")
+		fmt.Println(err)
+	}
 	// get investors
 	// get originator
 	// pay their portion
 
   // TODO, remove this
 	// get remaining assets from pool
-	// actually no, we don't care about other assets, we care about investors getting their portion
 	pool_id := asset.Pool
 	poolAsBytes, err := stub.GetState(pool_id)
 	if err != nil {
@@ -637,47 +676,51 @@ func process_payment(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 		security := Security{}
 		err = json.Unmarshal(securityAsBytes, &security)           //un stringify it aka JSON.parse()
 
-		fmt.Println("processingPayment for amount:")
-		fmt.Println(processingPayment)
-
-		// fmt.Println(security.Investor.Balance)
-		investorAsBytes, err := stub.GetState(security.Investor)
-		investor := Investor{}
-		json.Unmarshal(investorAsBytes, &investor)           //un stringify it aka JSON.parse()
-
-		fmt.Println("beginning balance")
-		fmt.Println(investor.Balance)
-		investor.Balance = processingPayment + investor.Balance
-		fmt.Println("updated balance")
-		fmt.Println(investor.Balance)
-
-
-		fmt.Println("Security keys")
-		fmt.Printf("%+v\n", security)
-
-		fmt.Println("Investor keys")
-		fmt.Printf("%+v\n", security.Investor)
-
-
-		fmt.Println("investor")
-		fmt.Println(investor)
-		fmt.Println("investor.Username")
-		fmt.Println(investor.Username)
-		fmt.Println("investor.Balance")
-		fmt.Println(investor.Balance)
-		fmt.Println("investor.Id")
-		fmt.Println(investor.Id)
-
-		investorAsBytes, _ = json.Marshal(investor)                         //convert to array of bytes
-		fmt.Println("investorAsBytes")
-		fmt.Println(string(investorAsBytes))
-
-		err = stub.PutState(investor.Id, investorAsBytes)                    //store owner by its Id
 		if err != nil {
-			fmt.Println("Could not store investor")
-			return shim.Error(err.Error())
+			return shim.Error("Failed to get security")
 		}
 
+		fmt.Println("processingPayment for amount:")
+		fmt.Println(processingPayment)
+		if security.Investor != "" {
+			fmt.Println("fetching investor: " + security.Investor)
+			investorAsBytes, err := stub.GetState(security.Investor)
+			investor := Investor{}
+			json.Unmarshal(investorAsBytes, &investor)           //un stringify it aka JSON.parse()
+
+			fmt.Println("beginning balance")
+			fmt.Println(investor.Balance)
+			investor.Balance = processingPayment + investor.Balance
+			fmt.Println("updated balance")
+			fmt.Println(investor.Balance)
+
+
+			fmt.Println("Security keys")
+			fmt.Printf("%+v\n", security)
+
+			fmt.Println("Investor keys")
+			fmt.Printf("%+v\n", security.Investor)
+
+
+			fmt.Println("investor")
+			fmt.Println(investor)
+			fmt.Println("investor.Username")
+			fmt.Println(investor.Username)
+			fmt.Println("investor.Balance")
+			fmt.Println(investor.Balance)
+			fmt.Println("investor.Id")
+			fmt.Println(investor.Id)
+
+			investorAsBytes, _ = json.Marshal(investor)                         //convert to array of bytes
+			fmt.Println("investorAsBytes")
+			fmt.Println(string(investorAsBytes))
+
+			err = stub.PutState(investor.Id, investorAsBytes)                    //store owner by its Id
+			if err != nil {
+				fmt.Println("Could not store investor")
+				return shim.Error(err.Error())
+			}
+		}
 		// fmt.Println(pool.Investors)
 		// security.investor.balance =+ interestPayment
 	}
@@ -691,7 +734,7 @@ func process_payment(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 	// res.Pool
   // receipt :=
 
-	jsonAsBytes, _ = json.Marshal(`"{payment: ` + strconv.FormatFloat(processingPayment, 'f', 2, 64) + `, receipient: ` + asset.Originator.Username + ` }"`)           //convert to array of bytes
+	jsonAsBytes, _ := json.Marshal(`"{payment: ` + strconv.FormatFloat(processingPayment, 'f', 2, 64) + `, receipient: ` + asset.Originator.Username + ` }"`)           //convert to array of bytes
 	err = stub.SetEvent("Payment dispersed: ", jsonAsBytes)     //rewrite the marble with id as key
 	if err != nil {
 		return shim.Error(err.Error())
@@ -704,9 +747,178 @@ func process_payment(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 
 	// err = stub.PutState(args[0], jsonAsBytes)     //rewrite the marble with id as key
 
-	fmt.Println("- end process_payment")
+	// fmt.Println("stub")
+	// fmt.Println(stub)
+	// f := "invoke"
+	// strs := []string{"pool1"}
+	// buf := &bytes.Buffer{}
+	// gob.NewEncoder(buf).Encode(strs)
+	// bs := buf.Bytes()
+  //
+  //
+	// strBytes := [1][1]byte{}
+	// strBytes[0][0] = []byte("pool1")
+  //
+	// strBytes = []byte("pool1")
+
+
+	// input := []string{"value_pool", "pool1"}
+	// output := make([][]byte, len(input))
+	// for i, v := range input {
+  //   output[i] = []byte(v)
+	// }
+	// TODO, make the value_pool function a normal one instead of using shim
+	// invoke := stub.InvokeChaincode("invoke", output, "")
+
+	// update pool value
+	// value_pool(stub, []string{pool.Id})
+
+	// update amortization value
+	// value_asset(stub, []string{asset.Id})
+
+	fmt.Println("- end process_payments")
 	return shim.Success(nil)
 }
+
+func value_pool( stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	fmt.Println("starting value_pool")
+	pool_id := args[0]
+
+	poolAsBytes, err := stub.GetState(pool_id)
+	pool := Pool{}
+	err = json.Unmarshal(poolAsBytes, &pool)           //un stringify it aka JSON.parse()
+	value := 0.0
+	var assetAsBytes []byte
+  var asset Asset
+	fmt.Println("starting loop")
+  for _, asset_id := range pool.Assets {
+		assetAsBytes, err = stub.GetState(asset_id)
+		asset = Asset{}
+		err = json.Unmarshal(assetAsBytes, &asset)           //un stringify it aka JSON.parse()
+		balance, _ := strconv.ParseFloat(asset.Balance, 32)
+    value = balance + value
+	}
+  pool.Value = value
+	poolAsBytes, _ = json.Marshal(pool)                         //convert to array of bytes
+	err = stub.PutState(pool.Id, poolAsBytes)                    //store owner by its Id
+	if err != nil {
+		fmt.Println("Could not store pool")
+		return shim.Error(err.Error())
+	}
+	pool_value := strconv.FormatFloat(pool.Value, 'f', 2, 64)
+	fmt.Println("set " + pool.Id + " value : " + pool_value)
+	fmt.Println("- end value_pool")
+	return shim.Success(nil)
+}
+
+// calculate monthly payment required for amortization
+// expects interest rate and period
+func calculate_monthly_payment(balance float64,  interestRate float64,  months float64) float64 {
+	// balance := 450000.00
+	monthlyInterestRate := interestRate / 12.0
+	// months := 3.0 * 12.0
+	monthlyPayment := ((balance * ( monthlyInterestRate * math.Pow((1 + monthlyInterestRate) , months))) / (  ( math.Pow ( (1 + monthlyInterestRate ) , months)) - 1 ))
+	return monthlyPayment
+}
+
+//
+// TODO, this doesn't seem to be working, fix
+// func calculate_payments_to_amoritization (balance float64,  interestRate float64, monthlyPayment float64) int {
+// 	monthlyInterestRate := interestRate / 12.0
+// 	// months := 3.0 * 12.0
+// 	// monthlyPayment := ((balance * ( monthlyInterestRate * math.Pow((1 + monthlyInterestRate) , months))) / (  ( math.Pow ( (1 + monthlyInterestRate ) , months)) - 1 ))
+// 	paymentsLeft := ( ( -1.0 * math.Log( (1.0 - interest * balance / monthlyPayment ) )) / math.Log( 1 + interestRate) )
+// 	return monthlyPayment
+// }
+
+func value_asset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	// Calculates the total amount that a homeowner will pay on their mortgage by amortization
+	asset_id := args[0]
+	retries := 5
+	var err error
+	var assetAsBytes []byte
+	for i := 0; i < retries; i++ {
+		fmt.Println("on iteration")
+		fmt.Println(i)
+		assetAsBytes, err = stub.GetState(asset_id)
+
+		// if err != nil {
+		if (len(assetAsBytes) == 0) {
+			fmt.Println("Could not load asset, retrying")
+			fmt.Println(asset_id)
+			fmt.Println(string(assetAsBytes))
+			// return shim.Error(err.Error())
+			time.Sleep(2 * time.Second) // adding sleep
+		} else {
+			fmt.Println("Asset loaded, continuing")
+			break
+		}
+	}
+
+	// if err != nil {
+	if (len(assetAsBytes) == 0) {
+		fmt.Println("Could not load asset after multiple tries, exiting")
+		// return shim.Error(err.Error())
+		return shim.Error("Could not load asset after multiple tries, exiting")
+	}
+
+	asset := Asset{}
+	err = json.Unmarshal(assetAsBytes, &asset)
+	if err != nil {
+		fmt.Println("Could not load asset")
+		return shim.Error(err.Error())
+	}
+	balance, _ := strconv.ParseFloat(asset.Balance, 32)
+	interest, _ := strconv.ParseFloat(asset.InterestRate, 32)
+	remainingPayments, _ := strconv.ParseFloat(asset.RemainingPayments, 32)
+
+	fmt.Println("balance")
+	fmt.Println(balance)
+	fmt.Println("interest")
+	fmt.Println(interest)
+	fmt.Println("remainingPayments")
+	fmt.Println(remainingPayments)
+
+	trueValue := (((interest / 12.0) * balance * remainingPayments) / (1.0 - math.Pow( ( (1.0 + ( interest / 12.0)) ), (-1.0 * remainingPayments) )))
+	fmt.Println("trueValue")
+	fmt.Println(trueValue)
+	if math.IsNaN(trueValue) {
+		fmt.Println("missing parameters")
+		return shim.Error("missing parameters")
+	}
+
+	asset.ExpectedPayoffAmount = strconv.FormatFloat(trueValue, 'f', 2, 64)
+	assetAsBytes, _ = json.Marshal(asset)                         //convert to array of bytes
+	err = stub.PutState(asset.Id, assetAsBytes)                    //store owner by its Id
+	if err != nil {
+		fmt.Println("Could not store asset")
+		return shim.Error(err.Error())
+	}
+	return shim.Success(nil)
+}
+
+// func value_security(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+// 	fmt.Println("starting value_security")
+// 	security_id = args[0]
+// 	securityAsBytes, err := stub.GetState(security_id)
+// 	security := Security{}
+// 	err = json.Unmarshal(securityAsBytes, &security)           //un stringify it aka JSON.parse()
+//
+//   // Security value is essentially the expected payout. So, we can get a rough calculation by
+// 	// (PoolValue * SecurityCouponRate) * MonthsUntilMaturity
+//   // TODO, that doesn't take into account the reduced interest amount
+//
+// 	investorAsBytes, _ := json.Marshal(investor)                         //convert to array of bytes
+// 	err = stub.PutState(investor.Id, investorAsBytes)                    //store owner by its Id
+// 	if err != nil {
+// 		fmt.Println("Could not store investor")
+// 		return shim.Error(err.Error())
+// 	}
+//
+// 	fmt.Println("- end init_investor")
+// 	return shim.Success(nil)
+//
+// }
 
 // create account number for investor account
 func init_investor(stub shim.ChaincodeStubInterface, args []string) pb.Response {
@@ -726,7 +938,9 @@ func init_investor(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	var investor Investor
 	investor.ObjectType = "asset_investor"
 	investor.Id =  args[0]
-	investor.Username = strings.ToLower(args[1])
+	if len(args) > 1 {
+		investor.Username = strings.ToLower(args[1])
+	}
 	// investor.Company = args[2]
 	// originator.Enabled = true
 	fmt.Println(investor)
@@ -750,9 +964,9 @@ func init_investor(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	return shim.Success(nil)
 }
 
-func init_securities(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+func init_security(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var err error
-	fmt.Println("starting init_securities")
+	fmt.Println("starting init_security")
 
 	// if len(args) != 3 {
 	// 	return shim.Error("Incorrect number of arguments. Expecting 3")
@@ -769,8 +983,10 @@ func init_securities(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 	security.Id = args[0]
 	security.CouponRate, err = strconv.ParseFloat(args[1], 32)
 	pool_id := args[2]
+	// security.MonthsUntilMaturity, _ = strconv.Atoi(args[3]) // hardcoding security life as 3 years for now
 	security.Maturity = false // TODO, maturity is end of life for a loan, not a security
-	security.MonthsUntilMaturity = 3 * 12 // hardcoding security life as 3 years for now
+
+	security.Pool = pool_id
 	// investor.Company = args[2]
 	// originator.Enabled = true
 	//check if user already exists
@@ -801,14 +1017,35 @@ func init_securities(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 	err = stub.PutState(pool_id, poolAsBytes)                    //store owner by its Id
   // pool.Securities[0] = security
 
-	fmt.Println("- end init_securities")
+	fmt.Println("- end init_security")
 	return shim.Success(nil)
 }
 
 // buy_securities (investor, pool, amount)
-func buy_securities(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+func InArray(needle interface{}, haystack interface{}) (exists bool, index int) {
+	exists = false
+	index = -1
+
+	switch reflect.TypeOf(haystack).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(haystack)
+
+		for i := 0; i < s.Len(); i++ {
+			if reflect.DeepEqual(needle, s.Index(i).Interface()) == true {
+				index = i
+				exists = true
+				return
+			}
+		}
+	}
+
+	return
+}
+
+func buy_security(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var err error
-	fmt.Println("starting buy_securities")
+	fmt.Println("starting buy_security")
 
 	// input sanitation
 	err = sanitize_arguments(args)
@@ -826,7 +1063,7 @@ func buy_securities(stub shim.ChaincodeStubInterface, args []string) pb.Response
 	// 	return shim.Error("This owner does not exist - " + new_owner_id)
 	// }
 
-	// set pool id in Asset object
+	// load investor
 	investorAsBytes, err := stub.GetState(investor_id)
 	if err != nil {
 		return shim.Error("Failed to get investor")
@@ -839,33 +1076,43 @@ func buy_securities(stub shim.ChaincodeStubInterface, args []string) pb.Response
 	// 	return shim.Error(err.Error())
 	// }
 
-
-  // add asset id to "Assets" variable in pool
+  // load security
 	securityAsBytes, err := stub.GetState(security_id)
 	if err != nil {
-		return shim.Error("Failed to get asset pool")
+		return shim.Error("Failed to get security")
 	}
 	security := Security{}
 	json.Unmarshal(securityAsBytes, &security)           //un stringify it aka JSON.parse()
 
-
-	security.Investor = investor.Id
-	fmt.Println("security.Investor")
-	fmt.Printf("%+v\n", security.Investor)
-	fmt.Println("security")
-	fmt.Printf("%+v\n", security)
-
-
+	securityInArray, _ := InArray(security.Id , investor.Securities)
+	if !securityInArray {
+		fmt.Println("purchasing security")
+		investor.Securities = append(investor.Securities, security.Id)
+		investorAsBytes, _ = json.Marshal(investor)           //convert to array of bytes
+		err = stub.PutState(investor_id, investorAsBytes)     //rewrite the marble with id as key
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+	}
+	// securityAsBytes, _ = json.Marshal(security)           //convert to array of bytes
+	// err = stub.PutState(security_id, securityAsBytes)     //rewrite the marble with id as key
 
 	// assetArray := []string{asset_id}  //[]string{pool_id, resPool.Assets}
 	// resPool.Assets = assetArray
   // updatedAssets := [string]{resPool.Assets, pool_id}
+
+	fmt.Println("setting security investor")
+	fmt.Println("security before")
+	fmt.Println(security)
+	security.Investor = investor.Id
+	fmt.Println("security after")
+	fmt.Println(security)
 	securityAsBytes, _ = json.Marshal(security)           //convert to array of bytes
-	err = stub.PutState(security_id, securityAsBytes)     //rewrite the marble with id as key
+	err = stub.PutState(security.Id, securityAsBytes)     //rewrite the marble with id as key
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	fmt.Println("- end buy_securities")
+	fmt.Println("- end buy_security")
 	return shim.Success(nil)
 }
 

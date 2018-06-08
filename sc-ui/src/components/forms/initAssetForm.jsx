@@ -14,6 +14,8 @@ class InitAssetForm extends React.Component {
       id: '',
       interestrate: '',
       balance: '',
+      // monthlypayment: '',
+      remainingpayments: '',
       underwriting: ''
     };
 
@@ -57,7 +59,7 @@ class InitAssetForm extends React.Component {
     // console.log("event")
     // console.log(event)
     console.log('creating asset with id: ' + JSON.stringify(this.state));
-    let config = {
+    var config = {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -68,15 +70,41 @@ class InitAssetForm extends React.Component {
         params: {
           ctorMsg: {
             function: 'init_asset',
-            args: [this.state.id, this.state.balance, this.state.interestrate, this.state.underwriting]
+            // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
+            args: [this.state.id, this.state.balance, this.state.interestrate, this.state.remainingpayments, this.state.underwriting]
             //args: Object.values(this.state)
           }
         }
       })
     }
     console.log(config.body)
-    fetch('http://localhost:3001/chaincode', config)
+    fetch('http://localhost:3001/chaincode', config).then ( () =>
 
+      setTimeout( () => {
+        {
+          var config_value = {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
+            },
+            body: JSON.stringify({
+              params: {
+                ctorMsg: {
+                  function: 'value_asset',
+                  // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
+                  args: [this.state.id]
+                  //args: Object.values(this.state)
+                }
+              }
+            })
+          }
+          fetch('http://localhost:3001/chaincode', config_value)
+        }
+      }, 2000)
+    )
+    this.setState({ open: false });
     // event.preventDefault();
   }
 
@@ -124,7 +152,7 @@ class InitAssetForm extends React.Component {
   render() {
     return (
       <div>
-          <Button color="primary" onClick={this.handleClickOpen}>Create New Asset</Button>
+          <Button style={{'float':'right', 'padding':'15px'}} color="secondary" size="small" variant="contained" onClick={this.handleClickOpen}>Create New Asset</Button>
           <Dialog
             open={this.state.open}
             onClose={this.handleClose}
@@ -133,6 +161,7 @@ class InitAssetForm extends React.Component {
           <DialogTitle id="form-dialog-title">Create Asset</DialogTitle>
           <DialogContent>
             <TextField
+              required
               autoFocus
               margin="dense"
               id="id"
@@ -141,6 +170,7 @@ class InitAssetForm extends React.Component {
               fullWidth
             />
             <TextField
+              required
               autoFocus
               margin="dense"
               id="interestrate"
@@ -149,6 +179,7 @@ class InitAssetForm extends React.Component {
               fullWidth
             />
             <TextField
+              required
               autoFocus
               margin="dense"
               id="balance"
@@ -157,6 +188,25 @@ class InitAssetForm extends React.Component {
               fullWidth
             />
             <TextField
+              required
+              autoFocus
+              margin="dense"
+              id="remainingpayments"
+              label="Number of Monthly Payments Remaining"
+              onChange={this.handleChange('remainingpayments')}
+              fullWidth
+            />
+          {/*
+            <TextField
+              autoFocus
+              margin="dense"
+              id="monthlypayment"
+              label="Monthly Payment"
+              onChange={this.handleChange('monthlypayment')}
+              fullWidth
+            />
+            */}
+            <TextField
               autoFocus
               margin="dense"
               id="underwriting"
@@ -164,6 +214,7 @@ class InitAssetForm extends React.Component {
               onChange={this.handleChange('underwriting')}
               fullWidth
             />
+
           </DialogContent>
           <DialogActions>
             <Button onClick={this.handleClose} color="primary">

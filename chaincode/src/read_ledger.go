@@ -119,14 +119,14 @@ func read_everything(stub shim.ChaincodeStubInterface) pb.Response {
 		if err != nil {
 			return shim.Error(err.Error())
 		}
-		queryKeyAsStr := aKeyValue.Key
+		// queryKeyAsStr := aKeyValue.Key
 		queryValAsBytes := aKeyValue.Value
-		fmt.Println("on asset id - ", queryKeyAsStr)
+		// fmt.Println("on asset id - ", queryKeyAsStr)
 		var asset Asset
 		json.Unmarshal(queryValAsBytes, &asset)                  //un stringify it aka JSON.parse()
 		everything.Assets = append(everything.Assets, asset)   //add this marble to the list
 	}
-	fmt.Println("asset array - ", everything.Assets)
+	// fmt.Println("asset array - ", everything.Assets)
 
 	// ---- Get All Originators ---- //
 	originatorsIterator, err := stub.GetStateByRange("originator0", "originator9999999999999999999")
@@ -140,14 +140,14 @@ func read_everything(stub shim.ChaincodeStubInterface) pb.Response {
 		if err != nil {
 			return shim.Error(err.Error())
 		}
-		queryKeyAsStr := aKeyValue.Key
+		// queryKeyAsStr := aKeyValue.Key
 		queryValAsBytes := aKeyValue.Value
-		fmt.Println("on originator id - ", queryKeyAsStr)
+		// fmt.Println("on originator id - ", queryKeyAsStr)
 		var originator Originator
 		json.Unmarshal(queryValAsBytes, &originator)                   //un stringify it aka JSON.parse()
 		everything.Originators = append(everything.Originators, originator)  //add this marble to the list
 	}
-	fmt.Println("originator array - ", everything.Originators)
+	// fmt.Println("originator array - ", everything.Originators)
 
 	// ---- Get All Pools ---- //
 	poolsIterator, err := stub.GetStateByRange("pool0", "pool9999999999999999999")
@@ -161,14 +161,14 @@ func read_everything(stub shim.ChaincodeStubInterface) pb.Response {
 	  if err != nil {
 	    return shim.Error(err.Error())
 	  }
-	  queryKeyAsStr := aKeyValue.Key
+	  // queryKeyAsStr := aKeyValue.Key
 	  queryValAsBytes := aKeyValue.Value
-	  fmt.Println("on pool id - ", queryKeyAsStr)
+	  // fmt.Println("on pool id - ", queryKeyAsStr)
 	  var pool Pool
 	  json.Unmarshal(queryValAsBytes, &pool)                   //un stringify it aka JSON.parse()
 	  everything.Pools = append(everything.Pools, pool)  //add this marble to the list
 	}
-	fmt.Println("pool array - ", everything.Pools)
+	// fmt.Println("pool array - ", everything.Pools)
 
 	// ---- Get All Securities ---- //
 	securitiesIterator, err := stub.GetStateByRange("security0", "security9999999999999999999")
@@ -182,14 +182,14 @@ func read_everything(stub shim.ChaincodeStubInterface) pb.Response {
 	  if err != nil {
 	    return shim.Error(err.Error())
 	  }
-	  queryKeyAsStr := aKeyValue.Key
+	  // queryKeyAsStr := aKeyValue.Key
 	  queryValAsBytes := aKeyValue.Value
-	  fmt.Println("on security id - ", queryKeyAsStr)
+	  // fmt.Println("on security id - ", queryKeyAsStr)
 	  var security Security
 	  json.Unmarshal(queryValAsBytes, &security)                   //un stringify it aka JSON.parse()
 	  everything.Securities = append(everything.Securities, security)  //add this marble to the list
 	}
-	fmt.Println("security array - ", everything.Securities)
+	// fmt.Println("security array - ", everything.Securities)
 
 	// ---- Get All Investors ---- //
 	investorsIterator, err := stub.GetStateByRange("investor0", "investor9999999999999999999")
@@ -203,14 +203,15 @@ func read_everything(stub shim.ChaincodeStubInterface) pb.Response {
 	  if err != nil {
 	    return shim.Error(err.Error())
 	  }
-	  queryKeyAsStr := aKeyValue.Key
+	  // queryKeyAsStr := aKeyValue.Key
 	  queryValAsBytes := aKeyValue.Value
-	  fmt.Println("on investor id - ", queryKeyAsStr)
+	  // fmt.Println("on investor id - ", queryKeyAsStr)
 	  var investor Investor
 	  json.Unmarshal(queryValAsBytes, &investor)                   //un stringify it aka JSON.parse()
 	  everything.Investors = append(everything.Investors, investor)  //add this marble to the list
 	}
-	fmt.Println("investor array - ", everything.Investors)
+	// fmt.Println("investor array - ", everything.Investors)
+	fmt.Println("result", everything)
 
 	//change to array of bytes
 	everythingAsBytes, _ := json.Marshal(everything)              //convert to array of bytes

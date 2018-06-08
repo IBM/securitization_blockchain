@@ -52,7 +52,7 @@ type Pool struct {
 	ObjectType     string      `json:"docType"`     //field for couchdb
 	Id             string      `json:"id"`
 	Rating         string      `json:"rating"`
-	ExcessSpread   float64     `json:excessspread`
+	ExcessSpread   float64     `json:excessspread` // remainder of payments that aren't sent to investors/originator
 	Value          float64     `json:value`				// sum of all mortgage values
 	Assets         []string    `json:"assets"`    // string of asset ids
 	// Assets         []*Asset     `json:"assets"`    // string of asset ids
@@ -69,20 +69,26 @@ type Asset struct {
 	ObjectType     string                      `json:"docType"` //field for couchdb
 	Id       			 string                      `json:"id"`      //the fieldtags are needed to keep case from bouncing around
 	Originator     Originator	         				 `json:"originator"`
-	// Pool           *Pool	                     `json:"pool"` // TODO, not sure if this is needed
-  Pool           string	                     `json:"pool"` // TODO, not sure if this is needed
-
+	Pool           string	                     `json:"pool"` // TODO, not sure if this is needed
 	State          string                      `json:"state"` // active, deliquent
 	Underwriting   string   					  			 `json:"underwriting"` // fico, user // TODO, this should be an object, but having issues with json marshalling
+	Rating         string                      `json:"rating"` // generated as result of FICO score and other underwriting info, used to determine risk. higher risk generally results in higher return, but likeliehood of default
+	InterestRate   string           	 				 `json:"interest"`
+	Balance        string                		   `json:"balance"`
+	MonthyPayment  string											 `json:"monthlypayment"`
+	RemainingPayments   string								 `json:"remainingpayments"`
+	ExpectedPayoffAmount string							   `json:"payoffamount"`
+
+	// (( InterestRate / 12 ) * Balance * PaymentsLeft) / (1 - (1 + (InterestRate / 12) ) ^ -PaymentsLeft )
+	// (((asset.InterestRate / 12) * asset.balance * asset.PaymentsLeft) / math.Pow( (1 - (1 + (asset.InterestRate / 12)) ), (-1 * asset.PaymentsLeft) ))
+
+	// Investor       InvestorRelation	   `json:"investor"`
 	// Underwriting struct {
 	// 	FICO					 string   `json:"FICO"`
 	// 	// DebtToIncome   float64  `json:"debt_to_income"`
 	// 	// MonthsActive   int  `json:"months_active"`
 	// } `json:"underwriting"`
-	Rating         string                      `json:"rating"` // generated as result of FICO score and other underwriting info, used to determine risk. higher risk generally results in higher return, but likeliehood of default
-	InterestRate   string           	 				 `json:"interest"`
-	Balance        string              				 `json:"balance"`
-	// Investor       InvestorRelation	   `json:"investor"`
+	// Pool           *Pool	                     `json:"pool"` // TODO, not sure if this is needed
 }
 
 // Underwriting information is used to determine asset rating, which subsequently determines which security it's associated with
@@ -99,6 +105,7 @@ type Originator struct {
 	Company        string   `json:"company"`
 	ProcessingFee  string   `json:"processingfee"` // percentage
 	Assets         []string `json:"assets"` // list of asset ids will do
+	Balance        string  `json:"balance"` // originator receives proceeds from security sales
 	// Assets         []Asset `json:"assets"`
 	// AssetRelation  []string `json:"assets"`
 }
@@ -108,17 +115,18 @@ type Security struct {
 	Id                  string      `json:"id"`
 	// Amount				    int			   `json:"amount"`
 	Rating				      string		  `json:"rating"`
-	CouponRate				  float64     `json:"return"` // lets say return is 8% on the year, and each security costs 1k
+	CouponRate				  float64     `json:"couponrate"` // lets say return is 8% on the year, and each security costs 1k
 																					  // so monthly_payout per security should total (1k * .08) / 12
 																					  // dividing that by number of assets in our pool will determine how much investor gets from each payment
-	Value               float64    `json:"value"` // Expected payout
+	Value               string    `json:"value"` // Expected payout
 	MonthsUntilMaturity int 	     `json:"monthsuntilmaturity"` // number of payments investor will receive
 	Maturity					  bool       `json:"maturity"`
 	MaturityDate        string     `json:"maturitydate"`
 	Investor            string     `json:"investor"` // TODO, array of investor ids, or array of structs?
-	// Pool				   Pool			 `json:"amount"`
+	Pool				        string			 `json:"pool"`
 	// Expiration     string     `json`
-	// AmountPaid     float64  `json:"investor"`
+	AmountPaid          string  `json:"amountpaid"`
+	PercentageSecuritized float64 `json:percentagesecuritized`
 	// AmountDue      float64  `json:"investor"`
 	// 																						 // TODO, investor ids should
 }
@@ -132,7 +140,7 @@ type Security struct {
 type Investor struct {
 	ObjectType     string     `json:"docType"`     //field for couchdb
 	Id             string     `json:"id"`
-	// Username       string     `json:"username"`
+	Username       string     `json:"username"`
 	Balance				 float64    `json:"balance"`
 	Securities		 []string    `json:"securities"`
 	// Securities		 []Security `json:"securities"`
@@ -211,7 +219,7 @@ func main() {
 // Returns - shim.Success or error
 // ============================================================================================================================
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
-	fmt.Println("Marbles Is Starting Up")
+	fmt.Println("Securitization Process Is Starting Up")
 	funcName, args := stub.GetFunctionAndParameters()
 	var number int
 	var err error
@@ -254,7 +262,7 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 	fmt.Println("  GetStringArgs() args found:", alt)
 
 	// store compatible marbles application version
-	err = stub.PutState("marbles_ui", []byte("4.0.1"))
+	err = stub.PutState("securitization_ui", []byte("1.0.0"))
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -295,10 +303,16 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return init_originator(stub, args)
 	} else if function == "init_investor"{        //create a new marble owner
 		return init_investor(stub, args)
-	} else if function == "init_securities" {      //create a new marble
-		return init_securities(stub, args)
-	} else if function == "buy_securities" {      //create a new marble
-		return buy_securities(stub, args)
+	} else if function == "init_security" {      //create a new marble
+		return init_security(stub, args)
+	} else if function == "buy_security" {      //create a new marble
+		return buy_security(stub, args)
+	} else if function == "value_pool" {      //create a new marble
+		return value_pool(stub, args)
+	} else if function == "value_asset" {      //create a new marble
+		return value_asset(stub, args)
+	} else if function == "delete" {      //create a new marble
+		return delete(stub, args)
 
   // buy / sell securities will have a
 	// } else if function == "buy_securities"{        //create a new marble owner

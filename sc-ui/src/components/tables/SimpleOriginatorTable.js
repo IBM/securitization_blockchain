@@ -11,12 +11,9 @@ import Button from '@material-ui/core/Button';
 // import Modal from '@material-ui/core/Modal';
 import Modal from '../modal.js';
 import FormDialog from '../forms/FormDialog.js'
-import InitInvestorForm from '../forms/initInvestorForm.jsx'
-import BuySecurityForm from '../forms/buySecurityForm.jsx'
-import SellSecurityForm from '../forms/sellSecurityForm.jsx'
-import TransferAssetForm from '../forms/transferAssetForm.jsx'
+import InitAssetPoolForm from '../forms/initAssetPoolForm.jsx'
+import InitOriginatorForm from '../forms/initOriginatorForm.jsx'
 import ProcessPaymentForm from '../forms/processPaymentForm.jsx'
-
 
 const styles = theme => ({
   root: {
@@ -30,35 +27,25 @@ const styles = theme => ({
 });
 
 let id = 0;
-function createData( id, balance, securities ) {
+function createData( id, processingfee, company, assets, balance ) {
   // id += 1;
-  return { id, balance, securities };
+  return { id, processingfee, company, assets, balance };
 }
 
-
-// var data = [
-//   createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-//   createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-//   createData('Eclair', 262, 16.0, 24, 6.0),
-//   createData('Cupcake', 305, 3.7, 67, 4.3),
-//   createData('Gingerbread', 356, 16.0, 49, 3.9),
-//   createData('Gingerbread', 356, 16.0, 49, 3.9)
-// ];
-
 function generateData() {
-  var investors = JSON.parse(localStorage.getItem('objects')).investors
-  // console.log(investors)
+  var originators = JSON.parse(localStorage.getItem('objects')).originators
+  // console.log(originators)
   var data = []
-  if (!investors || investors.length == 0) {
+  if (!originators || originators.length == 0) {
     return data
   }
-  for (var idx in investors) {
+  for (var idx in originators) {
     data.push(
       createData(
-        investors[idx].id, investors[idx].balance, investors[idx].securities
+        originators[idx].id, originators[idx].processingfee, originators[idx].company, originators[idx].assets, originators[idx].balance
       )
     )
-    if (idx == (investors.length -1)) {
+    if (idx == (originators.length -1)) {
       // console.log("data")
       // console.log(data)
       return data
@@ -67,7 +54,7 @@ function generateData() {
 }
 var data = generateData()
 
-function SimpleInvestorTable(props) {
+function SimpleOriginatorTable(props) {
   const { classes } = props;
   const data = generateData()
   return (
@@ -75,33 +62,37 @@ function SimpleInvestorTable(props) {
       <Table className={classes.table}>
         <TableHead>
           <TableRow>
-            <TableCell>Investor ID</TableCell>
+            <TableCell>Originator ID</TableCell>
+            <TableCell>Processing Fee</TableCell>
+            <TableCell>Company</TableCell>
+            <TableCell>Assets</TableCell>
             <TableCell>Balance</TableCell>
-            <TableCell>Securities</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {data.map(n => {
             return (
               <TableRow key={n.id}>
-                <TableCell component="th" scope="row">{n.id}</TableCell>
-                <TableCell>${n.balance.toFixed(2)}</TableCell>
-                <TableCell>{n.securities}</TableCell>
+                <TableCell component="th" scope="row">
+                  {n.id}
+                </TableCell>
+                <TableCell>{n.processingfee * 100}%</TableCell>
+                <TableCell>{n.company}</TableCell>
+                <TableCell>{n.assets}</TableCell>
+                <TableCell>{n.balance}</TableCell>
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
-      <InitInvestorForm ></InitInvestorForm>
-      <BuySecurityForm ></BuySecurityForm>
-      <SellSecurityForm ></SellSecurityForm>
+      <InitOriginatorForm></InitOriginatorForm>
     </Paper>
 
   );
 }
 
-SimpleInvestorTable.propTypes = {
+SimpleOriginatorTable.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(SimpleInvestorTable);
+export default withStyles(styles)(SimpleOriginatorTable);

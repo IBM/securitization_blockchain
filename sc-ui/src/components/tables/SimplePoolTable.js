@@ -11,7 +11,7 @@ import Button from '@material-ui/core/Button';
 // import Modal from '@material-ui/core/Modal';
 import Modal from '../modal.js';
 import FormDialog from '../forms/FormDialog.js'
-import InitAssetForm from '../forms/initAssetForm.jsx'
+import InitAssetPoolForm from '../forms/initAssetPoolForm.jsx'
 import ProcessPaymentForm from '../forms/processPaymentForm.jsx'
 
 
@@ -27,9 +27,9 @@ const styles = theme => ({
 });
 
 let id = 0;
-function createData( id, value, excessspread ) {
+function createData( id, value, assets, securities, excessspread ) {
   // id += 1;
-  return { id, value, excessspread };
+  return { id, value, assets, securities, excessspread };
 }
 
 
@@ -46,10 +46,14 @@ function generateData() {
   var pools = JSON.parse(localStorage.getItem('objects')).pools
   console.log(pools)
   var data = []
+  if (!pools || pools.length == 0) {
+    return data
+  }
+
   for (var idx in pools) {
     data.push(
       createData(
-        pools[idx].id, pools[idx].value, pools[idx].excessspread
+        pools[idx].id, pools[idx].Value, pools[idx].assets, pools[idx].securities, pools[idx].excessspread
       )
     )
     if (idx == (pools.length -1)) {
@@ -70,8 +74,10 @@ function SimplePoolTable(props) {
         <TableHead>
           <TableRow>
             <TableCell>Pool ID</TableCell>
-            <TableCell numeric>Value</TableCell>
-            <TableCell numeric>Excess Spread</TableCell>
+            <TableCell>Pool Assets</TableCell>
+            <TableCell>Value of Pool Assets</TableCell>
+            <TableCell>Securities</TableCell>
+            <TableCell>Excess Spread</TableCell>
 
           </TableRow>
         </TableHead>
@@ -82,19 +88,16 @@ function SimplePoolTable(props) {
                 <TableCell component="th" scope="row">
                   {n.id}
                 </TableCell>
-                <TableCell numeric>{n.value}</TableCell>
-                <TableCell numeric>{n.excessspread}</TableCell>
+                <TableCell>{n.assets}</TableCell>
+                <TableCell>{n.value.toFixed(2)}</TableCell>
+                <TableCell>{n.securities}</TableCell>
+                <TableCell>{n.excessspread}</TableCell>
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
-      <ProcessPaymentForm> </ProcessPaymentForm>
-      <InitAssetForm  class="float-right"></InitAssetForm>
-      <Button color="secondary" variant="contained" className="tablebutton" onClick={() => { console.log('onClick'); }}>
-        Transfer Asset
-      </Button>
-
+      <InitAssetPoolForm></InitAssetPoolForm>
     </Paper>
 
   );

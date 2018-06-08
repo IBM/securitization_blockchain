@@ -1,4 +1,4 @@
-for i in $(ls /Users/kalonji/projects/securitization_pattern/chaincode/src/*go) ;
+for i in $(ls /Users/kalonji/projects/securitization_blockchain/chaincode/src/*go) ;
   do docker cp ${i} chaincode:/opt/gopath/src/chaincode/securitization/ ;
 done
 docker exec chaincode bash -c 'pkill -f securitization '

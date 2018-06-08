@@ -19,7 +19,8 @@ function refreshState() {
   fetch('http://localhost:3001/chaincode', config)
     .then(response => response.json())
     .then((json) =>{
-      console.log("returned")
+      console.log("in refreshState helper")
+
       // const element = GenerateCards(JSON.parse(json))
       // ReactDOM.render(element, document.getElementById('test'));
       // console.log("this")
@@ -35,4 +36,4 @@ function refreshState() {
   });
 }
 
-export default (refreshState);
+export default refreshState;

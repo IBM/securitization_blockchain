@@ -1,18 +1,31 @@
 import React from 'react';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 class InitSecurityForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       id: '',
-      couponRate: '',
-      poolId: ''
+      rating: '',
+      couponrate: '',
+      value: '',
+      monthsuntilmaturity: '',
+      maturity: '',
+      pool: '',
+      investor: ''
     };
 
     // this.handleChange = this.handleChange.bind(this);
     this.handleIdChange = this.handleIdChange.bind(this);
-    this.handleCouponRateChange = this.handleCouponRateChange.bind(this);
-    this.handlePoolIdChange = this.handlePoolIdChange.bind(this);
+    this.handleInterestRateChange = this.handleInterestRateChange.bind(this);
+    this.handleBalanceChange = this.handleBalanceChange.bind(this);
+    this.handleUnderwritingChange = this.handleUnderwritingChange.bind(this);
 
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -24,22 +37,30 @@ class InitSecurityForm extends React.Component {
     });
   }
 
-  handleCouponRateChange(event) {
+  handleInterestRateChange(event) {
     console.log(event.target)
     this.setState({
       interestrate: event.target.value
     });
   }
 
-  handlePoolIdChange(event) {
+  handleBalanceChange(event) {
     console.log(event.target)
     this.setState({
       balance: event.target.value
     });
   }
 
-  handleSubmit(event) {
-    console.log('creating asset with id: ' + JSON.stringify(this.state));
+  handleUnderwritingChange(event) {
+    this.setState({
+      underwriting: event.target.value
+    });
+  }
+
+  handleSubmit = () =>  {
+    // console.log("event")
+    // console.log(event)
+    console.log('creating security with id: ' + JSON.stringify(this.state));
     let config = {
       method: 'POST',
       headers: {
@@ -51,35 +72,114 @@ class InitSecurityForm extends React.Component {
         params: {
           ctorMsg: {
             function: 'init_security',
-            args: Object.values(this.state)
+            args: [ this.state.id, this.state.couponrate, this.state.pool]
+            //args: Object.values(this.state)
           }
         }
       })
     }
     console.log(config.body)
     fetch('http://localhost:3001/chaincode', config)
-
-    event.preventDefault();
+    this.setState({ open: false });
+    // event.preventDefault();
   }
+
+  handleClickOpen = () => {
+    this.setState({ open: true });
+  };
+
+  handleClose = () => {
+    this.setState({ open: false });
+  };
+
+  handleChange = name => event => {
+    this.setState({
+      [name]: event.target.value,
+    });
+  };
+
+  // function generateTextFields(fields) {
+  //
+  //   return
+  // }
+
+  // <form onSubmit={this.handleSubmit}>
+  //   <label>
+  //     Id:
+  //     <input type="text" name="id" value={this.state.id} onChange={this.handleIdChange} />
+  //   </label>
+  //   <label>
+  //     InterestRate:
+  //     <input type="text" name="interestrate" value={this.state.interestrate} onChange={this.handleInterestRateChange}  />
+  //   </label>
+  //   <label>
+  //     Balance:
+  //     <input type="text" name="balance" value={this.state.balance} onChange={this.handleBalanceChange} />
+  //   </label>
+  //   <label>
+  //     Underwriting:
+  //     <input type="text" name="underwriting" value={this.state.underwriting} onChange={this.handleUnderwritingChange} />
+  //   </label> -->
+  //
+  //   <input type="submit" value="Submit" />
+  // </form>
+
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
-        <label>
-          Id:
-          <input type="text" name="id" value={this.state.id} onChange={this.handleIdChange} />
-        </label>
-        <label>
-          InterestRate:
-          <input type="text" name="interestrate" value={this.state.couponRate} onChange={this.handleCouponRateChange}  />
-        </label>
-        <label>
-          Balance:
-          <input type="text" name="balance" value={this.state.poolId} onChange={this.handlePoolIdChange} />
-        </label>
+      <div>
+          <Button style={{'float':'center', 'padding':'15px'}} color="primary" variant="contained" size="small" onClick={this.handleClickOpen}>Create Security</Button>
+          <Dialog
+            open={this.state.open}
+            onClose={this.handleClose}
+            aria-labelledby="form-dialog-title"
+          >
+          <DialogTitle id="form-dialog-title">Create Security</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="id"
+              label="Security ID"
+              onChange={this.handleChange('id')}
+              fullWidth
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="couponrate"
+              label="Coupon Rate"
+              onChange={this.handleChange('couponrate')}
+              fullWidth
+            />
+          {/*<TextField
+              autoFocus
+              margin="dense"
+              id="monthsuntilmaturity"
+              label="Months Until Maturity"
+              onChange={this.handleChange('monthsuntilmaturity')}
+              fullWidth
+            />*/}
+            <TextField
+              autoFocus
+              margin="dense"
+              id="pool"
+              label="Pool"
+              onChange={this.handleChange('pool')}
+              fullWidth
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleClose} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={this.handleSubmit} color="primary">
+              Create
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
 
-        <input type="submit" value="Submit" />
-      </form>
     );
   }
 }

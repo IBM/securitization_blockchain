@@ -7,7 +7,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
-class InitAssetPoolForm extends React.Component {
+class InitInvestorForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -52,7 +52,7 @@ class InitAssetPoolForm extends React.Component {
   handleSubmit = () =>  {
     // console.log("event")
     // console.log(event)
-    console.log('creating asset pool with id: ' + JSON.stringify(this.state));
+    console.log('creating investor with id: ' + JSON.stringify(this.state));
     let config = {
       method: 'POST',
       headers: {
@@ -63,7 +63,7 @@ class InitAssetPoolForm extends React.Component {
       body: JSON.stringify({
         params: {
           ctorMsg: {
-            function: 'init_asset_pool',
+            function: 'init_investor',
             args: [this.state.id]
             //args: Object.values(this.state)
           }
@@ -73,6 +73,7 @@ class InitAssetPoolForm extends React.Component {
     console.log(config.body)
     fetch('http://localhost:3001/chaincode', config)
     this.setState({ open: false });
+
     // event.preventDefault();
   }
 
@@ -120,19 +121,19 @@ class InitAssetPoolForm extends React.Component {
   render() {
     return (
       <div>
-          <Button color="primary" variant="contained" onClick={this.handleClickOpen}>Create Asset Pool</Button>
+          <Button style={{'float':'right', 'padding':'15px'}} variant="contained" color="primary" size="small" onClick={this.handleClickOpen}>Create Investor</Button>
           <Dialog
             open={this.state.open}
             onClose={this.handleClose}
             aria-labelledby="form-dialog-title"
           >
-          <DialogTitle id="form-dialog-title">Create New Asset Pool</DialogTitle>
+          <DialogTitle id="form-dialog-title">Create New Investor</DialogTitle>
           <DialogContent>
             <TextField
               autoFocus
               margin="dense"
               id="id"
-              label="Asset Pool ID"
+              label="Investor ID"
               onChange={this.handleChange('id')}
               fullWidth
             />
@@ -151,4 +152,4 @@ class InitAssetPoolForm extends React.Component {
     );
   }
 }
-export default InitAssetPoolForm;
+export default InitInvestorForm;

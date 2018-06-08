@@ -28,9 +28,9 @@ const styles = theme => ({
 });
 
 let id = 0;
-function createData( id, balance, interest, state, originator, pool ) {
+function createData( id, balance, interest, state, remainingpayments, originator, pool, payoffamount ) {
   // id += 1;
-  return { id, balance, interest, state, originator, pool };
+  return { id, balance, interest, state, remainingpayments, originator, pool, payoffamount };
 }
 
 
@@ -44,13 +44,16 @@ function createData( id, balance, interest, state, originator, pool ) {
 // ];
 
 function generateData() {
-  var assets = JSON.parse(localStorage.getItem('objects')).assets
+  var assets = JSON.parse(localStorage.getItem('objects')).assets || []
   console.log(assets)
   var data = []
+  if (assets.length == 0) {
+    return data
+  }
   for (var idx in assets) {
     data.push(
       createData(
-        assets[idx].id, assets[idx].balance, assets[idx].interest, assets[idx].state, assets[idx].originator.id, assets[idx].pool
+        assets[idx].id, assets[idx].balance, assets[idx].interest, assets[idx].state, assets[idx].remainingpayments, assets[idx].originator.id, assets[idx].pool, assets[idx].payoffamount
       )
     )
     if (idx == (assets.length -1)) {
@@ -76,21 +79,28 @@ function SimpleAssetTable(props) {
             <TableCell> State</TableCell>
             <TableCell> Originator </TableCell>
             <TableCell> Pool </TableCell>
+            {/*<TableCell> Monthly Payment </TableCell>*/}
+            <TableCell> Payments until Amortization </TableCell>
+            <TableCell> Expected Amortization Amount </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map(n => {
+          { data.length > 0 ?
+            data.map(n => {
             return (
               <TableRow key={n.id}>
                 <TableCell component="th" scope="row">{n.id}</TableCell>
-                <TableCell numeric>{n.balance}</TableCell>
-                <TableCell numeric>{n.interest}</TableCell>
-                <TableCell >{n.state}</TableCell>
+                <TableCell >$ {n.balance}</TableCell>
+                <TableCell numeric>{ (n.interest * 100).toFixed(2)}%</TableCell>
+                <TableCell>{n.state}</TableCell>
                 <TableCell>{n.originator}</TableCell>
                 <TableCell>{n.pool}</TableCell>
+                {/*<TableCell>{n.monthlypayment}</TableCell>*/}
+                <TableCell>{n.remainingpayments}</TableCell>
+                <TableCell>{n.payoffamount}</TableCell>
               </TableRow>
             );
-          })}
+          }) : null}
         </TableBody>
       </Table>
       <ProcessPaymentForm> </ProcessPaymentForm>
