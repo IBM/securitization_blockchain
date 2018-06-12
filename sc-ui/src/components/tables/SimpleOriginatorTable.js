@@ -33,7 +33,12 @@ function createData( id, processingfee, company, assets, balance ) {
 }
 
 function generateData() {
-  var originators = JSON.parse(localStorage.getItem('objects')).originators
+  if (JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).originators ) {
+    var originators = JSON.parse(localStorage.getItem('objects')).originators
+  } else {
+    var originators = []
+  }
+
   // console.log(originators)
   var data = []
   if (!originators || originators.length == 0) {

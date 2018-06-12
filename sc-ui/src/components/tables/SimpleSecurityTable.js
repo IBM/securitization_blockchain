@@ -47,8 +47,12 @@ function createData( id, rating, couponrate, pool, value, monthsuntilmaturity, m
 // ];
 
 function generateData() {
-  var securities = JSON.parse(localStorage.getItem('objects')).securities
-  // console.log(securities)
+
+  if (JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).securities ) {
+    var securities = JSON.parse(localStorage.getItem('objects')).securities
+  } else {
+    var securities = []
+  }
   var data = []
   if (!securities || securities.length == 0) {
     return data

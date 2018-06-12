@@ -7,6 +7,7 @@ function refreshState() {
       //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
     },
     body: JSON.stringify({
+      method: "query",
       params: {
         ctorMsg: {
           function: 'read_everything',

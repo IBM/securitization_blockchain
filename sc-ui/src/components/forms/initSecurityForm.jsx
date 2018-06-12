@@ -69,6 +69,7 @@ class InitSecurityForm extends React.Component {
         //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
       },
       body: JSON.stringify({
+        method: "invoke",
         params: {
           ctorMsg: {
             function: 'init_security',

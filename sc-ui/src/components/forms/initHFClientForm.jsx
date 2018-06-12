@@ -13,6 +13,7 @@ class InitHFCForm extends React.Component {
     this.state = {
       api_endpoint: '',
       chaincode_id: '',
+      chaincode_version: '',
       secure_context: '',
       key: '',
       secret: '',
@@ -58,7 +59,7 @@ class InitHFCForm extends React.Component {
   handleSubmit = () =>  {
     // console.log("event")
     // console.log(event)
-    console.log('creating asset with id: ' + JSON.stringify(this.state));
+    console.log('creating hyperledger client: ' + JSON.stringify(this.state));
     var config = {
       method: 'POST',
       headers: {
@@ -66,48 +67,16 @@ class InitHFCForm extends React.Component {
         'Content-Type': 'application/json',
         //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
       },
-      body: JSON.stringify({
-        params: {
-          ctorMsg: {
-            function: 'init_asset',
-            // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
-            args: [this.state.id, this.state.balance, this.state.interestrate, this.state.remainingpayments, this.state.underwriting]
-            //args: Object.values(this.state)
-          }
-        }
-      })
+      body: JSON.stringify(this.state)
     }
-    console.log(config.body)
-    fetch('http://localhost:3001/chaincode', config).then ( () =>
-
-      setTimeout( () => {
-        {
-          var config_value = {
-            method: 'POST',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-              //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
-            },
-            body: JSON.stringify({
-              params: {
-                ctorMsg: {
-                  function: 'value_asset',
-                  // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
-                  args: [this.state.id]
-                  //args: Object.values(this.state)
-                }
-              }
-            })
-          }
-          fetch('http://localhost:3001/chaincode', config_value)
-        }
-      }, 2000)
+    fetch('http://localhost:3001/init_hfc_client', config).then( () =>
+        setTimeout( () => {
+          fetch('http://localhost:3001/getchaincodes', config) // should wait for about 5 seconds for client to initialize
+        }, 10000)
     )
     this.setState({ open: false });
     // event.preventDefault();
   }
-
   handleClickOpen = () => {
     this.setState({ open: true });
   };
@@ -152,67 +121,77 @@ class InitHFCForm extends React.Component {
   render() {
     return (
       <div>
-          <Button style={{'float':'right', 'padding':'15px'}} color="secondary" size="small" variant="contained" onClick={this.handleClickOpen}>Create New Asset</Button>
+          <Button style={{'float':'right', 'padding':'15px'}} color="secondary" size="small" variant="contained" onClick={this.handleClickOpen}>Configure HF Client</Button>
           <Dialog
             open={this.state.open}
             onClose={this.handleClose}
             aria-labelledby="form-dialog-title"
           >
-          <DialogTitle id="form-dialog-title">Create Asset</DialogTitle>
+          <DialogTitle id="form-dialog-title">Provide Hyperledger Credentials</DialogTitle>
           <DialogContent>
             <TextField
               required
               autoFocus
               margin="dense"
               id="id"
-              label="Asset ID"
-              onChange={this.handleChange('id')}
+              label="API Endpoint"
+              onChange={this.handleChange('api_endpoint')}
               fullWidth
             />
             <TextField
               required
               autoFocus
               margin="dense"
-              id="interestrate"
-              label="Interest Rate"
-              onChange={this.handleChange('interestrate')}
+              id="key"
+              label="Key"
+              onChange={this.handleChange('key')}
               fullWidth
             />
             <TextField
               required
               autoFocus
               margin="dense"
-              id="balance"
-              label="Balance"
-              onChange={this.handleChange('balance')}
+              id="secret"
+              label="Secret"
+              onChange={this.handleChange('secret')}
               fullWidth
             />
             <TextField
               required
               autoFocus
               margin="dense"
-              id="remainingpayments"
-              label="Number of Monthly Payments Remaining"
-              onChange={this.handleChange('remainingpayments')}
+              id="network_id"
+              label="Network ID"
+              onChange={this.handleChange('network_id')}
               fullWidth
             />
             <TextField
+              required
               autoFocus
               margin="dense"
-              id="monthlypayment"
-              label="Monthly Payment"
-              onChange={this.handleChange('monthlypayment')}
+              id="chaincode_id"
+              label="Chaincode ID"
+              onChange={this.handleChange('chaincode_id')}
               fullWidth
             />
             <TextField
+              required
               autoFocus
               margin="dense"
-              id="underwriting"
-              label="Underwriting Information"
-              onChange={this.handleChange('underwriting')}
+              id="chaincode_version"
+              label="Chaincode Version"
+              onChange={this.handleChange('chaincode_version')}
               fullWidth
             />
-
+            <TextField
+              required
+              autoFocus
+              margin="dense"
+              id="secure_context"
+              label="Secure Context"
+              onChange={this.handleChange('secure_context')}
+              fullWidth
+            />
           </DialogContent>
           <DialogActions>
             <Button onClick={this.handleClose} color="primary">

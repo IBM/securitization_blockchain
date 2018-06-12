@@ -22,6 +22,7 @@ import SimplePoolTable from './components/tables/SimplePoolTable.js'
 import SimpleInvestorTable from './components/tables/SimpleInvestorTable.js'
 import SimpleSecurityTable from './components/tables/SimpleSecurityTable.js'
 import SimpleOriginatorTable from './components/tables/SimpleOriginatorTable.js'
+import InitHFCForm from './components/forms/initHFClientForm.jsx'
 
 
 import FormDialog from './components/forms/FormDialog.js'
@@ -98,6 +99,7 @@ function refreshState() {
       //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
     },
     body: JSON.stringify({
+      method: "query",
       params: {
         ctorMsg: {
           function: 'read_everything',
@@ -108,25 +110,42 @@ function refreshState() {
   }
   // console.log(config.body)
   fetch('http://localhost:3001/chaincode', config)
-    .then(response => response.json())
+    .then(response => response.json() )
     .then((json) =>{
       console.log("in refresh state method")
       // const element = GenerateCards(JSON.parse(json))
       // ReactDOM.render(element, document.getElementById('test'));
       // console.log("this")
       // console.log(this)
-      var stateObjects = JSON.parse(json)
+      console.log("JSON")
+      console.log(json)
+      // if (typeof(json) == "string") {
+      // var stateObjects = JSON.parse(json)
+      // } else {
+      //   var stateObjects = json
+      // }
+
+      // console.log("stateObjects")
       // console.log(stateObjects)
       // TODO, use react "set state" properly
       // console.log("setting state")
       // console.log({"objects": JSON.parse(json)})
       // this.setState({"objects": JSON.parse(json)})
-      localStorage.setItem('objects', json)
+      if (typeof(json) == "string") {
+        localStorage.setItem('objects', json)
+        // localStorage.setItem('objects', JSON.parse(json))
+      } else {
+        localStorage.setItem('objects', JSON.stringify(json))
+      }
+      // }
       // console.log("this.props")
       // console.log(this.props)
       // this.props.objects = json
-
-      return JSON.parse(json)
+      if (JSON.parse(json)) {
+        return JSON.parse(json)
+      } else {
+        return json
+      }
   }).catch( (err) => {
       console.log("fetch failed")
       console.log(err)
@@ -147,7 +166,7 @@ class App extends Component {
           //     // console.log('refreshing state');
           //     // return { unseen: "does not display" }
           // });
-      }, 5000);
+      }, 8000);
   }
 
   handleChange = (event, value) => {
@@ -186,6 +205,10 @@ class App extends Component {
           {value === 1 && <TabContainer><SimplePoolTable></SimplePoolTable></TabContainer>}
         </div>
         */}
+
+        <div >
+        <InitHFCForm> </InitHFCForm>
+        </div>
 
         <div>
         <AppBar label="Originators" position="static" style={{position:'static',width:'90%', align: 'middle', margin: 'auto', padding: '10px'}} >

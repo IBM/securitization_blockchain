@@ -68,6 +68,7 @@ class InitAssetForm extends React.Component {
       },
       body: JSON.stringify({
         params: {
+          method: "invoke",
           ctorMsg: {
             function: 'init_asset',
             // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
@@ -90,6 +91,7 @@ class InitAssetForm extends React.Component {
               //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
             },
             body: JSON.stringify({
+              method: "invoke",
               params: {
                 ctorMsg: {
                   function: 'value_asset',
@@ -102,7 +104,7 @@ class InitAssetForm extends React.Component {
           }
           fetch('http://localhost:3001/chaincode', config_value)
         }
-      }, 2000)
+      }, 10000)
     )
     this.setState({ open: false });
     // event.preventDefault();

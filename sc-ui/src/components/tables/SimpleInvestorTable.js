@@ -46,7 +46,12 @@ function createData( id, balance, securities ) {
 // ];
 
 function generateData() {
-  var investors = JSON.parse(localStorage.getItem('objects')).investors
+
+  if  (JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).investors ) {
+    var investors = JSON.parse(localStorage.getItem('objects')).investors
+  } else {
+    var investors = []
+  }
   // console.log(investors)
   var data = []
   if (!investors || investors.length == 0) {

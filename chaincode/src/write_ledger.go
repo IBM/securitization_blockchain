@@ -162,8 +162,8 @@ func init_asset(stub shim.ChaincodeStubInterface, args []string) (pb.Response) {
 	// 	return shim.Error("This asset already exists - " + id)  //all stop a marble by this id exists
 	// }
 
-	//build the marble json string manually
-	monthlyPayment := calculate_monthly_payment(balance, interest,  remainingpayments)
+	// build the marble json string manually
+	// monthlyPayment := calculate_monthly_payment(balance, interest,  remainingpayments)
 	str := `{
 		"docType":"asset",
 		"id": "` + asset_id + `",

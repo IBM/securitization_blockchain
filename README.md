@@ -18,7 +18,6 @@ When the reader has completed this Code Pattern, they will understand how to:
 
 <!--Remember to dump an image in this path-->
 <p align="center">
-<!-- <img src="https://i.imgur.com/lNZxVxo.png"  data-canonical-src="https://i.imgur.com/lNZxVxo.png" width="650" height="450" style="margin-left: auto; margin-right: auto;"> -->
 <img src="https://i.imgur.com/aHtB4G8.png"  />
 </p>
 
@@ -112,8 +111,16 @@ To run the Securitization UI locally, we'll need to install a few node libraries
 
 Install the Securitization UI node packages by running `npm install` in the project root directory and in the [react-backend](react-backend) directory. Both `python` and `build-essential` are required for these dependencies to install properly:
 ```
+# install react dependencies
+cd sc-ui
 npm install
-cd react-backend && npm install
+
+# install express/hyperledger dependencies
+cd react-backend
+npm install
+
+# return to the root project directory
+cd ../../
 ```
 
 <!--Update this section-->
@@ -125,9 +132,9 @@ cd react-backend && npm install
 <!-- Select components from [here](https://github.ibm.com/developer-journeys/journey-docs/tree/master/_content/dev#technologies), copy and paste the raw text for ease -->
 * [Hyperledger Fabric](https://hyperledger-fabric.readthedocs.io/en/release-1.1/)
 * [Hyperledger Node.js SDK](https://github.com/hyperledger/fabric-sdk-node)
-* [npm](https://www.npmjs.com/)
-* [node.js](https://nodejs.org/en/)
-* [react.js](https://reactjs.org/)
+* [NPM](https://www.npmjs.com/)
+* [Node.js](https://nodejs.org/en/)
+* [React.js](https://reactjs.org/)
 
 <!--Update this section when the video is created-->
 <!-- # Watch the Video
@@ -160,6 +167,10 @@ git clone github.com/IBM/securitization_blockchain
 
 1. To deploy the application to IBM Cloud, we'll need to leverage the IBM Cloud CLI. Ensure the cli is installed using the prerequisites section above, and then run the following command to deploy the application
 ```
+# Log in using IBM Cloud credentials
+bx login
+
+# Push application to IBM Cloud
 bx cf push
 ```
 
@@ -217,9 +228,10 @@ If you're manually deploying the application and services, -->
 ## 4. Upload and Instantiate Chaincode
 "Smart contracts", commonly referred to as "Chaincode", can be used to execute business logic and validate incoming requests. In this context, the contracts are used to implement CRUD operations for tracking assets on the IBM Blockchain ledger.
 
+### IBM Cloud Hosted Hyperledger
 To begin the process of uploading the smart contracts to the blockchain, we can start by opening the IBM Cloud dashboard, selecting your provisioned Blockchain service, and accessing the blockchain network monitor by clicking "Enter Monitor"
 <p align="center">
-<img src="https://i.imgur.com/J2pbo7H.png"  data-canonical-src="https://i.imgur.com/J2pbo7H.png" width="650" height="450" style="margin-left: auto; margin-right: auto;">
+<img src="https://i.imgur.com/BpUjPhe.png"  data-canonical-src="https://i.imgur.com/BpUjPhe.png" width="650" height="450" style="margin-left: auto; margin-right: auto;">
 </p>
 
 Next, click the "Install code" option on the left hand menu, and then the "Install Chaincode" button on the right of the page
@@ -227,20 +239,52 @@ Next, click the "Install code" option on the left hand menu, and then the "Insta
 <img src="https://i.imgur.com/HmdDsgm.png"  data-canonical-src="https://i.imgur.com/HmdDsgm.png" width="650" height="450" style="margin-left: auto; margin-right: auto;">
 </p>
 
-Enter an id and a version (here we'll use "securitzation_contracts" and "v1"). Then, select the "Add Files" button to upload the [samples.go](contracts/basic/simple_contract/samples.go), [schemas.go](contracts/basic/simple_contract/schemas.go), and [simple_contract_hyperledger.go](contracts/basic/simple_contract/simple_contract_hyperledger.go) files
+Enter an id and a version (here we'll use "sec" and "v1"). Then, select the "Choose Files" button to upload the smart contracts, which are titled [lib.go](chaincode/src/lib.go), [read_ledger.go](chaincode/src/read_ledger.go), [write_ledger.go](chaincode/src/write_ledger.go), and [securitization.go](chaincode/src/securitization.go). These files are located in the `chaincode/src` directory of this project
 
 <p align="center">
 <img src="https://i.imgur.com/nYwMM47.png"  data-canonical-src="https://i.imgur.com/nYwMM47.png" width="650" height="450" style="margin-left: auto; margin-right: auto;">
 </p>
 
-Finally, we'll need to Instantiate the chaincode. This can be done by opening the chaincode options menu and selecting "Instantiate"
-
-This will present a form where arguments can be provided to the chaincodes `init` function. In this case, we'll just need to provide a json string `"1.0"` in the Arguments section, and then click "Submit"
+Finally, we'll need to Instantiate the chaincode. This can be done by opening the chaincode options menu and selecting "Instantiate". This will present a form where arguments can be provided to the chaincode `init` function. In this case, we'll just need to provide an integer (we used `"101"`) to the Arguments section, and then click "Submit"
 <p align="center">
 <img src="https://i.imgur.com/blo1Qx3.png"  data-canonical-src="https://i.imgur.com/blo1Qx3.png" width="450" height="450" style="margin-left: auto; margin-right: auto;">
 </p>
 
-For additional documentation on the chaincode implementation, please see the README in the [simple_contract](contracts/basic/simple_contract) directory
+### Local Hyperledger Setup
+If you're planning to make custom changes to the smart contracts, it may be faster to develop and test chaincode locally before pushing to a hosted service. We can deploy a local hyperledger network using a `docker-compose` file with the following commands
+
+```
+git clone https://github.com/hyperledger/fabric-samples.git
+cd fabric-samples/chaincode-docker-devmode
+docker-compose -f docker-compose-simple.yaml up
+```
+
+In a separate tab, run the following from this project directory
+```
+./update.sh
+```
+
+Or run the chaincode setup steps manually with
+```
+docker exec -it chaincode bash
+mkdir -p chaincode/securitization
+cd chaincode/securitization
+go build
+CORE_PEER_ADDRESS=peer:7051 CORE_CHAINCODE_ID_NAME=sec:0 ./securitization
+```
+
+In a third tab, run the following commands to install and instantiate the chaincode
+```
+docker exec -it cli bash
+peer chaincode install -p chaincodedev/chaincode/securitization -n sec -v 0
+peer chaincode instantiate -n sec  -v 0 -c '{"Args":["101"]}' -C myc
+```
+
+Run an invoke command to ensure the chaincode was installed successfully
+```
+peer chaincode invoke -n sec -c '{"Args":["read_everything"]}' -C myc
+```
+
 
 <!-- ### Manual installation
 Otherwise, continue by installing [Node.js](https://nodejs.org/en/) runtime and NPM. Currently the Hyperledger Fabric SDK only appears to work with node v8.9.0+, but [is not yet supported](https://github.com/hyperledger/fabric-sdk-node#build-and-test) on node v9.0+. If your system requires newer versions of node for other projects, we'd suggest using [nvm](https://github.com/creationix/nvm) to easily switch between node versions. We did so with the following commands
@@ -301,13 +345,15 @@ npm start | PORT=3001 node react-backend/bin/www
 
 ## 6. Obtain service credentials
 
-The credentials for IBM Cloud Blockchain service, can be found in the ``Services`` menu in IBM Cloud by selecting the ``Service Credentials`` option for each service.
+This section is only necessary for working on the hosted Hyperledger offering. The credentials for IBM Cloud Blockchain service, can be found in the ``Services`` menu in IBM Cloud by selecting the ``Service Credentials`` option for each service.
 
-The Blockchain credentials consist of the `key`, `secret`, and `network_id` parameters
+The Blockchain credentials consist of the `key`, `secret`, and `network_id` parameters.
 <!-- ![]("https://i.imgur.com/Qof7sve.png" width="250" height="400") -->
 <p align="center">
 <img src="https://i.imgur.com/Qof7sve.png"  data-canonical-src="https://i.imgur.com/Qof7sve.png" width="450" height="450" style="margin-left: auto; margin-right: auto;">
 </p>
+
+We'll also need to provide the Chaincode Id and Version
 
 <!-- These credentials will need to be provided to the UI in the next step -->
 

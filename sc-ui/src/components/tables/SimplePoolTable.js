@@ -43,7 +43,12 @@ function createData( id, value, assets, securities, excessspread ) {
 // ];
 
 function generateData() {
-  var pools = JSON.parse(localStorage.getItem('objects')).pools
+  if (JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).pools ) {
+    var pools = JSON.parse(localStorage.getItem('objects')).pools
+  } else {
+    var pools = []
+  }
+
   console.log(pools)
   var data = []
   if (!pools || pools.length == 0) {
