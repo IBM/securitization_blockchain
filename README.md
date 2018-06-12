@@ -109,20 +109,6 @@ To run the Securitization UI locally, we'll need to install a few node libraries
 - [MQTT](http://mqtt.org/): Client package to subscribe to Watson IoT Platform and handle incoming messages
 - [Hyperledger Fabric SDK](https://fabric-sdk-node.github.io/): Enables backend to connect to IBM Blockchain service
 
-Install the Securitization UI node packages by running `npm install` in the project root directory and in the [react-backend](react-backend) directory. Both `python` and `build-essential` are required for these dependencies to install properly:
-```
-# install react dependencies
-cd sc-ui
-npm install
-
-# install express/hyperledger dependencies
-cd react-backend
-npm install
-
-# return to the root project directory
-cd ../../
-```
-
 <!--Update this section-->
 ## Included components
 * [IBM Blockchain](https://console.bluemix.net/catalog/services/blockchain)
@@ -174,15 +160,22 @@ bx login
 bx cf push
 ```
 
-2. To see the app and services created and configured for this Code Pattern, use the IBM Cloud dashboard, or run `bx cf apps` and `bx cf services` in the terminal. The app should be named `monitoring-ui` with a unique suffix.
+2. To see the app and services created and configured for this Code Pattern, use the IBM Cloud dashboard, or run `bx cf apps` and `bx cf services` in the terminal. The app should be named `securitization-blockchain` with a unique suffix.
 
 ## 2. Deploy Application locally
-Install the Monitoring UI node packages by running `npm install` in the project root directory and in the [react-backend](react-backend) directory. Both `python` and `build-essential` are required for these dependencies to install properly:
+Install the Securitization UI node packages by running `npm install` in the project root directory and in the [react-backend](react-backend) directory. Both `python` and `build-essential` are required for these dependencies to install properly:
 ```
+# install react dependencies
+cd sc-ui
 npm install
-cd react-backend && npm install
-```
 
+# install express/hyperledger dependencies
+cd react-backend
+npm install
+
+# return to the root project directory
+cd ../../
+```
 <!-- Finally, run the application
 ```
 cd sc-ui
@@ -226,7 +219,7 @@ After selecting the blockchain icon, a form will be presented for configuring th
 If you're manually deploying the application and services, -->
 
 ## 4. Upload and Instantiate Chaincode
-"Smart contracts", commonly referred to as "Chaincode", can be used to execute business logic and validate incoming requests. In this context, the contracts are used to implement CRUD operations for tracking assets on the IBM Blockchain ledger.
+"Smart contracts", commonly referred to as "Chaincode", can be used to execute business logic and validate incoming requests. In this context, the contracts are used to initialize all participants of the securitization process, define their relationships, and verify transactions. These contracts can be hosted either on IBM Cloud or on a local Hyperledger network managed by Docker.
 
 ### IBM Cloud Hosted Hyperledger
 To begin the process of uploading the smart contracts to the blockchain, we can start by opening the IBM Cloud dashboard, selecting your provisioned Blockchain service, and accessing the blockchain network monitor by clicking "Enter Monitor"
@@ -242,12 +235,12 @@ Next, click the "Install code" option on the left hand menu, and then the "Insta
 Enter an id and a version (here we'll use "sec" and "v1"). Then, select the "Choose Files" button to upload the smart contracts, which are titled [lib.go](chaincode/src/lib.go), [read_ledger.go](chaincode/src/read_ledger.go), [write_ledger.go](chaincode/src/write_ledger.go), and [securitization.go](chaincode/src/securitization.go). These files are located in the `chaincode/src` directory of this project
 
 <p align="center">
-<img src="https://i.imgur.com/nYwMM47.png"  data-canonical-src="https://i.imgur.com/nYwMM47.png" width="650" height="450" style="margin-left: auto; margin-right: auto;">
+<img src="https://i.imgur.com/NJgMwPm.png"  data-canonical-src="https://i.imgur.com/NJgMwPm.png" width="650" height="450" style="margin-left: auto; margin-right: auto;">
 </p>
 
-Finally, we'll need to Instantiate the chaincode. This can be done by opening the chaincode options menu and selecting "Instantiate". This will present a form where arguments can be provided to the chaincode `init` function. In this case, we'll just need to provide an integer (we used `"101"`) to the Arguments section, and then click "Submit"
+Finally, we'll need to Instantiate the chaincode. This can be done by opening the chaincode "Actions" menu and selecting "Instantiate". This will present a form where arguments can be provided to the chaincode `init` function. In this case, we'll just need to provide an integer (we used `"101"`) to the Arguments section, and then click "Next" and then "Submit"
 <p align="center">
-<img src="https://i.imgur.com/blo1Qx3.png"  data-canonical-src="https://i.imgur.com/blo1Qx3.png" width="450" height="450" style="margin-left: auto; margin-right: auto;">
+<img src="https://i.imgur.com/eh1Djmj.png"  data-canonical-src="https://i.imgur.com/eh1Djmj.png" width="450" height="450" style="margin-left: auto; margin-right: auto;">
 </p>
 
 ### Local Hyperledger Setup
@@ -345,7 +338,7 @@ npm start | PORT=3001 node react-backend/bin/www
 
 ## 6. Obtain service credentials
 
-This section is only necessary for working on the hosted Hyperledger offering. The credentials for IBM Cloud Blockchain service, can be found in the ``Services`` menu in IBM Cloud by selecting the ``Service Credentials`` option for each service.
+This section is only necessary for working on the hosted Hyperledger offering. The credentials for IBM Cloud Blockchain service can be found in the ``Services`` menu in IBM Cloud by selecting the ``Service Credentials`` option for each service.
 
 The Blockchain credentials consist of the `key`, `secret`, and `network_id` parameters.
 <!-- ![]("https://i.imgur.com/Qof7sve.png" width="250" height="400") -->
@@ -353,7 +346,14 @@ The Blockchain credentials consist of the `key`, `secret`, and `network_id` para
 <img src="https://i.imgur.com/Qof7sve.png"  data-canonical-src="https://i.imgur.com/Qof7sve.png" width="450" height="450" style="margin-left: auto; margin-right: auto;">
 </p>
 
-We'll also need to provide the Chaincode Id and Version
+We'll also need to provide the Chaincode Id and Version, which is "sec" and "v1" in this example
+
+The credentials will need to be entered in the configuration form, which can be opened by clicking the button in the upper right of the UI
+<p align="center">
+<img src="https://i.imgur.com/zsxkXHA.png" width="600" height="450" style="margin-left: auto; margin-right: auto;">
+</p>
+
+After submitting this form, the UI will fetch a "connection profile" json file, which contains all information needed by our hyperledger client to connect to the blockchain.
 
 <!-- These credentials will need to be provided to the UI in the next step -->
 
@@ -397,9 +397,8 @@ TONE_ANALYZER_PASSWORD=<add_tone_analyzer_password>
 ``` -->
 
 ## 7. Application Configuration
-
 <!-- TODO, reword this -->
-The securitization flow can be summed up with the following diagram
+The securitization flow generally occurs in the following format
 
 1. A homebuyer will apply for financing of an asset via a loan "originator". The loan will have a balance, interest rate, monthly payment, and expected time period for payback (many mortgages are roughly 30 years). A total expected payoff amount will be generated based off this information as well.
 
@@ -411,13 +410,12 @@ The securitization flow can be summed up with the following diagram
 
 5. Each payment is split up and distributed amongst investors who own "securities" associated with the pool. When all mortgages in the pool are paid off, each investor should have received their original investment back plus the agreed "Yield" amount. Each payment will also have a processing fee which will be dispersed to the originator
 
-
-This process can be replicated with this application by visiting the dashboard and creating Originators, Assets, Pools, Securities, and Investors using the provided forms.
+This securitization process can be replicated with this application by visiting the dashboard and creating Originators, Assets, Pools, Securities, and Investors using the provided forms.
 
 First, we'll need to create a loan "Originator", which will require an ID, Processing Fee (percentage), and (optional) Company Name. This form can be loaded by selecting the "Create Originator" button
 
 <p align="center">
-<img src="https://i.imgur.com/GrNQTyH.png" width="550" height="250" style="margin-left: auto; margin-right: auto;">
+<img src="https://i.imgur.com/GrNQTyH.png" width="700" height="250" style="margin-left: auto; margin-right: auto;">
 </p>
 
 <p align="center">
@@ -471,7 +469,7 @@ Once these calculations are complete, the dashboard tables will then be updated 
 > This error occurs if the certificate generated by the SDK user has not been uploaded to the peer
 
 * `Error: The gRPC binary module was not installed. This may be fixed by running "npm rebuild"`
-> `grpc` is a requirement for the fabric-client SDK. Confirm that is has been installed in the `react_backend` directory with `npm install grpc@1.11.0`
+> `grpc` is a requirement for the fabric-client SDK. Confirm that it has been installed in the `react_backend` directory with `npm install grpc@1.11.0`
 
 <!-- * Error: Environment {GUID} is still not active, retry once status is active
 
