@@ -8,7 +8,7 @@
 
 In this Code Pattern, we'll demonstrate how to simulate a securitization process using React.js, Hyperledger Fabric Node SDK, and an IBM Blockchain service instance.
 
-Securitization is a financial process that can be used to consolidate a set of illquid assets into a set of tradable securities. A common example of an illquid asset would be a home mortgage, as they cannot be readily bought and sold. An example of a tradable asset can be a stock or bond. This process can be useful for financial institutions that are looking to increase the liquidity of their assets and free up capital. This application provides a dashboard that'll allow users to create and view the relationship between Assets, Pools, Investors, and Securities.
+Securitization is a financial process that can be used to consolidate a set of illquid assets into a set of tradable securities. A common example of an illiquid asset would be a home mortgage, as they cannot be readily bought and sold. An example of a tradable asset can be a stock or bond. This process can be useful for financial institutions that are looking to increase the liquidity of their assets and free up capital. This application provides a dashboard that'll allow users to create and view the relationship between Assets, Pools, Investors, and Securities.
 
 When the reader has completed this Code Pattern, they will understand how to:
 
