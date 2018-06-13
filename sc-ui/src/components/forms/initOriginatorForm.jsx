@@ -35,7 +35,7 @@ class InitOriginatorForm extends React.Component {
         params: {
           ctorMsg: {
             function: 'init_originator',
-            args: [this.state.id, this.state.company, this.state.processingfee]
+            args: [this.state.id, this.state.company, String(parseFloat(this.state.processingfee) * 0.01)]
             //args: Object.values(this.state)
           }
         }

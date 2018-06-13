@@ -72,15 +72,15 @@ class InitAssetForm extends React.Component {
           ctorMsg: {
             function: 'init_asset',
             // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
-            args: [this.state.id, this.state.balance, this.state.interestrate, this.state.remainingpayments, this.state.underwriting]
+            args: [this.state.id, this.state.balance, String(parseFloat(this.state.interestrate) * 0.01) , this.state.remainingpayments, this.state.underwriting]
             //args: Object.values(this.state)
           }
         }
       })
     }
-    console.log(config.body)
+    console.log("initializing asset")
+    console.log(Date.now())
     fetch('http://localhost:3001/chaincode', config).then ( () =>
-
       setTimeout( () => {
         {
           var config_value = {
@@ -102,6 +102,8 @@ class InitAssetForm extends React.Component {
               }
             })
           }
+          console.log(Date.now())
+          console.log("value asset")
           fetch('http://localhost:3001/chaincode', config_value)
         }
       }, 10000)
@@ -176,7 +178,7 @@ class InitAssetForm extends React.Component {
               autoFocus
               margin="dense"
               id="interestrate"
-              label="Interest Rate"
+              label="Interest Rate (%)"
               onChange={this.handleChange('interestrate')}
               fullWidth
             />

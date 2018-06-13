@@ -110,74 +110,69 @@ func delete(stub shim.ChaincodeStubInterface, args []string) (pb.Response) {
 func init_asset(stub shim.ChaincodeStubInterface, args []string) (pb.Response) {
 	var err error
 	fmt.Println("starting init_asset")
-
 	if len(args) != 5 {
 		return shim.Error("Incorrect number of arguments. Expecting 5")
 	}
-
 	//input sanitation
 	err = sanitize_arguments(args)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-
-	asset_id := args[0]
-	// initial_amount := args[1] //strings.ToLower(args[1])
-	balance := args[1]
-	// state := args[2]
-	interest := args[2]
-	// underwriting, err := json.Marshal(args[5])  //make(map(args[5]))
-	// monthlyPayment := args[3]
-  remainingpayments := args[3]
-	underwriting := args[4]  //make(map(args[5]))
-
-	state := "active"
-	// originator := ""
-	// if len(args) > 5 {
-	//   originator = args[5]
+	// asset_id := args[0]
+	// // initial_amount := args[1] //strings.ToLower(args[1])
+	// balance := args[1]
+	// // state := args[2]
+	// interest := args[2]
+	// // underwriting, err := json.Marshal(args[5])  //make(map(args[5]))
+	// // monthlyPayment := args[3]
+  // remainingpayments := args[3]
+	// underwriting := args[4]  //make(map(args[5]))
+	// state := "active"
+	var asset Asset
+	asset.Id = args[0]
+	asset.Balance =  args[1]
+	asset.InterestRate = args[2]
+	asset.RemainingPayments = args[3]
+	asset.Underwriting = args[4]
+	asset.State = "active"
+	// asset.ObjectType = "fin_asset"
+	// originator.Username = strings.ToLower(args[1])
+	// originator.Enabled = true
+	//check if user already exists
+	// TODO, uncomment
+	// _, err = get_originator(stub, originator.Id)
+	// if err == nil {
+	// 	fmt.Println("This originator already exists - " + originator.Id)
+	// 	return shim.Error("This originator already exists - " + originator.Id)
 	// }
-
-	// size, err := strconv.Atoi(args[2])
-	// if err != nil {
-	// 	return shim.Error("Failure parsing underwriting information")
-	// }
-
-	//check if new owner exists
-	// owner, err := get_owner(stub, owner_id)
-	// if err != nil {
-	// 	fmt.Println("Failed to find owner - " + owner_id)
-	// 	return shim.Error(err.Error())
-	// }
-
-	//check authorizing company (see note in set_owner() about how this is quirky)
-	// if owner.Company != authed_by_company{
-	// 	return shim.Error("The company '" + authed_by_company + "' cannot authorize creation for '" + owner.Company + "'.")
-	// }
-
-	//check if marble id already exists
-	// asset, err := get_asset(stub, id)
-	// if err == nil { // TODO, uncomment
-	// 	fmt.Println("This asset already exists - " + id)
-	// 	fmt.Println(asset)
-	// 	return shim.Error("This asset already exists - " + id)  //all stop a marble by this id exists
-	// }
-
-	// build the marble json string manually
-	// monthlyPayment := calculate_monthly_payment(balance, interest,  remainingpayments)
-	str := `{
-		"docType":"asset",
-		"id": "` + asset_id + `",
-		"state": "` + state + `",
-		"interest": "` + interest + `",
-		"balance": "` + balance + `",
-		"remainingpayments": "` + remainingpayments + `",
-		"underwriting":"` + underwriting + `"
-	}`
-	err = stub.PutState(asset_id, []byte(str))                         //store marble with id as key
+	//store user
+	assetAsBytes, _ := json.Marshal(asset)                         //convert to array of bytes
+	fmt.Println("writing asset to state")
+	fmt.Println(string(assetAsBytes))
+	err = stub.PutState(asset.Id, assetAsBytes)                    //store owner by its Id
 	if err != nil {
+		fmt.Println("Could not store asset")
 		return shim.Error(err.Error())
 	}
 
+	// build the marble json string manually
+	// monthlyPayment := calculate_monthly_payment(balance, interest,  remainingpayments)
+	// str := `{
+	// 	"docType":"asset",
+	// 	"id": "` + asset_id + `",
+	// 	"state": "` + state + `",
+	// 	"interest": "` + interest + `",
+	// 	"balance": "` + balance + `",
+	// 	"remainingpayments": "` + remainingpayments + `",
+	// 	"underwriting":"` + underwriting + `"
+	// }`
+	// fmt.Println("asset str")
+	// fmt.Println(str)
+
+	// err = stub.PutState(asset_id, []byte(str))                         //store marble with id as key
+	// if err != nil {
+		// return shim.Error(err.Error())
+	// }
 	fmt.Println("- end init_asset")
 
 	// calculate payoff amount
@@ -237,7 +232,7 @@ func init_originator(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 	}
 
 	var originator Originator
-	originator.ObjectType = "asset_originator"
+	// originator.ObjectType = "asset_originator"
 	originator.Id =  args[0]
 	// originator.Username = strings.ToLower(args[1])
 	originator.Company = args[1]
@@ -831,6 +826,72 @@ func calculate_monthly_payment(balance float64,  interestRate float64,  months f
 // 	return monthlyPayment
 // }
 
+func value_pool(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	// Calculates the total amount that a homeowner will pay on their mortgage by amortization
+	pool_id := args[0]
+	retries := 5
+	var err error
+	var poolAsBytes []byte
+	var assetAsBytes []byte
+	for i := 0; i < retries; i++ {
+		fmt.Println("on iteration")
+		fmt.Println(i)
+		poolAsBytes, err = stub.GetState(pool_id)
+
+		// if err != nil {
+		if (len(poolAsBytes) == 0) {
+			fmt.Println("Could not load pool, retrying")
+			fmt.Println(asset_id)
+			fmt.Println(string(assetAsBytes))
+			// return shim.Error(err.Error())
+			time.Sleep(2 * time.Second) // adding sleep
+		} else {
+			fmt.Println("Asset pool loaded, continuing")
+			break
+		}
+	}
+
+	// if err != nil {
+	if (len(poolAsBytes) == 0) {
+		fmt.Println("Could not load pool after multiple tries, exiting")
+		// return shim.Error(err.Error())
+		return shim.Error("Could not load pool after multiple tries, exiting")
+	}
+
+	pool := Pool{}
+	asset := Pool{}
+	err = json.Unmarshal(poolAsBytes, &pool)
+	if err != nil {
+		fmt.Println("Could not load pool")
+		return shim.Error(err.Error())
+	}
+	poolValue := 0.0
+	for _, asset_id := range pool.Assets {
+		assetAsBytes, err = stub.GetState(asset_id)
+		asset = Asset{}
+		poolValue = poolValue + strconv.ParseFloat(asset.ExpectedPayoffAmount, 32)
+	}
+	pool.Value = poolValue
+	// balance, _ := strconv.ParseFloat(asset.Balance, 32)
+	// interest, _ := strconv.ParseFloat(asset.InterestRate, 32)
+	// remainingPayments, _ := strconv.ParseFloat(asset.RemainingPayments, 32)
+	// trueValue := (((interest / 12.0) * balance * remainingPayments) / (1.0 - math.Pow( ( (1.0 + ( interest / 12.0)) ), (-1.0 * remainingPayments) )))
+	// fmt.Println("trueValue")
+	// fmt.Println(trueValue)
+	// if math.IsNaN(trueValue) {
+	// 	fmt.Println("missing parameters")
+	// 	return shim.Error("missing parameters")
+	// }
+	// asset.ExpectedPayoffAmount = strconv.FormatFloat(trueValue, 'f', 2, 64)
+	poolAsBytes, _ = json.Marshal(pool)                         //convert to array of bytes
+	err = stub.PutState(pool.Id, poolAsBytes)                    //store owner by its Id
+	if err != nil {
+		fmt.Println("Could not store pool")
+		return shim.Error(err.Error())
+	}
+	return shim.Success(nil)
+}
+
 func value_asset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// Calculates the total amount that a homeowner will pay on their mortgage by amortization
 	asset_id := args[0]
@@ -871,14 +932,6 @@ func value_asset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	balance, _ := strconv.ParseFloat(asset.Balance, 32)
 	interest, _ := strconv.ParseFloat(asset.InterestRate, 32)
 	remainingPayments, _ := strconv.ParseFloat(asset.RemainingPayments, 32)
-
-	fmt.Println("balance")
-	fmt.Println(balance)
-	fmt.Println("interest")
-	fmt.Println(interest)
-	fmt.Println("remainingPayments")
-	fmt.Println(remainingPayments)
-
 	trueValue := (((interest / 12.0) * balance * remainingPayments) / (1.0 - math.Pow( ( (1.0 + ( interest / 12.0)) ), (-1.0 * remainingPayments) )))
 	fmt.Println("trueValue")
 	fmt.Println(trueValue)
@@ -886,7 +939,6 @@ func value_asset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		fmt.Println("missing parameters")
 		return shim.Error("missing parameters")
 	}
-
 	asset.ExpectedPayoffAmount = strconv.FormatFloat(trueValue, 'f', 2, 64)
 	assetAsBytes, _ = json.Marshal(asset)                         //convert to array of bytes
 	err = stub.PutState(asset.Id, assetAsBytes)                    //store owner by its Id
@@ -936,7 +988,7 @@ func init_investor(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	}
 
 	var investor Investor
-	investor.ObjectType = "asset_investor"
+	// investor.ObjectType = "asset_investor"
 	investor.Id =  args[0]
 	if len(args) > 1 {
 		investor.Username = strings.ToLower(args[1])
