@@ -73,7 +73,7 @@ class InitSecurityForm extends React.Component {
         params: {
           ctorMsg: {
             function: 'init_security',
-            args: [ this.state.id, this.state.couponrate, this.state.pool]
+            args: [ this.state.id, String(parseFloat(this.state.couponrate) * 0.01), this.state.pool]
             //args: Object.values(this.state)
           }
         }

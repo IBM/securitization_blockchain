@@ -18,7 +18,7 @@ var exec = require('child_process').exec;
 module.exports = router;
 command_prefix = 'docker exec cli peer chaincode invoke -n sec -c \'{"Args":'
 
-function requestConnectionProfile(req) {
+function requestConnectionProfile(req, res) {
   console.log("requesting connection profile")
   console.log(req.body)
   if ( ! req.body.api_endpoint.includes('/api/v1')) {
@@ -45,8 +45,15 @@ function requestConnectionProfile(req) {
       console.log(body)
       console.log("connection profile request error")
       console.log(err)
+      if (err) {
+        console.log("Error fetching connection profile")
+        res.send(err)
+      }
       fs.writeFile('./connection_profile.json', body, 'utf8', function(err){
-        if(err) {console.log(err)}
+        if (err) {
+          console.log(err)
+          console.log(err)
+        }
       })
       return json
       // return hfc.loadFromConfig(json)
@@ -79,7 +86,7 @@ function enrollUser (username, client, url, networkId) {
     //user.setRoles('admin')
     // client.setUserContext(user)
     client.setUserContext(user)
-    console.log(username + " enrolled. Please upload following certificate via blockchain UI: \n " + url + "/network/" + networkId + "/members/certificates")
+    console.log(username + " enrolled. Please upload following certificate via blockchain UI: \n " + certificateAuthObj.url + "/network/" + networkId + "/members/certificates")
     console.log(user._signingIdentity._certificate + '\n')
     // res.send("User created. Please upload following certificate via blockchain UI: " + user._signingIdentity._certificate)
 
@@ -97,34 +104,18 @@ router.post('/init_hfc_client', function (req, res) {
     // command =  command_prefix + '\'{"Args":["process_payment", "asset1", "3000"]}\' -C myc'
     // exec(command)
     if (fs.existsSync('./connection_profile.json')) {
-      // var options = {
-      //     url: req.body.urlRestRoot + '/networks/' + req.body.networkId + '/connection_profile',
-      //     method: 'GET',
-      //     headers: {
-      //         'Accept': 'application/json',
-      //         'Content-Type': 'application/json',
-      //         'Accept-Charset': 'utf-8',
-      //         "Authorization": "Basic " + new Buffer(req.body.key + ":" + req.body.secret, "utf8").toString("base64")
-      //     }
-      // }
-      // request(options, function(err, res, body) {
-      //   let json = JSON.parse(body);
-      //   fs.writeFile('./connection_profile.json', body, 'utf8', function(err){
-      //     if (err) {console.log(err)}
-      //   })
-      //   config = hfc.loadFromConfig(json)
-      // });
-      // requestConnectionProfile(req)
       console.log("Local connection profile loading")
       client = hfc.loadFromConfig('./connection_profile.json')
     } else {
-      // console.log("Requesting connection profile")
-      client = hfc.loadFromConfig(requestConnectionProfile( req ))
+      console.log("Request connection profile")
+
+      var response = requestConnectionProfile( req, res )
+      client = hfc.loadFromConfig(response)
     }
     console.log(client)
     org = Object.keys(client._network_config._network_config.organizations)[0]
-    console.log("loading org")
-    console.log(org)
+    // console.log("loading org")
+    // console.log(org)
     certificateAuthorities = client._network_config._network_config.certificateAuthorities
     certificateAuthorityName = Object.keys(certificateAuthorities)[0]
     certificateAuthObj = certificateAuthorities[certificateAuthorityName]
@@ -145,7 +136,7 @@ router.post('/init_hfc_client', function (req, res) {
     }).then( (result) => {
       client.getUserContext(username, true).then ( (user) => {
       // res.send("Client Initialized")
-      // console.log("Client Initialized")
+      console.log("Client Initialized")
       if (user && user.isEnrolled()) {
         console.log("Client Loaded From Persistence")
         res.send("Client Loaded From Persistence")
@@ -192,7 +183,7 @@ router.post('/init_hfc_client', function (req, res) {
     res.send(200)
 });
 
-// command = 'docker exec cli peer chaincode invoke -n sec -c '{"Args":["read","asset1"]}' -C myc 2> foo.txt ; cat foo.txt | grep chaincodeInvokeOrQuery | grep -v ESCC | awk -F \'payload:\' \'{print $2}\''
+// command = 'docker exec cli peer chaincode invoke -n sec -c '{"Args":["read","asset1"]}' -C myc 2> docker.out ; cat docker.out | grep chaincodeInvokeOrQuery | grep -v ESCC | awk -F \'payload:\' \'{print $2}\''
 
 router.post('/chaincode', function (req, res) {
   console.log("chaincode request received")
@@ -223,39 +214,42 @@ router.post('/chaincode', function (req, res) {
             chaincodeId: sec_chaincode.name, //chaincode.name,
             chaincodeVersion: sec_chaincode.version, //chaincode.version,
             txId: transaction_id,
+            fcn: req.body.params.ctorMsg.function, // TODO, uncomment this
+            args: req.body.params.ctorMsg.args
+          }
+          proposeTransaction(txRequest)
+          // if ( proposeTransaction(txRequest)) {
+          //   submitTransaction(txRequest)
+          // } else {
+          //   console.log("transaction rejected")
+          // }
+      } else { // query
+          console.log("query chaincode with hfc client")
+          // console.log(sec_chaincode)
+          // var assetId = JSON.parse(req.body.params.ctorMsg.args).assetID
+          var txRequest = {
+            chaincodeId: sec_chaincode.name,
+            chaincodeVersion: sec_chaincode.version,
+            // txId: transaction_id,
             fcn: req.body.params.ctorMsg.function,
             args: req.body.params.ctorMsg.args
           }
-
-          if (proposeTransaction(txRequest)) {
-            console.log("transaction approved, submitting")
-            // submitTransaction(txRequest)
-          }
-      } else { // query
-          console.log("query chaincode with hfc client")
-          // var assetId = JSON.parse(req.body.params.ctorMsg.args).assetID
-          var request = {
-              chaincodeId: sec_chaincode.name,
-              chaincodeVersion: sec_chaincode.version,
-              // txId: transaction_id,
-              fcn: req.body.params.ctorMsg.function,
-              args: req.body.params.ctorMsg.args
-            }
-          console.log(request)
-          channel.queryByChaincode(request).then( (cc_response) => {
-            // console.log(cc_response[0].toString())
+          console.log(txRequest)
+          channel.queryByChaincode(txRequest).then( (cc_response) => {
+            console.log("cc query response received")
             console.log(cc_response[0].toString())
-            res.send( cc_response[0].toString() )
+            // res.send( cc_response[0].toString() )
           }).catch ( (err) => {
+            console.log("cc query failed")
             console.log(err)
-            res.send(err)
-          });
+            // res.send(err)
+          })
       }
   } else {
   // if (client == null) {
     console.log("hfc client not defined, invoking chaincode with docker")
     // if hyperledger client not initialized, assume local Docker network is running
-    var command = 'docker exec cli peer chaincode invoke -n sec -c \'' + chaincode_query +  '\' -C myc 2> foo.txt ; cat foo.txt | grep chaincodeInvokeOrQuery | grep -v ESCC | awk -F \'payload:\' \'{print $2}\''
+    var command = 'docker exec cli peer chaincode invoke -n sec -c \'' + chaincode_query +  '\' -C myc 2> docker.out ; cat docker.out | grep chaincodeInvokeOrQuery | grep -v ESCC | awk -F \'payload:\' \'{print $2}\''
     console.log(command)
     exec(command, (err, stdout, stderr) => {
       if (err) {
@@ -267,9 +261,9 @@ router.post('/chaincode', function (req, res) {
       console.log(stdout);
     });
   }
-  // payload=$(docker exec cli peer chaincode invoke -n sec -c '{"Args":["read","asset1"]}' -C myc 2> foo.txt ; cat foo.txt | grep chaincodeInvokeOrQuery | grep -v ESCC | awk -F 'payload:' '{print $2}')
+  // payload=$(docker exec cli peer chaincode invoke -n sec -c '{"Args":["read","asset1"]}' -C myc 2> docker.out ; cat docker.out | grep chaincodeInvokeOrQuery | grep -v ESCC | awk -F 'payload:' '{print $2}')
   // echo -e $payload
-  // output=$(cat foo.txt | grep chaincodeInvokeOrQuery | grep -v ESCC | awk -F 'payload:' '{print $2}' )
+  // output=$(cat docker.out | grep chaincodeInvokeOrQuery | grep -v ESCC | awk -F 'payload:' '{print $2}' )
   // res.send(200)
 });
 
@@ -287,43 +281,50 @@ router.post('/getchaincodes', function (req, res) {
     console.log(response)
     chaincodes = response
   }).then ( (result) =>  {
-    sec_chaincode = _.where( chaincodes.chaincodes, {name: 'sec', version: '4'} )[0]
+    sec_chaincode = _.where( chaincodes.chaincodes, {name: 'sec', version: 'v2'} )[0]
     console.log(chaincodes)
     res.sendStatus(200)
   });
 });
 
-function proposeTransaction(txRequest) {
-  channel.sendTransactionProposal(txRequest).then ( (proposalRes) => {
-    console.log("sending transaction proposal")
-    var proposalResponses = proposalRes[0];
-    var proposal = proposalRes[1];
-    let isProposalGood = false;
-    console.log("proposalResponses")
-    console.log(proposalResponses)
-    if (proposalResponses && proposalResponses[0].response && proposalResponses[0].response.status === 200) {
-        console.log('Transaction proposal was good');
-        // return true;
-        var sendPromise = channel.sendTransaction({
-          proposalResponses: proposalResponses,
-          proposal: proposal
-        })
-        sendPromise.then( (result) => {
-          console.log("transaction result")
-          console.log(result)
-          // res.send(result)
-        })
-      } else {
-        console.log('Transaction proposal was rejected');
-        // console.log('Transaction proposal was rejected');
-        return false
-    }
-  }).catch ( (err) => {
-    console.log(err)
-    return false
-    // res.send(err)
-  });
-}
+// function proposeTransaction(txRequest) {
+//   channel.sendTransactionProposal(txRequest).then ( (proposalRes) => {
+//     console.log("sending transaction proposal")
+//     var proposalResponses = proposalRes[0];
+//     var proposal = proposalRes[1];
+//     let isProposalGood = false;
+//     console.log("proposalResponses")
+//     console.log(proposalResponses)
+//     if (proposalResponses && proposalResponses[0].response && proposalResponses[0].response.status === 200) {
+//         console.log('Transaction proposal was accepted');
+//         // return true;
+//         // console.log("proposalResponses")
+//         // console.log(proposalResponses)
+//         // console.log("proposal")
+//         // console.log(proposal)
+//
+//         setTimeout(function() {
+//           channel.sendTransaction({
+//             proposalResponses: proposalResponses,
+//             proposal: proposal
+//           }).then( (result) => {
+//             console.log("transaction result")
+//             console.log(result)
+//             // res.send(result)
+//           })
+//         }, 1000)
+//
+//       } else {
+//         console.log('Transaction proposal was rejected');
+//         // console.log('Transaction proposal was rejected');
+//         return false
+//     }
+//   }).catch ( (err) => {
+//     console.log(err)
+//     return false
+//     // res.send(err)
+//   });
+// }
 
 function submitTransaction(txRequest) {
   // if (isProposalGood) {
@@ -339,4 +340,32 @@ function submitTransaction(txRequest) {
       res.send(result)
     })
   // }
+}
+
+function proposeTransaction(txRequest) {
+  channel.sendTransactionProposal(txRequest).then ( (proposalRes) => {
+    console.log("sending transaction proposal")
+    var proposalResponses = proposalRes[0];
+    var proposal = proposalRes[1];
+    let isProposalGood = false;
+    if (proposalResponses && proposalResponses[0].response && proposalResponses[0].response.status === 200) {
+        console.log('Transaction proposal was accepted');
+        // return true;
+        channel.sendTransaction({
+          proposalResponses: proposalResponses,
+          proposal: proposal
+        }).then( (res) => {
+            console.log("Transaction result")
+            console.log(res)
+        })
+      } else {
+        console.log('Transaction proposal was rejected');
+        // console.log('Transaction proposal was rejected');
+        return false
+      }
+  }).catch ( (err) => {
+    return false
+    console.log(err)
+    // res.send(err)
+  });
 }

@@ -221,6 +221,8 @@ If you're manually deploying the application and services, -->
 ## 4. Upload and Instantiate Chaincode
 "Smart contracts", commonly referred to as "Chaincode", can be used to execute business logic and validate incoming requests. In this context, the contracts are used to initialize all participants of the securitization process, define their relationships, and verify transactions. These contracts can be hosted either on IBM Cloud or on a local Hyperledger network managed by Docker.
 
+The chaincode
+
 ### IBM Cloud Hosted Hyperledger
 To begin the process of uploading the smart contracts to the blockchain, we can start by opening the IBM Cloud dashboard, selecting your provisioned Blockchain service, and accessing the blockchain network monitor by clicking "Enter Monitor"
 <p align="center">
@@ -243,39 +245,39 @@ Finally, we'll need to Instantiate the chaincode. This can be done by opening th
 <img src="https://i.imgur.com/eh1Djmj.png"  data-canonical-src="https://i.imgur.com/eh1Djmj.png" width="450" height="450" style="margin-left: auto; margin-right: auto;">
 </p>
 
-### Local Hyperledger Setup
-If you're planning to make custom changes to the smart contracts, it may be faster to develop and test chaincode locally before pushing to a hosted service. We can deploy a local hyperledger network using a `docker-compose` file with the following commands
+### Local Hyperledger Installation
+<!-- If you're planning to make custom changes to the smart contracts, it may be faster to develop and test chaincode locally before pushing to a hosted service.  -->
+We can deploy a local hyperledger network using a `docker-compose` file with the following commands
 
 ```
 git clone https://github.com/hyperledger/fabric-samples.git
 cd fabric-samples/chaincode-docker-devmode
+
+# clear your previous network if it exists
+docker-compose -f docker-compose-simple.yaml down
+
+# start up a new local hyperledger network
 docker-compose -f docker-compose-simple.yaml up
 ```
+By default, this will stay open and aggregate the logs from the container. If you'd prefer it to run in headless mode, please add the `-d` flag to the command
 
-In a separate tab, run the following from this project directory
+In a separate tab, run the following commands from the *root directory* of this project to copy the chaincode files into the "chaincode" container, build the binary, and start the chaincode service. The last command will run as a daemon, and will not exit
 ```
-./update.sh
-```
-
-Or run the chaincode setup steps manually with
-```
-docker exec -it chaincode bash
-mkdir -p chaincode/securitization
-cd chaincode/securitization
-go build
-CORE_PEER_ADDRESS=peer:7051 CORE_CHAINCODE_ID_NAME=sec:0 ./securitization
+docker exec -it chaincode mkdir -p securitization
+docker cp ./chaincode/src/. chaincode:/opt/gopath/src/chaincode/securitization/
+docker exec -it chaincode bash -c 'cd securitization && go build'
+docker exec -it chaincode bash -c 'CORE_PEER_ADDRESS=peer:7051 CORE_CHAINCODE_ID_NAME=sec:0 ./securitization/securitization'
 ```
 
 In a third tab, run the following commands to install and instantiate the chaincode
 ```
-docker exec -it cli bash
-peer chaincode install -p chaincodedev/chaincode/securitization -n sec -v 0
-peer chaincode instantiate -n sec  -v 0 -c '{"Args":["101"]}' -C myc
+docker exec cli peer chaincode install -p chaincodedev/chaincode/securitization -n sec -v 0
+docker exec cli peer chaincode instantiate -n sec  -v 0 -c '{"Args":["101"]}' -C myc
 ```
 
-Run an invoke command to ensure the chaincode was installed successfully
+Finally, run an invoke command to ensure the chaincode was installed successfully
 ```
-peer chaincode invoke -n sec -c '{"Args":["read_everything"]}' -C myc
+docker exec cli peer chaincode invoke -n sec -c '{"Args":["read_everything"]}' -C myc
 ```
 
 
@@ -338,7 +340,7 @@ npm start | PORT=3001 node react-backend/bin/www
 
 ## 6. Obtain service credentials
 
-This section is only necessary for working on the hosted Hyperledger offering. The credentials for IBM Cloud Blockchain service can be found in the ``Services`` menu in IBM Cloud by selecting the ``Service Credentials`` option for each service.
+This section is only necessary for working on the hosted Hyperledger offering. The credentials for IBM Cloud Blockchain service can be found in the ``Services`` menu in IBM Cloud by selecting the ``Service Credentials`` option for each service. If using the local network,
 
 The Blockchain credentials consist of the `key`, `secret`, and `network_id` parameters.
 <!-- ![]("https://i.imgur.com/Qof7sve.png" width="250" height="400") -->

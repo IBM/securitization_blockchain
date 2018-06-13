@@ -166,7 +166,7 @@ class App extends Component {
           //     // console.log('refreshing state');
           //     // return { unseen: "does not display" }
           // });
-      }, 8000);
+      }, 5000);
   }
 
   handleChange = (event, value) => {
@@ -205,7 +205,6 @@ class App extends Component {
           {value === 1 && <TabContainer><SimplePoolTable></SimplePoolTable></TabContainer>}
         </div>
         */}
-
         <div >
         <InitHFCForm> </InitHFCForm>
         </div>

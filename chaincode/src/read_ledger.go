@@ -100,7 +100,7 @@ func read(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 func read_everything(stub shim.ChaincodeStubInterface) pb.Response {
 	type Everything struct {
 		Originators   []Originator   `json:"originators"`
-		Assets  			[]Asset        `json:"assets"`
+		Assets  			[]Asset     `json:"assets"`
 		Pools				  []Pool				 `json:"pools"`
 		Securities		[]Security		 `json:"securities"`
 		Investors     []Investor		 `json:"investors"`

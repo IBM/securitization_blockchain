@@ -14,7 +14,7 @@ class InitHFCForm extends React.Component {
       api_endpoint: '',
       chaincode_id: '',
       chaincode_version: '',
-      secure_context: '',
+      // secure_context: '',
       key: '',
       secret: '',
       network_id: ''
@@ -116,7 +116,9 @@ class InitHFCForm extends React.Component {
   //
   //   <input type="submit" value="Submit" />
   // </form>
-
+  handleClickShowPassword = () => {
+    this.setState({ showPassword: !this.state.showPassword });
+  };
 
   render() {
     return (
@@ -183,6 +185,7 @@ class InitHFCForm extends React.Component {
               onChange={this.handleChange('chaincode_version')}
               fullWidth
             />
+          {/*
             <TextField
               required
               autoFocus
@@ -191,7 +194,7 @@ class InitHFCForm extends React.Component {
               label="Secure Context"
               onChange={this.handleChange('secure_context')}
               fullWidth
-            />
+            />*/}
           </DialogContent>
           <DialogActions>
             <Button onClick={this.handleClose} color="primary">

@@ -49,7 +49,7 @@ type SimpleChaincode struct {
 // }
 
 type Pool struct {
-	ObjectType     string      `json:"docType"`     //field for couchdb
+	// ObjectType     string      `json:"docType"`     //field for couchdb
 	Id             string      `json:"id"`
 	Rating         string      `json:"rating"`
 	ExcessSpread   float64     `json:excessspread` // remainder of payments that aren't sent to investors/originator
@@ -66,7 +66,7 @@ type Pool struct {
 }
 
 type Asset struct {
-	ObjectType     string                      `json:"docType"` //field for couchdb
+	// ObjectType     string                      `json:"docType"` //field for couchdb
 	Id       			 string                      `json:"id"`      //the fieldtags are needed to keep case from bouncing around
 	Originator     Originator	         				 `json:"originator"`
 	Pool           string	                     `json:"pool"` // TODO, not sure if this is needed
@@ -99,7 +99,7 @@ type Asset struct {
 
 // ----- Participants ----- //
 type Originator struct {
-	ObjectType     string   `json:"docType"`     //field for couchdb
+	// ObjectType     string   `json:"docType"`     //field for couchdb
 	Id             string   `json:"id"`
 	Username       string   `json:"username"`
 	Company        string   `json:"company"`
@@ -126,7 +126,8 @@ type Security struct {
 	Pool				        string			 `json:"pool"`
 	// Expiration     string     `json`
 	AmountPaid          string  `json:"amountpaid"`
-	PercentageSecuritized float64 `json:percentagesecuritized`
+	OriginatalValue     string  `json:"originalvalue"`
+	// PercentageSecuritized float64 `json:percentagesecuritized`
 	// AmountDue      float64  `json:"investor"`
 	// 																						 // TODO, investor ids should
 }
@@ -138,7 +139,7 @@ type Security struct {
 // }
 
 type Investor struct {
-	ObjectType     string     `json:"docType"`     //field for couchdb
+	// ObjectType     string     `json:"docType"`     //field for couchdb
 	Id             string     `json:"id"`
 	Username       string     `json:"username"`
 	Balance				 float64    `json:"balance"`
