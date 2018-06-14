@@ -73,7 +73,7 @@ class InitSecurityForm extends React.Component {
         params: {
           ctorMsg: {
             function: 'init_security',
-            args: [ this.state.id, String(parseFloat(this.state.couponrate) * 0.01), this.state.pool]
+            args: [ this.state.id, String(parseFloat(this.state.couponrate) * 0.01), this.state.pool, this.state.monthsuntilmaturity]
             //args: Object.values(this.state)
           }
         }
@@ -153,14 +153,14 @@ class InitSecurityForm extends React.Component {
               onChange={this.handleChange('couponrate')}
               fullWidth
             />
-          {/*<TextField
+            <TextField
               autoFocus
               margin="dense"
               id="monthsuntilmaturity"
               label="Months Until Maturity"
               onChange={this.handleChange('monthsuntilmaturity')}
               fullWidth
-            />*/}
+            />
             <TextField
               autoFocus
               margin="dense"

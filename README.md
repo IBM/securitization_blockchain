@@ -132,7 +132,7 @@ https://www.youtube.com/watch?v=Mw6924hCAIc -->
 
 
 # Steps
-There are two methods we can use to deploy the application, either use the ``Deploy to IBM Cloud`` steps **OR** create the services and run locally.
+There are two methods we can use to deploy the application, either run everything locally on your development machine, **OR** initialize a hosted blockchain service and run in IBM Cloud.
 1. [Clone repository](#1-clone-the-repository)
 2. [Setup repository codebase locally](#2-deploy-application-locally) OR [Deploy to IBM Cloud](#2-deploy-application-to-ibm-cloud)
 3. [Create Watson services with IBM Cloud](#3-create-services)
@@ -149,20 +149,7 @@ Clone the `securitization_blockchain` project locally. In a terminal, run:
 git clone github.com/IBM/securitization_blockchain
 ```
 
-## 2. Deploy Application to IBM Cloud
-
-1. To deploy the application to IBM Cloud, we'll need to leverage the IBM Cloud CLI. Ensure the cli is installed using the prerequisites section above, and then run the following command to deploy the application
-```
-# Log in using IBM Cloud credentials
-bx login
-
-# Push application to IBM Cloud
-bx cf push
-```
-
-2. To see the app and services created and configured for this Code Pattern, use the IBM Cloud dashboard, or run `bx cf apps` and `bx cf services` in the terminal. The app should be named `securitization-blockchain` with a unique suffix.
-
-## 2. Deploy Application locally
+## 2. Deploy Application (**local**)
 Install the Securitization UI node packages by running `npm install` in the project root directory and in the [react-backend](react-backend) directory. Both `python` and `build-essential` are required for these dependencies to install properly:
 ```
 # install react dependencies
@@ -175,6 +162,16 @@ npm install
 
 # return to the root project directory
 cd ../../
+```
+
+As an alternative to installing these additional dependencies on your system, you can build the application and dependencies in a docker container like so
+```
+docker build -t securitization_blockchain .
+```
+
+If the build is successful, we can then start the application with
+```
+docker run -it -p 3000:3000 -p 3001:3001 -v /var/run/docker.sock:/var/run/docker.sock -v /usr/local/bin/docker:/usr/local/bin/docker securitization_blockchain bash -c 'npm start | PORT=3001 node react-backend/bin/www'
 ```
 <!-- Finally, run the application
 ```
@@ -193,13 +190,27 @@ docker run -d -p 8081:8081 monitoring_ui
 
 <!-- there are MANY updates necessary here, just screenshots where appropriate -->
 
-## 3. Create Services
+## 2. Deploy Application (**hosted**)
 
-Next, we'll need to deploy our service instances using the IBM Cloud dashboard.
+1. To deploy the application to IBM Cloud, we'll need to leverage the IBM Cloud CLI. Ensure the cli is installed using the prerequisites section above, and then run the following command to deploy the application
+```
+# Log in using IBM Cloud credentials
+bx login
+
+# Push application to IBM Cloud
+bx cf push
+```
+
+2. To see the app and services created and configured for this Code Pattern, use the IBM Cloud dashboard, or run `bx cf apps` and `bx cf services` in the terminal. The app should be named `securitization-blockchain` with a unique suffix.
+
+
+## 3. Create Services (**hosted**)
+
+Next, we'll need to deploy our service instances using the IBM Cloud dashboard. This step is only required if you're not deploying the application locally. If you are running everything locally, please skip ahead to the "Local Hyperledger Installation" in step 4
 
 ### Blockchain
 
-We can continue on by deploying the IBM Blockchain service. This can be found by logging in to the IBM Cloud [dashboard](https://console.bluemix.net/), selecting the "Catalog" button, searching for "Blockchain", and clicking on the resulting icon. Or click this [*link*](https://console.bluemix.net/catalog/services/blockchain).
+The IBM Blockchain service can be found by logging in to the IBM Cloud [dashboard](https://console.bluemix.net/), selecting the "Catalog" button, searching for "Blockchain", and clicking on the resulting icon. Or click this [*link*](https://console.bluemix.net/catalog/services/blockchain).
 
 <p align="center">
 <img src="https://i.imgur.com/qWQOXq5.png"  data-canonical-src="https://i.imgur.com/qWQOXq5.png">
@@ -221,9 +232,7 @@ If you're manually deploying the application and services, -->
 ## 4. Upload and Instantiate Chaincode
 "Smart contracts", commonly referred to as "Chaincode", can be used to execute business logic and validate incoming requests. In this context, the contracts are used to initialize all participants of the securitization process, define their relationships, and verify transactions. These contracts can be hosted either on IBM Cloud or on a local Hyperledger network managed by Docker.
 
-The chaincode
-
-### IBM Cloud Hosted Hyperledger
+### IBM Cloud Hosted Hyperledger (**hosted**)
 To begin the process of uploading the smart contracts to the blockchain, we can start by opening the IBM Cloud dashboard, selecting your provisioned Blockchain service, and accessing the blockchain network monitor by clicking "Enter Monitor"
 <p align="center">
 <img src="https://i.imgur.com/BpUjPhe.png"  data-canonical-src="https://i.imgur.com/BpUjPhe.png" width="650" height="450" style="margin-left: auto; margin-right: auto;">
@@ -245,7 +254,7 @@ Finally, we'll need to Instantiate the chaincode. This can be done by opening th
 <img src="https://i.imgur.com/eh1Djmj.png"  data-canonical-src="https://i.imgur.com/eh1Djmj.png" width="450" height="450" style="margin-left: auto; margin-right: auto;">
 </p>
 
-### Local Hyperledger Installation
+### Local Hyperledger Installation (**local**)
 <!-- If you're planning to make custom changes to the smart contracts, it may be faster to develop and test chaincode locally before pushing to a hosted service.  -->
 We can deploy a local hyperledger network using a `docker-compose` file with the following commands
 
@@ -317,7 +326,7 @@ workspace and select **View details**. Save this ID for later.
 *Optionally*, to view the conversation dialog select the workspace and choose the
 **Dialog** tab, here's a snippet of the dialog: -->
 
-## 5. Run the application
+## 5. Run the application (**local**)
 
 1. Start the app locally with
 ```
@@ -329,8 +338,6 @@ npm start | PORT=3001 node react-backend/bin/www
 
 2. To access the Securitization application, open the following URL in a browser: `http://localhost:3000/`
 <!--Add a section that explains to the reader what typical output looks like, include screenshots -->
-
-
 <!-- TODO, update dashboard view -->
 <p align="center">
 <img src="https://i.imgur.com/nljtWdf.png"  data-canonical-src="https://i.imgur.com/nljtWdf.png" width="750" height="450" style="margin-left: auto; margin-right: auto;">
@@ -338,9 +345,9 @@ npm start | PORT=3001 node react-backend/bin/www
 
 <!--Include any troubleshooting tips (driver issues, etc)-->
 
-## 6. Obtain service credentials
+## 6. Obtain service credentials (**hosted**)
 
-This section is only necessary for working on the hosted Hyperledger offering. The credentials for IBM Cloud Blockchain service can be found in the ``Services`` menu in IBM Cloud by selecting the ``Service Credentials`` option for each service. If using the local network,
+This section is only necessary for working on the hosted IBM Cloud blockchain offering. If deploying locally, you can skip to step #7. The credentials for IBM Cloud Blockchain service can be found in the ``Services`` menu in IBM Cloud by selecting the ``Service Credentials`` option for each service. If using the local network,
 
 The Blockchain credentials consist of the `key`, `secret`, and `network_id` parameters.
 <!-- ![]("https://i.imgur.com/Qof7sve.png" width="250" height="400") -->

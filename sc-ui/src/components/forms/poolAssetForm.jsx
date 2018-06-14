@@ -58,7 +58,34 @@ class PoolAsset extends React.Component {
       })
     }
     console.log(config.body)
-    fetch('http://localhost:3001/chaincode', config)
+    fetch('http://localhost:3001/chaincode', config).then ( () =>
+      setTimeout( () => {
+        {
+          var config_value = {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
+            },
+            body: JSON.stringify({
+              method: "invoke",
+              params: {
+                ctorMsg: {
+                  function: 'value_pool',
+                  // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
+                  args: [this.state.poolId]
+                  //args: Object.values(this.state)
+                }
+              }
+            })
+          }
+          console.log(Date.now())
+          console.log("value pool")
+          fetch('http://localhost:3001/chaincode', config_value)
+        }
+      }, 5000)
+    )
     // event.preventDefault();
   }
 

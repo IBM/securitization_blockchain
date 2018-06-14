@@ -342,8 +342,12 @@ func set_originator(stub shim.ChaincodeStubInterface, args []string) pb.Response
 	// 	return shim.Error("The company '" + authed_by_company + "' cannot authorize transfers for '" + res.Owner.Company + "'.")
 	// }
 
-	// transfer the marble
+	// transfer the asset
 	asset.Originator = originator                   //change the owner
+	asset_balance, _ := strconv.ParseFloat(asset.Balance, 32)
+	originator_processing_fee, _ := strconv.ParseFloat(originator.ProcessingFee, 32)
+	asset_remaining_payments, _ := strconv.ParseFloat(asset.RemainingPayments, 32)
+	asset.ProcessingPayment = strconv.FormatFloat(((asset_balance * originator_processing_fee) / asset_remaining_payments ),  'f', 6, 64)
 	// res.Owner.Username = owner.Username
 	// res.Owner.Company = owner.Company
 	assetAsBytes, _ = json.Marshal(asset)           //convert to array of bytes
@@ -555,7 +559,6 @@ func rate_asset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 func process_payment(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var err error
 	fmt.Println("starting process_payment")
-
 	// input sanitation
 	err = sanitize_arguments(args)
 	if err != nil {
@@ -579,13 +582,13 @@ func process_payment(stub shim.ChaincodeStubInterface, args []string) pb.Respons
   balance, err := strconv.ParseFloat(asset.Balance, 32)
 	interestRate, err := strconv.ParseFloat(asset.InterestRate, 32)
 	processingFee, err := strconv.ParseFloat(asset.Originator.ProcessingFee, 32)
-	// paymentsLeft, err := strconv.Atoi(asset.RemainingPayments)
+	paymentsLeft, err := strconv.Atoi(asset.RemainingPayments)
 	// TODO
 	// percent.Percent(25, 2000) // return 500
 	paymentsPerYear := 12.0 // assuming interest rate is a yearly percentage
 
 	interestPayment := ((balance * interestRate) / paymentsPerYear)
-	processingPayment := processingFee * paymentAmount
+	processingPayment, _ := strconv.ParseFloat(asset.ProcessingPayment, 32) //:= processingFee * paymentAmount
 	principalPayment := paymentAmount - interestPayment - processingFee
 
 	// updated := balance - principalPayment
@@ -597,21 +600,9 @@ func process_payment(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 	fmt.Println(asset.Balance)
 
 	asset.Balance = strconv.FormatFloat(updatedBalance, 'f', 2, 64)
-	// asset.RemainingPayments = paymentsLeft - 1
+	asset.RemainingPayments = strconv.Itoa(paymentsLeft - 1)
 	// asset.Balance = updatedBalance
 	// investorBalance = strconv.FormatFloat(investor.Balance, 'f', 2, 64)
-
-
-	fmt.Println("updated asset.Balance")
-	fmt.Println(asset.Balance)
-	fmt.Println("asset")
-	fmt.Printf("%+v\n", asset)
-
-	fmt.Println("processingFee")
-	fmt.Println(processingFee)
-	fmt.Println("paymentAmount")
-	fmt.Println(paymentAmount)
-
 	assetAsBytes, err = json.Marshal(asset)
 
 	if err != nil {
@@ -630,7 +621,21 @@ func process_payment(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 	}
 	// get investors
 	// get originator
+	// if asset.Originator != nil {
+	// originator = stub.GetState(asset.Originator)
+	// originatorBalance, err := strconv.ParseFloat(asset.Originator.Balance, 32)
+	fmt.Println("asset.Originator.Balance before")
+	fmt.Println(asset.Originator.Balance)
+	asset.Originator.Balance = asset.Originator.Balance + asset.ProcessingPayment // strconv.FormatFloat( (originatorBalance + processingPayment), 'f', 2, 64)
+	fmt.Println("asset.Originator.Balance after")
+	asset.Originator.Balance
+	originatorAsBytes, err := json.Marshal(asset.Originator)
+	err = stub.PutState(asset.Originator.Id, originatorAsBytes)
+
+	// }
 	// pay their portion
+
+
 
   // TODO, remove this
 	// get remaining assets from pool
@@ -676,29 +681,7 @@ func process_payment(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 			investor := Investor{}
 			json.Unmarshal(investorAsBytes, &investor)           //un stringify it aka JSON.parse()
 
-			fmt.Println("beginning balance")
-			fmt.Println(investor.Balance)
-			investor.Balance = processingPayment + investor.Balance
-			fmt.Println("updated balance")
-			fmt.Println(investor.Balance)
-
-
-			fmt.Println("Security keys")
-			fmt.Printf("%+v\n", security)
-
-			fmt.Println("Investor keys")
-			fmt.Printf("%+v\n", security.Investor)
-
-
-			fmt.Println("investor")
-			fmt.Println(investor)
-			fmt.Println("investor.Username")
-			fmt.Println(investor.Username)
-			fmt.Println("investor.Balance")
-			fmt.Println(investor.Balance)
-			fmt.Println("investor.Id")
-			fmt.Println(investor.Id)
-
+			investor.Balance = investor.Balance + (security.CouponRate * paymentAmount)
 			investorAsBytes, _ = json.Marshal(investor)                         //convert to array of bytes
 			fmt.Println("investorAsBytes")
 			fmt.Println(string(investorAsBytes))
@@ -709,12 +692,23 @@ func process_payment(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 				return shim.Error(err.Error())
 			}
 		}
+
+		if security.RemainingPayments != "" {
+			securityRemainingPayments, err := strconv.Atoi(security.RemainingPayments)
+			if err != nil {
+				return shim.Error(err.Error())
+			}
+			securityRemainingPayments = securityRemainingPayments - 1
+			security.RemainingPayments = strconv.Itoa(securityRemainingPayments)
+			securityAsBytes, _ = json.Marshal(security)
+			err = stub.PutState(security.Id, securityAsBytes)                    //store owner by its Id
+			if err != nil {
+				return shim.Error(err.Error())
+			}
+		}
 		// fmt.Println(pool.Investors)
 		// security.investor.balance =+ interestPayment
 	}
-
-
-
 	// TODO
   // recreate originator with processingfee, test out
 	// res.Originator.ProcessingFee, err
@@ -829,9 +823,13 @@ func value_pool(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	}
 	poolValue := 0.0
 	for _, asset_id := range pool.Assets {
+		fmt.Println("loading asset")
+		fmt.Println(asset_id)
 		assetAsBytes, err = stub.GetState(asset_id)
 		asset = Asset{}
 		expectedPayoffAmount, _ = strconv.ParseFloat(asset.ExpectedPayoffAmount, 32)
+		fmt.Println("expectedPayoffAmount")
+		fmt.Println(expectedPayoffAmount)
 		poolValue = poolValue + expectedPayoffAmount
 	}
 	pool.Value = poolValue
@@ -995,10 +993,11 @@ func init_security(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 
 	var security Security
 	// security.Rating = "asset_investor"
+	fmt.Println(args)
 	security.Id = args[0]
 	security.CouponRate, err = strconv.ParseFloat(args[1], 32)
 	pool_id := args[2]
-	// security.MonthsUntilMaturity, _ = strconv.Atoi(args[3]) // hardcoding security life as 3 years for now
+	security.RemainingPayments = args[3] // hardcoding security life as 3 years for now
 	security.Maturity = false // TODO, maturity is end of life for a loan, not a security
 
 	security.Pool = pool_id
@@ -1011,8 +1010,8 @@ func init_security(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	// 	return shim.Error("This security already exists - " + security.Id)
 	// }
 
-
-
+	//
+	// security.MonthlyPayout =
 	//store user
 	securityAsBytes, _ := json.Marshal(security)                         //convert to array of bytes
 	err = stub.PutState(security.Id, securityAsBytes)                    //store owner by its Id

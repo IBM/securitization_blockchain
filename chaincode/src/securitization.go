@@ -77,6 +77,7 @@ type Asset struct {
 	Balance        string                		   `json:"balance"`
 	MonthyPayment  string											 `json:"monthlypayment"`
 	RemainingPayments   string								 `json:"remainingpayments"`
+	ProcessingPayment   string								 `json:"processingpayment"`
 	ExpectedPayoffAmount string							   `json:"payoffamount"`
 
 	// (( InterestRate / 12 ) * Balance * PaymentsLeft) / (1 - (1 + (InterestRate / 12) ) ^ -PaymentsLeft )
@@ -119,14 +120,16 @@ type Security struct {
 																					  // so monthly_payout per security should total (1k * .08) / 12
 																					  // dividing that by number of assets in our pool will determine how much investor gets from each payment
 	Value               string    `json:"value"` // Expected payout
-	MonthsUntilMaturity int 	     `json:"monthsuntilmaturity"` // number of payments investor will receive
+	// MonthsUntilMaturity int 	     `json:"monthsuntilmaturity"` // number of payments investor will receive
 	Maturity					  bool       `json:"maturity"`
 	MaturityDate        string     `json:"maturitydate"`
 	Investor            string     `json:"investor"` // TODO, array of investor ids, or array of structs?
 	Pool				        string			 `json:"pool"`
 	// Expiration     string     `json`
 	AmountPaid          string  `json:"amountpaid"`
-	OriginatalValue     string  `json:"originalvalue"`
+	OriginalValue       string  `json:"originalvalue"`
+	MonthlyPayout				string  `json:"monthlypayout"`
+	RemainingPayments   string  `json:"remainingpayments"`
 	// PercentageSecuritized float64 `json:percentagesecuritized`
 	// AmountDue      float64  `json:"investor"`
 	// 																						 // TODO, investor ids should
