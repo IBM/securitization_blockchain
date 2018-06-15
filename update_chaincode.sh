@@ -1,6 +1,4 @@
-for i in $(ls ./chaincode/src/*go) ;
-  do docker cp ${i} chaincode:/opt/gopath/src/chaincode/securitization/ ;
-done
+docker cp ./chaincode/src/. chaincode:/opt/gopath/src/chaincode/securitization/
 docker exec chaincode bash -c 'pkill -f securitization '
 docker exec chaincode bash -c 'cd /opt/gopath/src/chaincode/securitization ; \
                                   go build ; if [ "$(echo $?)" == "0" ] ; \

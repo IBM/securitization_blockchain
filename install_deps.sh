@@ -12,9 +12,15 @@ echo "PATH=${PATH}:/root/.nvm/versions/node/v8.9.0/bin/" >> /etc/environment
 # git clone https://github.com/IBM/securitization_blockchain
 # npm install node_pre_gyp
 # npm install nopt
-cd ~/securitization_blockchain/sc-ui
+cd /root/securitization_blockchain/sc-ui
 npm install
-cd ~/securitization_blockchain/sc-ui/react_backend
-npm install grpc@1.11.0 # this shouldn't be necessary since it's in package.json, but we get an error looking for "nopt" and other grpc dependencies otherwise
+
+cd /root/securitization_blockchain/sc-ui/react-backend
+pwd
+# this shouldn't be necessary since it's in package.json, but we get an error looking for "nopt" and other grpc dependencies otherwise
 npm install
-# PORT=3001 npm start | PORT=3001 node react-backend/bin/www
+npm install node-pre-gyp
+npm install --only=dev
+npm install grpc@1.11.0
+# npm rebuild
+# npm start | PORT=3001 node react-backend/bin/www

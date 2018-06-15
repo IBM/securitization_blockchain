@@ -628,7 +628,7 @@ func process_payment(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 	fmt.Println(asset.Originator.Balance)
 	asset.Originator.Balance = asset.Originator.Balance + asset.ProcessingPayment // strconv.FormatFloat( (originatorBalance + processingPayment), 'f', 2, 64)
 	fmt.Println("asset.Originator.Balance after")
-	asset.Originator.Balance
+	fmt.Println(asset.Originator.Balance)
 	originatorAsBytes, err := json.Marshal(asset.Originator)
 	err = stub.PutState(asset.Originator.Id, originatorAsBytes)
 

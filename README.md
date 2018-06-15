@@ -132,7 +132,7 @@ https://www.youtube.com/watch?v=Mw6924hCAIc -->
 
 
 # Steps
-There are two methods we can use to deploy the application, either run everything locally on your development machine, **OR** initialize a hosted blockchain service and run in IBM Cloud.
+There are two methods we can use to deploy the application, either run everything locally on your development machine, *OR* initialize a hosted blockchain service and run in IBM Cloud.
 1. [Clone repository](#1-clone-the-repository)
 2. [Setup repository codebase locally](#2-deploy-application-locally) OR [Deploy to IBM Cloud](#2-deploy-application-to-ibm-cloud)
 3. [Create Watson services with IBM Cloud](#3-create-services)
@@ -169,10 +169,6 @@ As an alternative to installing these additional dependencies on your system, yo
 docker build -t securitization_blockchain .
 ```
 
-If the build is successful, we can then start the application with
-```
-docker run -it -p 3000:3000 -p 3001:3001 -v /var/run/docker.sock:/var/run/docker.sock -v /usr/local/bin/docker:/usr/local/bin/docker securitization_blockchain bash -c 'npm start | PORT=3001 node react-backend/bin/www'
-```
 <!-- Finally, run the application
 ```
 cd sc-ui
@@ -233,7 +229,7 @@ If you're manually deploying the application and services, -->
 "Smart contracts", commonly referred to as "Chaincode", can be used to execute business logic and validate incoming requests. In this context, the contracts are used to initialize all participants of the securitization process, define their relationships, and verify transactions. These contracts can be hosted either on IBM Cloud or on a local Hyperledger network managed by Docker.
 
 ### IBM Cloud Hosted Hyperledger (**hosted**)
-To begin the process of uploading the smart contracts to the blockchain, we can start by opening the IBM Cloud dashboard, selecting your provisioned Blockchain service, and accessing the blockchain network monitor by clicking "Enter Monitor"
+To begin the process of uploading the smart contracts to the hosted blockchain service, we can start by opening the IBM Cloud dashboard, selecting your provisioned Blockchain service, and accessing the blockchain network monitor by clicking "Enter Monitor"
 <p align="center">
 <img src="https://i.imgur.com/BpUjPhe.png"  data-canonical-src="https://i.imgur.com/BpUjPhe.png" width="650" height="450" style="margin-left: auto; margin-right: auto;">
 </p>
@@ -254,7 +250,7 @@ Finally, we'll need to Instantiate the chaincode. This can be done by opening th
 <img src="https://i.imgur.com/eh1Djmj.png"  data-canonical-src="https://i.imgur.com/eh1Djmj.png" width="450" height="450" style="margin-left: auto; margin-right: auto;">
 </p>
 
-### Local Hyperledger Installation (**local**)
+### Hyperledger Network Setup (**local**)
 <!-- If you're planning to make custom changes to the smart contracts, it may be faster to develop and test chaincode locally before pushing to a hosted service.  -->
 We can deploy a local hyperledger network using a `docker-compose` file with the following commands
 
@@ -332,6 +328,11 @@ workspace and select **View details**. Save this ID for later.
 ```
 cd sc-ui
 npm start | PORT=3001 node react-backend/bin/www
+```
+
+If you built the application using docker, then simply run
+```
+docker run -it -p 3000:3000 -p 3001:3001 -v /var/run/docker.sock:/var/run/docker.sock -v /usr/local/bin/docker:/usr/local/bin/docker securitization_blockchain bash -c 'cd /root/securitization_blockchain/sc-ui ; npm start | PORT=3001 node react-backend/bin/www'
 ```
 
 <!-- This method is ideal for a development environment but not suitable for a production environment. TODO, this comment is from the original author, would like to understand why-->

@@ -6,7 +6,7 @@ docker build -t securitization_blockchain .
 echo "Starting local hyperledger network"
 git clone https://github.com/hyperledger/fabric-samples.git
 cd fabric-samples/chaincode-docker-devmode
-docker-compose -d -f docker-compose-simple.yaml up
+docker-compose -f docker-compose-simple.yaml up -d
 cd $PROJECT_ROOT_DIR
 
 echo "Uploading chaincode"
