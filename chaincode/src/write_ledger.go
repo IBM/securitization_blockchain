@@ -288,16 +288,6 @@ func set_originator(stub shim.ChaincodeStubInterface, args []string) pb.Response
 
 	var asset_id = args[0]
 	var originator_id = args[1]
-	// var authed_by_company = args[2]
-	// fmt.Println(marble_id + "->" + new_owner_id + " - |" + authed_by_company)
-
-	// check if user already exists
-	// owner, err := get_originator(stub, new_owner_id)
-	// if err != nil {
-	// 	return shim.Error("This owner does not exist - " + new_owner_id)
-	// }
-
-	// get marble's current state
 	assetAsBytes, err := stub.GetState(asset_id)
 
 	if err != nil {
@@ -332,6 +322,10 @@ func set_originator(stub shim.ChaincodeStubInterface, args []string) pb.Response
 		// return shim.Error("security already purchased")
 		originator.Assets = append( originator.Assets, asset.Id )
 		originatorAsBytes, _ := json.Marshal(originator)           //convert to array of bytes
+		fmt.Println(string(originatorAsBytes))
+		fmt.Println("originator_id")
+		fmt.Println(originator_id)
+
 		err = stub.PutState(originator_id, originatorAsBytes)     //rewrite the marble with id as key
 		if err != nil {
 			return shim.Error(err.Error())
@@ -343,7 +337,7 @@ func set_originator(stub shim.ChaincodeStubInterface, args []string) pb.Response
 	// }
 
 	// transfer the asset
-	asset.Originator = originator                   //change the owner
+	asset.Originator = originator_id                   //change the owner
 	asset_balance, _ := strconv.ParseFloat(asset.Balance, 32)
 	originator_processing_fee, _ := strconv.ParseFloat(originator.ProcessingFee, 32)
 	asset_remaining_payments, _ := strconv.ParseFloat(asset.RemainingPayments, 32)
@@ -351,6 +345,8 @@ func set_originator(stub shim.ChaincodeStubInterface, args []string) pb.Response
 	// res.Owner.Username = owner.Username
 	// res.Owner.Company = owner.Company
 	assetAsBytes, _ = json.Marshal(asset)           //convert to array of bytes
+	fmt.Println(string(assetAsBytes))
+
 	err = stub.PutState(asset_id, assetAsBytes)     //rewrite the marble with id as key
 	if err != nil {
 		return shim.Error(err.Error())
@@ -461,7 +457,7 @@ func pool_asset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	pool := Pool{}
 	json.Unmarshal(poolAsBytes, &pool)           //un stringify it aka JSON.parse()
 
-	assetInArray, _ := InArray(asset.Id , pool.Assets)
+	assetInArray, _ := InArray(asset.Id, pool.Assets)
 	if !assetInArray {
 		fmt.Println("adding asset to pool")
 		pool.Assets = append(pool.Assets, asset.Id)
@@ -577,11 +573,16 @@ func process_payment(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 		return shim.Error(err.Error())
 		// return shim.Error("Failed to unmarshal json")
 	}
+	originator := Originator{}
+	originatorAsBytes, err := stub.GetState(asset.Originator)
+	err = json.Unmarshal(originatorAsBytes, &originator)           //un stringify it aka JSON.parse()
+
 
 	paymentAmount, err := strconv.ParseFloat(args[1], 32)
   balance, err := strconv.ParseFloat(asset.Balance, 32)
 	interestRate, err := strconv.ParseFloat(asset.InterestRate, 32)
-	processingFee, err := strconv.ParseFloat(asset.Originator.ProcessingFee, 32)
+
+	processingFee, err := strconv.ParseFloat(originator.ProcessingFee, 32)
 	paymentsLeft, err := strconv.Atoi(asset.RemainingPayments)
 	// TODO
 	// percent.Percent(25, 2000) // return 500
@@ -625,12 +626,15 @@ func process_payment(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 	// originator = stub.GetState(asset.Originator)
 	// originatorBalance, err := strconv.ParseFloat(asset.Originator.Balance, 32)
 	fmt.Println("asset.Originator.Balance before")
-	fmt.Println(asset.Originator.Balance)
-	asset.Originator.Balance = asset.Originator.Balance + asset.ProcessingPayment // strconv.FormatFloat( (originatorBalance + processingPayment), 'f', 2, 64)
-	fmt.Println("asset.Originator.Balance after")
-	fmt.Println(asset.Originator.Balance)
-	originatorAsBytes, err := json.Marshal(asset.Originator)
-	err = stub.PutState(asset.Originator.Id, originatorAsBytes)
+	fmt.Println(originator.Balance)
+	fmt.Println("asset.ProcessingPayment")
+	fmt.Println(asset.ProcessingPayment)
+	originatorBalance, _ := strconv.ParseFloat(originator.Balance, 32)
+	updatedOriginatorBalance := processingPayment + originatorBalance
+	originator.Balance = strconv.FormatFloat(updatedOriginatorBalance, 'f', 2, 64)
+	originatorAsBytes, err = json.Marshal(originator)
+	fmt.Println("asset.Originator.Id")
+	err = stub.PutState(asset.Originator, originatorAsBytes)
 
 	// }
 	// pay their portion
@@ -716,8 +720,8 @@ func process_payment(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 	// res.Pool
   // receipt :=
 
-	jsonAsBytes, _ := json.Marshal(`"{payment: ` + strconv.FormatFloat(processingPayment, 'f', 2, 64) + `, receipient: ` + asset.Originator.Username + ` }"`)           //convert to array of bytes
-	err = stub.SetEvent("Payment dispersed: ", jsonAsBytes)     //rewrite the marble with id as key
+	// jsonAsBytes, _ := json.Marshal(`"{payment: ` + strconv.FormatFloat(processingPayment, 'f', 2, 64) + `, receipient: ` + asset.Originator.Username + ` }"`)           //convert to array of bytes
+	// err = stub.SetEvent("Payment dispersed: ", jsonAsBytes)     //rewrite the marble with id as key
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -782,41 +786,49 @@ func calculate_monthly_payment(balance float64,  interestRate float64,  months f
 // 	return monthlyPayment
 // }
 
-func value_pool(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+
+// calculate the total value of a pool
+// this should be done when a payment is applied toward an asset in a pool, and when an asset is added to a pool
+func value_asset_pool(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// Calculates the total amount that a homeowner will pay on their mortgage by amortization
-	pool_id := args[0]
-	retries := 5
+	fmt.Println("start -value_asset_pool")
+	asset_id := args[0]
 	var err error
 	var poolAsBytes []byte
 	var assetAsBytes []byte
 	var expectedPayoffAmount float64
-	for i := 0; i < retries; i++ {
-		fmt.Println("on iteration")
-		fmt.Println(i)
-		poolAsBytes, err = stub.GetState(pool_id)
-
-		// if err != nil {
-		if (len(poolAsBytes) == 0) {
-			fmt.Println("Could not load pool, retrying")
-			fmt.Println(string(assetAsBytes))
-			// return shim.Error(err.Error())
-			time.Sleep(2 * time.Second) // adding sleep
-		} else {
-			fmt.Println("Asset pool loaded, continuing")
-			break
-		}
-	}
-
-	// if err != nil {
-	if (len(poolAsBytes) == 0) {
-		fmt.Println("Could not load pool after multiple tries, exiting")
-		// return shim.Error(err.Error())
-		return shim.Error("Could not load pool after multiple tries, exiting")
-	}
-
+	// for i := 0; i < retries; i++ {
+	// 	fmt.Println("on iteration")
+	// 	fmt.Println(i)
+	// 	poolAsBytes, err = stub.GetState(pool_id)
+  //
+	// 	// if err != nil {
+	// 	if (len(poolAsBytes) == 0) {
+	// 		fmt.Println("Could not load pool, retrying")
+	// 		fmt.Println(string(assetAsBytes))
+	// 		// return shim.Error(err.Error())
+	// 		time.Sleep(2 * time.Second) // adding sleep
+	// 	} else {
+	// 		fmt.Println("Asset pool loaded, continuing")
+	// 		break
+	// 	}
+	// }
 	pool := Pool{}
 	asset := Asset{}
+	fmt.Println("asset_id")
+	fmt.Println(asset_id)
+
+	assetAsBytes, err = stub.GetState(asset_id)
+	err = json.Unmarshal(assetAsBytes, &asset)
+	fmt.Println("asset")
+	fmt.Println(asset)
+
+	poolAsBytes, err = stub.GetState(asset.Pool)
 	err = json.Unmarshal(poolAsBytes, &pool)
+	fmt.Println("poolAsBytes")
+	fmt.Println(string(poolAsBytes))
+	fmt.Println("assetAsBytes")
+	fmt.Println(string(assetAsBytes))
 	if err != nil {
 		fmt.Println("Could not load pool")
 		return shim.Error(err.Error())
@@ -827,11 +839,13 @@ func value_pool(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 		fmt.Println(asset_id)
 		assetAsBytes, err = stub.GetState(asset_id)
 		asset = Asset{}
+		err = json.Unmarshal(assetAsBytes, &asset)
 		expectedPayoffAmount, _ = strconv.ParseFloat(asset.ExpectedPayoffAmount, 32)
 		fmt.Println("expectedPayoffAmount")
 		fmt.Println(expectedPayoffAmount)
 		poolValue = poolValue + expectedPayoffAmount
 	}
+	// fmt.Println("setting updated pool value")
 	pool.Value = poolValue
 	// balance, _ := strconv.ParseFloat(asset.Balance, 32)
 	// interest, _ := strconv.ParseFloat(asset.InterestRate, 32)
@@ -844,14 +858,87 @@ func value_pool(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// 	return shim.Error("missing parameters")
 	// }
 	// asset.ExpectedPayoffAmount = strconv.FormatFloat(trueValue, 'f', 2, 64)
+	// fmt.Println("write updated pool")
 	poolAsBytes, _ = json.Marshal(pool)                         //convert to array of bytes
 	err = stub.PutState(pool.Id, poolAsBytes)                    //store owner by its Id
 	if err != nil {
 		fmt.Println("Could not store pool")
 		return shim.Error(err.Error())
 	}
+	fmt.Println("end -value_asset_pool")
 	return shim.Success(nil)
 }
+
+// func value_pool(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+// 	// Calculates the total amount that a homeowner will pay on their mortgage by amortization
+// 	pool_id := args[0]
+// 	retries := 5
+// 	var err error
+// 	var poolAsBytes []byte
+// 	var assetAsBytes []byte
+// 	var expectedPayoffAmount float64
+// 	for i := 0; i < retries; i++ {
+// 		fmt.Println("on iteration")
+// 		fmt.Println(i)
+// 		poolAsBytes, err = stub.GetState(pool_id)
+//
+// 		// if err != nil {
+// 		if (len(poolAsBytes) == 0) {
+// 			fmt.Println("Could not load pool, retrying")
+// 			fmt.Println(string(assetAsBytes))
+// 			// return shim.Error(err.Error())
+// 			time.Sleep(2 * time.Second) // adding sleep
+// 		} else {
+// 			fmt.Println("Asset pool loaded, continuing")
+// 			break
+// 		}
+// 	}
+//
+// 	// if err != nil {
+// 	if (len(poolAsBytes) == 0) {
+// 		fmt.Println("Could not load pool after multiple tries, exiting")
+// 		// return shim.Error(err.Error())
+// 		return shim.Error("Could not load pool after multiple tries, exiting")
+// 	}
+//
+// 	pool := Pool{}
+// 	asset := Asset{}
+// 	err = json.Unmarshal(poolAsBytes, &pool)
+// 	if err != nil {
+// 		fmt.Println("Could not load pool")
+// 		return shim.Error(err.Error())
+// 	}
+// 	poolValue := 0.0
+// 	for _, asset_id := range pool.Assets {
+// 		fmt.Println("loading asset")
+// 		fmt.Println(asset_id)
+// 		assetAsBytes, err = stub.GetState(asset_id)
+// 		asset = Asset{}
+// 		expectedPayoffAmount, _ = strconv.ParseFloat(asset.ExpectedPayoffAmount, 32)
+// 		fmt.Println("expectedPayoffAmount")
+// 		fmt.Println(expectedPayoffAmount)
+// 		poolValue = poolValue + expectedPayoffAmount
+// 	}
+// 	pool.Value = poolValue
+// 	// balance, _ := strconv.ParseFloat(asset.Balance, 32)
+// 	// interest, _ := strconv.ParseFloat(asset.InterestRate, 32)
+// 	// remainingPayments, _ := strconv.ParseFloat(asset.RemainingPayments, 32)
+// 	// trueValue := (((interest / 12.0) * balance * remainingPayments) / (1.0 - math.Pow( ( (1.0 + ( interest / 12.0)) ), (-1.0 * remainingPayments) )))
+// 	// fmt.Println("trueValue")
+// 	// fmt.Println(trueValue)
+// 	// if math.IsNaN(trueValue) {
+// 	// 	fmt.Println("missing parameters")
+// 	// 	return shim.Error("missing parameters")
+// 	// }
+// 	// asset.ExpectedPayoffAmount = strconv.FormatFloat(trueValue, 'f', 2, 64)
+// 	poolAsBytes, _ = json.Marshal(pool)                         //convert to array of bytes
+// 	err = stub.PutState(pool.Id, poolAsBytes)                    //store owner by its Id
+// 	if err != nil {
+// 		fmt.Println("Could not store pool")
+// 		return shim.Error(err.Error())
+// 	}
+// 	return shim.Success(nil)
+// }
 
 func value_asset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// Calculates the total amount that a homeowner will pay on their mortgage by amortization
@@ -909,6 +996,9 @@ func value_asset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	}
 	return shim.Success(nil)
 }
+
+
+
 
 // func value_security(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 // 	fmt.Println("starting value_security")

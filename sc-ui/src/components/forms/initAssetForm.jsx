@@ -6,6 +6,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import refreshState from '../helpers/refreshState.js'
 
 class InitAssetForm extends React.Component {
   constructor(props) {
@@ -67,10 +68,10 @@ class InitAssetForm extends React.Component {
         //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
       },
       body: JSON.stringify({
+        method: "invoke",
         params: {
-          method: "invoke",
           ctorMsg: {
-            function: 'init_asset',
+            function: "init_asset",
             // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
             args: [this.state.id, this.state.balance, String(parseFloat(this.state.interestrate) * 0.01) , this.state.remainingpayments, this.state.underwriting]
             //args: Object.values(this.state)
@@ -81,6 +82,8 @@ class InitAssetForm extends React.Component {
     console.log("initializing asset")
     console.log(Date.now())
     fetch('http://localhost:3001/chaincode', config).then ( () =>
+    {
+      refreshState()
       setTimeout( () => {
         {
           var config_value = {
@@ -107,7 +110,7 @@ class InitAssetForm extends React.Component {
           fetch('http://localhost:3001/chaincode', config_value)
         }
       }, 10000)
-    )
+    })
     this.setState({ open: false });
     // event.preventDefault();
   }

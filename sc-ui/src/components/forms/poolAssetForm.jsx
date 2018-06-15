@@ -6,7 +6,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-
 class PoolAsset extends React.Component {
   constructor(props) {
     super(props);
@@ -72,9 +71,9 @@ class PoolAsset extends React.Component {
               method: "invoke",
               params: {
                 ctorMsg: {
-                  function: 'value_pool',
+                  function: 'value_asset_pool',
                   // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
-                  args: [this.state.poolId]
+                  args: [this.state.assetId]
                   //args: Object.values(this.state)
                 }
               }

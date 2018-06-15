@@ -16,25 +16,25 @@ function refreshState() {
       }
     })
   }
-  console.log("refreshing state")
-  fetch('http://localhost:3001/chaincode', config)
-    .then(response => response.json())
-    .then((json) =>{
-      console.log("in refreshState helper")
+  // TODO, what's the best way to do this? don't want to query for state too often. look into "setEvent" blockchain method
+  console.log("refreshing state until change detected")
+  var objects = localStorage.getItem('objects')
+  setTimeout( () => {
+    fetch('http://localhost:3001/chaincode', config)
+      .then(response => response.json())
+      .then((json) =>{
+        console.log("in refreshState helper")
+        var stateObjects = JSON.parse(json)
+        console.log(stateObjects)
+        // TODO, use react "set state" properly
+        // this.setState({"objects": JSON.parse(json)})
+        localStorage.setItem('objects', json)
+        return JSON.parse(json)
+    }).catch( (err) => {
+        console.log("fetch failed")
+    });
+  }, 3000)
 
-      // const element = GenerateCards(JSON.parse(json))
-      // ReactDOM.render(element, document.getElementById('test'));
-      // console.log("this")
-      // console.log(this)
-      var stateObjects = JSON.parse(json)
-      console.log(stateObjects)
-      // TODO, use react "set state" properly
-      // this.setState({"objects": JSON.parse(json)})
-      localStorage.setItem('objects', json)
-      return JSON.parse(json)
-  }).catch( (err) => {
-      console.log("fetch failed")
-  });
 }
 
 export default refreshState;

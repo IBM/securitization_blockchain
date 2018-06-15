@@ -59,7 +59,7 @@ function generateData() {
   for (var idx in assets) {
     data.push(
       createData(
-        assets[idx].id, assets[idx].balance, assets[idx].interest, assets[idx].state, assets[idx].remainingpayments, assets[idx].originator.id, assets[idx].pool, assets[idx].payoffamount
+        assets[idx].id, assets[idx].balance, assets[idx].interest, assets[idx].state, assets[idx].remainingpayments, assets[idx].originator, assets[idx].pool, assets[idx].payoffamount
       )
     )
     if (idx == (assets.length -1)) {
@@ -85,8 +85,8 @@ function SimpleAssetTable(props) {
             <TableCell> State</TableCell>
             <TableCell> Originator </TableCell>
             <TableCell> Pool </TableCell>
-            {/*<TableCell> Monthly Payment </TableCell>*/}
-            <TableCell> Payments until Amortization </TableCell>
+            {/*<TableCell> Monthly Payment </TableCell>
+               <TableCell> Payments until Amortization </TableCell>*/}
             <TableCell> Expected Amortization Amount </TableCell>
           </TableRow>
         </TableHead>
@@ -101,8 +101,8 @@ function SimpleAssetTable(props) {
                 <TableCell>{n.state}</TableCell>
                 <TableCell>{n.originator}</TableCell>
                 <TableCell>{n.pool}</TableCell>
-                {/*<TableCell>{n.monthlypayment}</TableCell>*/}
-                <TableCell>{n.remainingpayments}</TableCell>
+                {/*<TableCell>{n.monthlypayment}</TableCell>
+                 <TableCell>{n.remainingpayments}</TableCell>*/}
                 <TableCell>{n.payoffamount}</TableCell>
               </TableRow>
             );

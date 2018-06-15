@@ -80,9 +80,9 @@ function SimplePoolTable(props) {
           <TableRow>
             <TableCell>Pool ID</TableCell>
             <TableCell>Pool Assets</TableCell>
-            <TableCell>Value of Pool Assets</TableCell>
+            <TableCell>Value of Pool Assets (Including Expected Interest)</TableCell>
             <TableCell>Securities</TableCell>
-            <TableCell>Excess Spread</TableCell>
+            {/*<TableCell>Excess Spread</TableCell>*/}
 
           </TableRow>
         </TableHead>
@@ -96,7 +96,7 @@ function SimplePoolTable(props) {
                 <TableCell>{n.assets}</TableCell>
                 <TableCell>{n.value.toFixed(2)}</TableCell>
                 <TableCell>{n.securities}</TableCell>
-                <TableCell>{n.excessspread}</TableCell>
+                {/*<TableCell>{n.excessspread}</TableCell>*/}
               </TableRow>
             );
           })}

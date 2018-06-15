@@ -49,6 +49,8 @@ class ProcessPaymentForm extends React.Component {
   handleSubmit = () =>  {
     // console.log("event")
     // console.log(event)
+    this.setState({ open: false });
+
     console.log('processing payment for asset: ' + JSON.stringify(this.state));
     let config = {
       method: 'POST',
@@ -70,12 +72,34 @@ class ProcessPaymentForm extends React.Component {
     }
     console.log(config.body)
     fetch('http://localhost:3001/chaincode', config).then ( () =>
-      {
-        console.log("closing payment form")
-        refreshState()
-        this.setState({ open: false });
-      }
-    )
+      setTimeout( () => {
+        {
+          var config_value = {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
+            },
+            body: JSON.stringify({
+              method: "invoke",
+              params: {
+                ctorMsg: {
+                  function: 'value_asset_pool',
+                  // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
+                  args: [this.state.id]
+                  //args: Object.values(this.state)
+                }
+              }
+            })
+          }
+          console.log(Date.now())
+          console.log("value pool")
+          fetch('http://localhost:3001/chaincode', config_value)
+
+        }
+      }, 5000))
+
 
     // event.preventDefault();
   }

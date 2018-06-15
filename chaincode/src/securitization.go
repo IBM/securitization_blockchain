@@ -68,7 +68,8 @@ type Pool struct {
 type Asset struct {
 	// ObjectType     string                      `json:"docType"` //field for couchdb
 	Id       			 string                      `json:"id"`      //the fieldtags are needed to keep case from bouncing around
-	Originator     Originator	         				 `json:"originator"`
+	// Originator     Originator	         				 `json:"originator"`
+	Originator     string   	         				 `json:"originator"`
 	Pool           string	                     `json:"pool"` // TODO, not sure if this is needed
 	State          string                      `json:"state"` // active, deliquent
 	Underwriting   string   					  			 `json:"underwriting"` // fico, user // TODO, this should be an object, but having issues with json marshalling
@@ -311,8 +312,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return init_security(stub, args)
 	} else if function == "buy_security" {      //create a new marble
 		return buy_security(stub, args)
-	} else if function == "value_pool" {      //create a new marble
-		return value_pool(stub, args)
+	} else if function == "value_asset_pool" {      //create a new marble
+		return value_asset_pool(stub, args)
 	} else if function == "value_asset" {      //create a new marble
 		return value_asset(stub, args)
 	} else if function == "delete" {      //create a new marble
