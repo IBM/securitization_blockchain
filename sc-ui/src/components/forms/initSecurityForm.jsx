@@ -6,6 +6,8 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import refreshState from '../helpers/refreshState.js'
+
 
 class InitSecurityForm extends React.Component {
   constructor(props) {
@@ -80,7 +82,9 @@ class InitSecurityForm extends React.Component {
       })
     }
     console.log(config.body)
-    fetch('http://localhost:3001/chaincode', config)
+    fetch('http://localhost:3001/chaincode', config).then( () => {
+      refreshState(2)
+    })
     this.setState({ open: false });
     // event.preventDefault();
   }

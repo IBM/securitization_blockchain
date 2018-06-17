@@ -110,14 +110,14 @@ func delete(stub shim.ChaincodeStubInterface, args []string) (pb.Response) {
 func init_asset(stub shim.ChaincodeStubInterface, args []string) (pb.Response) {
 	var err error
 	fmt.Println("starting init_asset")
-	if len(args) != 5 {
-		return shim.Error("Incorrect number of arguments. Expecting 5")
-	}
+	// if len(args) != 5 {
+	// 	return shim.Error("Incorrect number of arguments. Expecting 5")
+	// }
 	//input sanitation
-	err = sanitize_arguments(args)
-	if err != nil {
-		return shim.Error(err.Error())
-	}
+	// err = sanitize_arguments(args)
+	// if err != nil {
+	// 	return shim.Error(err.Error())
+	// }
 	// asset_id := args[0]
 	// // initial_amount := args[1] //strings.ToLower(args[1])
 	// balance := args[1]
@@ -128,12 +128,14 @@ func init_asset(stub shim.ChaincodeStubInterface, args []string) (pb.Response) {
   // remainingpayments := args[3]
 	// underwriting := args[4]  //make(map(args[5]))
 	// state := "active"
+
 	var asset Asset
 	asset.Id = args[0]
 	asset.Balance =  args[1]
 	asset.InterestRate = args[2]
 	asset.RemainingPayments = args[3]
-	asset.Underwriting = args[4]
+	fmt.Println(asset)
+	// asset.Underwriting = args[4]
 	asset.State = "active"
 	// asset.ObjectType = "fin_asset"
 	// originator.Username = strings.ToLower(args[1])
@@ -146,6 +148,21 @@ func init_asset(stub shim.ChaincodeStubInterface, args []string) (pb.Response) {
 	// 	return shim.Error("This originator already exists - " + originator.Id)
 	// }
 	//store user
+	balance, _ := strconv.ParseFloat(asset.Balance, 32)
+	// fmt.Println("balance set")
+	interest, _ := strconv.ParseFloat(asset.InterestRate, 32)
+	// fmt.Println("interest set")
+	remainingPayments, _ := strconv.ParseFloat(asset.RemainingPayments, 32)
+	// fmt.Println("remaining set")
+	trueValue := (((interest / 12.0) * balance * remainingPayments) / (1.0 - math.Pow( ( (1.0 + ( interest / 12.0)) ), (-1.0 * remainingPayments) )))
+	// fmt.Println("trueValue")
+	// fmt.Println(trueValue)
+	// if math.IsNaN(trueValue) {
+	// 	fmt.Println("missing parameters")
+	// 	return shim.Error("missing parameters")
+	// }
+	asset.ExpectedPayoffAmount = strconv.FormatFloat(trueValue, 'f', 2, 64)
+
 	assetAsBytes, _ := json.Marshal(asset)                         //convert to array of bytes
 	fmt.Println("writing asset to state")
 	fmt.Println(string(assetAsBytes))
@@ -638,8 +655,6 @@ func process_payment(stub shim.ChaincodeStubInterface, args []string) pb.Respons
 
 	// }
 	// pay their portion
-
-
 
   // TODO, remove this
 	// get remaining assets from pool

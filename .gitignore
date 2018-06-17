@@ -5,3 +5,4 @@ sc-ui/*priv
 sc-ui/*pub
 sc-ui/connection_profile.json
 sc-ui/docker.out
+fabric-samples/

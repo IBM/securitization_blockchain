@@ -81,10 +81,10 @@ function SimpleOriginatorTable(props) {
                 <TableCell component="th" scope="row">
                   {n.id}
                 </TableCell>
-                <TableCell>{n.processingfee * 100}%</TableCell>
+                <TableCell>{n.processingfee * 100} %</TableCell>
                 <TableCell>{n.company}</TableCell>
-                <TableCell>{n.assets}</TableCell>
-                <TableCell>{n.balance}</TableCell>
+                <TableCell>{  n.assets ? n.assets.join(', ') : '' }</TableCell>
+                <TableCell>$ {n.balance}</TableCell>
               </TableRow>
             );
           })}

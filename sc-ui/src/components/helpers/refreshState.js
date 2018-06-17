@@ -1,4 +1,4 @@
-function refreshState() {
+function refreshState(seconds) {
   let config = {
     method: 'POST',
     headers: {
@@ -17,7 +17,8 @@ function refreshState() {
     })
   }
   // TODO, what's the best way to do this? don't want to query for state too often. look into "setEvent" blockchain method
-  console.log("refreshing state until change detected")
+  // console.log("refreshing state until change detected")
+  var ms = 1000 + (1000 * seconds)
   var objects = localStorage.getItem('objects')
   setTimeout( () => {
     fetch('http://localhost:3001/chaincode', config)
@@ -33,7 +34,7 @@ function refreshState() {
     }).catch( (err) => {
         console.log("fetch failed")
     });
-  }, 3000)
+  }, ms)
 
 }
 

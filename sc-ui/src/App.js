@@ -23,7 +23,7 @@ import SimpleInvestorTable from './components/tables/SimpleInvestorTable.js'
 import SimpleSecurityTable from './components/tables/SimpleSecurityTable.js'
 import SimpleOriginatorTable from './components/tables/SimpleOriginatorTable.js'
 import InitHFCForm from './components/forms/initHFClientForm.jsx'
-
+import DeleteObjectForm from './components/forms/deleteObjectForm.jsx'
 
 import FormDialog from './components/forms/FormDialog.js'
 
@@ -166,7 +166,7 @@ class App extends Component {
           //     // console.log('refreshing state');
           //     // return { unseen: "does not display" }
           // });
-      }, 5000);
+      }, 20000);
   }
 
   handleChange = (event, value) => {
@@ -205,9 +205,15 @@ class App extends Component {
           {value === 1 && <TabContainer><SimplePoolTable></SimplePoolTable></TabContainer>}
         </div>
         */}
+
         <div >
         <InitHFCForm> </InitHFCForm>
         </div>
+
+        <div >
+        <DeleteObjectForm> </DeleteObjectForm>
+        </div>
+
 
         <div>
         <AppBar label="Originators" position="static" style={{position:'static',width:'90%', align: 'middle', margin: 'auto', padding: '10px'}} >

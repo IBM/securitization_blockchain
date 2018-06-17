@@ -91,7 +91,7 @@ function SimpleInvestorTable(props) {
               <TableRow key={n.id}>
                 <TableCell component="th" scope="row">{n.id}</TableCell>
                 <TableCell>${n.balance.toFixed(2)}</TableCell>
-                <TableCell>{n.securities}</TableCell>
+                <TableCell>{  n.securities ? n.securities.join(', ') : '' }</TableCell>
               </TableRow>
             );
           })}

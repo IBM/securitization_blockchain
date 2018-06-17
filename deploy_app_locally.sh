@@ -2,7 +2,7 @@
 # set -e
 # Deploy locally
 PROJECT_ROOT_DIR=$(pwd)
-docker build -t securitization_blockchain .
+# docker build -t securitization_blockchain .
 
 echo "Starting local hyperledger network"
 # if ls fabric-samples

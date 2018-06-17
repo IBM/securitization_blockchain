@@ -62,7 +62,7 @@ function generateData() {
         assets[idx].id, assets[idx].balance, assets[idx].interest, assets[idx].state, assets[idx].remainingpayments, assets[idx].originator, assets[idx].pool, assets[idx].payoffamount
       )
     )
-    if (idx == (assets.length -1)) {
+    if (idx == (assets.length - 1)) {
       console.log("data")
       console.log(data)
       return data
@@ -87,6 +87,7 @@ function SimpleAssetTable(props) {
             <TableCell> Pool </TableCell>
             {/*<TableCell> Monthly Payment </TableCell>
                <TableCell> Payments until Amortization </TableCell>*/}
+            <TableCell> Payments until Amortization </TableCell>
             <TableCell> Expected Amortization Amount </TableCell>
           </TableRow>
         </TableHead>
@@ -103,7 +104,8 @@ function SimpleAssetTable(props) {
                 <TableCell>{n.pool}</TableCell>
                 {/*<TableCell>{n.monthlypayment}</TableCell>
                  <TableCell>{n.remainingpayments}</TableCell>*/}
-                <TableCell>{n.payoffamount}</TableCell>
+                <TableCell>{n.remainingpayments}</TableCell>
+                <TableCell>$ {n.payoffamount}</TableCell>
               </TableRow>
             );
           }) : null}

@@ -252,7 +252,7 @@ Finally, we'll need to Instantiate the chaincode. This can be done by opening th
 
 ### Hyperledger Network Setup (**local**)
 <!-- If you're planning to make custom changes to the smart contracts, it may be faster to develop and test chaincode locally before pushing to a hosted service.  -->
-We can deploy a local hyperledger network using a `docker-compose` file with the following commands
+As an alternative to the hosted IBM Blockchain service, we can deploy a local Hyperledger network using docker-compose like so
 
 ```
 git clone https://github.com/hyperledger/fabric-samples.git

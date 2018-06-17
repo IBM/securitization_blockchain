@@ -7,23 +7,20 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import InputAdornment from '@material-ui/core/InputAdornment';
-import refreshState from '../helpers/refreshState.js'
 
 
-class InitOriginatorForm extends React.Component {
+class DeleteObjectForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      id: '',
-      processingfee: '',
-      company: ''
+      id: ''
     };
     // this.handleChange = this.handleChange.bind(this);
   }
   handleSubmit = () =>  {
     // console.log("event")
     // console.log(event)
-    console.log('creating originator with id: ' + JSON.stringify(this.state));
+    console.log('deleting object id: ' + JSON.stringify(this.state));
     let config = {
       method: 'POST',
       headers: {
@@ -35,17 +32,15 @@ class InitOriginatorForm extends React.Component {
         method: "invoke",
         params: {
           ctorMsg: {
-            function: 'init_originator',
-            args: [this.state.id, this.state.company, String(parseFloat(this.state.processingfee) * 0.01)]
+            function: 'delete',
+            args: [this.state.id]
             //args: Object.values(this.state)
           }
         }
       })
     }
     console.log(config.body)
-    fetch('http://localhost:3001/chaincode', config).then( () => {
-      refreshState()
-    })
+    fetch('http://localhost:3001/chaincode', config)
     this.setState({ open: false });
     // event.preventDefault();
   }
@@ -67,38 +62,21 @@ class InitOriginatorForm extends React.Component {
   render() {
     return (
       <div>
-          <Button color="primary" variant="contained" onClick={this.handleClickOpen}>Create Originator</Button>
+          <Button style={{'float':'right', 'padding':'15px'}} color="primary" size="small" variant="contained" onClick={this.handleClickOpen}>Delete Object</Button>
           <Dialog
             open={this.state.open}
             onClose={this.handleClose}
             aria-labelledby="form-dialog-title"
           >
-          <DialogTitle id="form-dialog-title">Create New Originator</DialogTitle>
+          <DialogTitle id="form-dialog-title">Delete Object</DialogTitle>
           <DialogContent>
             <TextField
               autoFocus
               margin="dense"
               id="id"
               required
-              label="Originator ID"
+              label="Object ID"
               onChange={this.handleChange('id')}
-              fullWidth
-            />
-            <TextField
-              autoFocus
-              margin="dense"
-              required
-              id="processingfee"
-              label="Processing Fee (percentage of total loan)"
-              onChange={this.handleChange('processingfee')}
-              fullWidth
-            />
-            <TextField
-              autoFocus
-              margin="dense"
-              id="company"
-              label="Company"
-              onChange={this.handleChange('company')}
               fullWidth
             />
           </DialogContent>
@@ -116,4 +94,4 @@ class InitOriginatorForm extends React.Component {
     );
   }
 }
-export default InitOriginatorForm;
+export default DeleteObjectForm;

@@ -1,4 +1,5 @@
 import React from 'react';
+import refreshState from '../helpers/refreshState.js'
 
 class SetOriginatorForm extends React.Component {
   constructor(props) {
@@ -48,7 +49,9 @@ class SetOriginatorForm extends React.Component {
       })
     }
     console.log(config.body)
-    fetch('http://localhost:3001/chaincode', config)
+    fetch('http://localhost:3001/chaincode', config).then( () => {
+      refreshState(2)
+    })
 
     event.preventDefault();
   }

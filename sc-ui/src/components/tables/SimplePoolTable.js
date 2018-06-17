@@ -93,9 +93,9 @@ function SimplePoolTable(props) {
                 <TableCell component="th" scope="row">
                   {n.id}
                 </TableCell>
-                <TableCell>{n.assets}</TableCell>
+                <TableCell>{  n.assets ? n.assets.join(', ') : '' }</TableCell>
                 <TableCell>{n.value.toFixed(2)}</TableCell>
-                <TableCell>{n.securities}</TableCell>
+                <TableCell>{  n.securities ? n.securities.join(', ') : '' }</TableCell>
                 {/*<TableCell>{n.excessspread}</TableCell>*/}
               </TableRow>
             );

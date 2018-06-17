@@ -71,7 +71,37 @@ class TransferAssetForm extends React.Component {
       }
       console.log(config.body)
       fetch('http://localhost:3001/chaincode', config).then( () => {
-        refreshState()
+        setTimeout( () => {
+          console.log("getting values of pool")
+          {
+            var config_value = {
+              method: 'POST',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
+              },
+              body: JSON.stringify({
+                method: "invoke",
+                params: {
+                  ctorMsg: {
+                    function: 'value_asset_pool',
+                    // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
+                    args: [this.state.asset_id]
+                    //args: Object.values(this.state)
+                  }
+                }
+              })
+            }
+            console.log(Date.now())
+            console.log("value pool")
+            fetch('http://localhost:3001/chaincode', config_value).then( () => {
+              console.log("getting values of pool")
+              refreshState(1)
+            })
+          }
+        }, 3000)
+        // refreshState()
       })
     // event.preventDefault();
     }
@@ -99,7 +129,7 @@ class TransferAssetForm extends React.Component {
       console.log("refreshing")
       fetch('http://localhost:3001/chaincode', config).then(
         () => {
-          refreshState()
+          refreshState(2)
         }
       ).then( () => {
         console.log("this.state")

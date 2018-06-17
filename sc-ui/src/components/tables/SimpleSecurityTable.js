@@ -31,9 +31,9 @@ const styles = theme => ({
 });
 
 let id = 0;
-function createData( id, rating, couponrate, pool, value, paymentsleft, maturity, investor ) {
+function createData( id, rating, couponrate, pool, value, remainingpayments, maturity, investor ) {
   // id += 1;
-  return { id, rating, couponrate, pool, value, paymentsleft, maturity, investor };
+  return { id, rating, couponrate, pool, value, remainingpayments, maturity, investor };
 }
 
 
@@ -60,7 +60,7 @@ function generateData() {
   for (var idx in securities) {
     data.push(
       createData(
-        securities[idx].id, securities[idx].rating, securities[idx].couponrate, securities[idx].pool, securities[idx].value, securities[idx].paymentsleft, securities[idx].maturity, securities[idx].investor
+        securities[idx].id, securities[idx].rating, securities[idx].couponrate, securities[idx].pool, securities[idx].value, securities[idx].remainingpayments, securities[idx].maturity, securities[idx].investor
       )
     )
     if (idx == (securities.length -1)) {
@@ -84,11 +84,10 @@ function SimpleSecurityTable(props) {
             <TableCell> Pool</TableCell>
             <TableCell> Coupon Rate</TableCell>
             <TableCell> Investor </TableCell>
-            <TableCell> Payments Left </TableCell>
-            {/*<TableCell> Value (Expected Payout)</TableCell>
+            {/*<TableCell> Payments Left </TableCell>
+            <TableCell> Value (Expected Payout)</TableCell>
             <TableCell> Maturity </TableCell>
             <TableCell> Rating</TableCell>*/}
-
           </TableRow>
         </TableHead>
         <TableBody>
@@ -99,8 +98,9 @@ function SimpleSecurityTable(props) {
                 <TableCell>{n.pool}</TableCell>
                 <TableCell>{n.couponrate.toFixed(2) * 100}%</TableCell>
                 <TableCell>{n.investor}</TableCell>
-                <TableCell >{n.paymentsleft}</TableCell>
-                {/*<TableCell>{n.value}</TableCell>
+
+                {/* <TableCell >{n.remainingpayments}</TableCell>
+                  <TableCell>{n.value}</TableCell>
                  <TableCell>{n.maturity}</TableCell>
                 <TableCell>{n.rating}</TableCell>*/}
               </TableRow>

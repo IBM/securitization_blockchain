@@ -6,7 +6,7 @@ var CAClient = require('fabric-ca-client')
 var fs = require('fs')
 var _ = require('underscore')
 var util = require('util')
-
+var async = require('async')
 /* GET home page. */
 // router.get('/', function(req, res, next) {
 //   res.render('index', { title: 'Express' });
@@ -18,14 +18,96 @@ var exec = require('child_process').exec;
 module.exports = router;
 command_prefix = 'docker exec cli peer chaincode invoke -n sec -c \'{"Args":'
 
-function requestConnectionProfile(req, res) {
-  console.log("requesting connection profile")
-  console.log(req.body)
+function uploadAdminCert(req, mspId) {
+  var uploadAdminCertReq = {
+    "msp_id": mspId,
+    "adminCertName": "admin_cert" + Math.floor(Math.random() * 1000),
+    "adminCertificate": user._signingIdentity._certificate,
+    "peer_names": Object.keys(client._network_config._network_config.peers),
+    "SKIP_CACHE": true
+  }
   if ( ! req.body.api_endpoint.includes('/api/v1')) {
     var api_endpoint = req.body.api_endpoint + '/api/v1'
   } else {
     var api_endpoint = req.body.api_endpoint
   }
+  var options = {
+      url: api_endpoint + '/networks/' + req.body.network_id + '/certificates',
+      method: 'POST',
+      headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Accept-Charset': 'utf-8',
+          "Authorization": "Basic " + new Buffer(req.body.key + ":" + req.body.secret, "utf8").toString("base64")
+      },
+      body: uploadAdminCertReq
+  }
+  // console.log(options)
+  console.log("uploading admin cert")
+  request(options, function(err, res, body) {
+    console.log("res")
+    console.log(res)
+    if (err) {
+      console.log(err)
+    }
+  })
+}
+
+function enrollUser (username, client, networkId, client_crypto_suite, req, res) {
+  console.log("Monitoring Client User doesn't exist. Loading CA client to enroll")
+  var org = Object.keys(client._network_config._network_config.organizations)[0]
+  // console.log("loading org")
+  // console.log(org)
+  var certificateAuthorities = client._network_config._network_config.certificateAuthorities
+  var certificateAuthorityName = Object.keys(certificateAuthorities)[0]
+  var certificateAuthObj = certificateAuthorities[certificateAuthorityName]
+  var registrar = client._network_config._network_config.certificateAuthorities[certificateAuthorityName].registrar[0]
+  var mspId = client._network_config._network_config.organizations[org]['mspid']
+
+  var ca = new CAClient(certificateAuthObj.url, {
+    trustedRoots: [],
+    verify: false
+  }, certificateAuthObj.caName, client_crypto_suite)
+  enrollment = ca.enroll({
+    enrollmentID: registrar.enrollId,
+    enrollmentSecret: registrar.enrollSecret
+  }).then( (result) => {
+    console.log("Enrolling client")
+    // user = new User('admin', config );
+    return client.createUser({
+      username: username,
+      mspid: mspId,
+      cryptoContent: {
+        privateKeyPEM: result.key.toBytes(),
+        signedCertPEM: result.certificate
+      }
+    })
+  }).then((user) => {
+    client.setUserContext(user).then( () => {
+      console.log(username + " enrolled. Upload following certificate via blockchain UI: \n " + certificateAuthObj.url + "/network/" + networkId + "/members/certificates")
+      console.log(user._signingIdentity._certificate + '\n')
+      res.send("Upload this certificate \n" + user._signingIdentity._certificate )
+      // uploadAdminCert(req, mspId)
+    })
+  }).catch((err) => {
+    console.error('Failed to enroll and persist admin. Error: ' + err.stack ? err.stack : err);
+    throw new Error('Failed to enroll admin');
+  });
+}
+
+// TODO, let user switch between local deployment and starter plan deployment
+// if (fs.existsSync('./connection_profile.json')) {
+//   initializeClient(null)
+// }
+// var client
+function requestConnectionProfile(req, res) {
+  console.log("requesting connection profile")
+  if ( ! req.body.api_endpoint.includes('/api/v1')) {
+    var api_endpoint = req.body.api_endpoint + '/api/v1'
+  } else {
+    var api_endpoint = req.body.api_endpoint
+  }
+  // initializeClient()
   // console.log(req.body)
   var options = {
       url: api_endpoint + '/networks/' + req.body.network_id + '/connection_profile',
@@ -43,8 +125,6 @@ function requestConnectionProfile(req, res) {
       let json = JSON.parse(body);
       console.log("body")
       console.log(body)
-      console.log("connection profile request error")
-      console.log(err)
       if (err) {
         console.log("Error fetching connection profile")
         res.send(err)
@@ -54,131 +134,229 @@ function requestConnectionProfile(req, res) {
           console.log(err)
           console.log(err)
         }
+        // initializeClient()
       })
-      return json
+      // return json
       // return hfc.loadFromConfig(json)
   })
+  // TODO, remove this after testing
 }
 
-function enrollUser (username, client, url, networkId) {
-  console.log("Monitoring Client User doesn't exist. Loading CA client to enroll")
-  var registrar = client._network_config._network_config.certificateAuthorities[certificateAuthorityName].registrar[0]
-  var ca = new CAClient(certificateAuthObj.url, {
-    trustedRoots: [],
-    verify: false
-  }, certificateAuthObj.caName, crypto_suite)
-  enrollment = ca.enroll({
-    enrollmentID: registrar.enrollId,
-    enrollmentSecret: registrar.enrollSecret
-  }).then( (result) => {
-    console.log("Enrolling client")
-    // user = new User('admin', config );
-    return client.createUser({
-      username: username,
-      mspid: mspId,
-      cryptoContent: {
-        privateKeyPEM: result.key.toBytes(),
-        signedCertPEM: result.certificate
-      }
-    })
-  }).then((user) => {
-    //user.setEnrollment(res.key, res.certificate, 'org2')
-    //user.setRoles('admin')
-    // client.setUserContext(user)
-    client.setUserContext(user)
-    console.log(username + " enrolled. Please upload following certificate via blockchain UI: \n " + certificateAuthObj.url + "/network/" + networkId + "/members/certificates")
-    console.log(user._signingIdentity._certificate + '\n')
-    // res.send("User created. Please upload following certificate via blockchain UI: " + user._signingIdentity._certificate)
-
-    //return user
-  }).catch((err) => {
-    console.error('Failed to enroll and persist admin. Error: ' + err.stack ? err.stack : err);
-    throw new Error('Failed to enroll admin');
-  });
+function loadConnectionProfile() {
+  if (fs.existsSync('./connection_profile.json')) {
+    console.log("Local connection profile loading")
+    client = hfc.loadFromConfig('./connection_profile.json')
+  }
 }
 
-router.post('/init_hfc_client', function (req, res) {
-    console.log("request received to initialize client")
-    console.log(req.body.api_endpoint)
-    console.log(req.body)
-    // command =  command_prefix + '\'{"Args":["process_payment", "asset1", "3000"]}\' -C myc'
-    // exec(command)
-    if (fs.existsSync('./connection_profile.json')) {
-      console.log("Local connection profile loading")
-      client = hfc.loadFromConfig('./connection_profile.json')
-    } else {
-      console.log("Request connection profile")
-
-      var response = requestConnectionProfile( req, res )
-      client = hfc.loadFromConfig(response)
-    }
-    console.log(client)
+function initializeClient(res, req) {
+  console.log("Initializing HFC client")
+  if (fs.existsSync('./connection_profile.json')) {
+    console.log("Local connection profile loading")
+    client = hfc.loadFromConfig('./connection_profile.json')
     org = Object.keys(client._network_config._network_config.organizations)[0]
     // console.log("loading org")
     // console.log(org)
     certificateAuthorities = client._network_config._network_config.certificateAuthorities
     certificateAuthorityName = Object.keys(certificateAuthorities)[0]
     certificateAuthObj = certificateAuthorities[certificateAuthorityName]
-    mspId = client._network_config._network_config.organizations[org]['mspid']
-    storePath = './'
-    client_crypto_suite = hfc.newCryptoSuite()
-    crypto_store = hfc.newCryptoKeyStore({path: storePath})
-    crypto_suite = hfc.newCryptoSuite()
-    crypto_suite.setCryptoKeyStore(crypto_store)
-    username = "monitoring_admin"
-    // var crypto_store = hfc.newCryptoKeyStore({path: storePath})
+    var mspId = client._network_config._network_config.organizations[org]['mspid']
+    var storePath = './'
+    var client_crypto_suite = hfc.newCryptoSuite()
+    var crypto_store = hfc.newCryptoKeyStore({path: storePath})
+    var crypto_suite = hfc.newCryptoSuite()
+    console.log(client)
+    console.log(org)
+    // console.log(crypto_suite)
     // crypto_suite.setCryptoKeyStore(crypto_store)
-    client.setCryptoSuite(crypto_suite)
-    // config.setCryptoSuite(client_crypto_suite);
+    // client.setCryptoSuite(crypto_suite)
+    var username = "monitoring_admin"
 
-    hfc.newDefaultKeyValueStore({path: storePath}).then( (store) => {
-      client.setStateStore(store)
-    }).then( (result) => {
-      client.getUserContext(username, true).then ( (user) => {
-      // res.send("Client Initialized")
-      console.log("Client Initialized")
-      if (user && user.isEnrolled()) {
-        console.log("Client Loaded From Persistence")
-        res.send("Client Loaded From Persistence")
-        console.log("Be sure to upload following cert via blockchain UI: \n" + req.body.urlRestRoot + "/network/" + req.body.networkId + "/members/certificates")
-        console.log(user._signingIdentity._certificate + '\n')
-        // TODO, render this certificate in UI, and only when admin calls fail
-      } else {
-        console.log("Monitoring Client User doesn't exist. Loading CA client to enroll")
-        enrollUser(username, client, req.body.urlRestRoot, req.body.networkId)
-        // client.setUserContext(user)
-        // console.log("Monitoring Client User doesn't exist. Loading CA client to enroll")
-        // var ca = new CAClient(certificateAuthObj.url, {
-        //   trustedRoots: [],
-        //   verify: false
-        // }, certificateAuthObj.caName, crypto_suite)
-        // enrollment = ca.enroll({
-        //   enrollmentID: registrar.enrollId,
-        //   enrollmentSecret: registrar.enrollSecret
-        // }).then( (result) => {
-        //   console.log("Enrolling client")
-        //   // user = new User('admin', config );
-        //   return config.createUser({
-        //     username: 'monitoring_admin',
-        //     mspid: mspId,
-        //     cryptoContent: { privateKeyPEM: result.key.toBytes(), signedCertPEM: result.certificate }
-        //   })
-        // }).then((user) => {
-        //   //user.setEnrollment(res.key, res.certificate, 'org2')
-        //   //user.setRoles('admin')
-        //   config.setUserContext(user)
-        //   console.log("\"monitoring_admin\" user created. Please upload following certificate via blockchain UI: \n " + req.body.urlRestRoot + "/network/" + req.body.networkId + "/members/certificates")
-        //   console.log(user._signingIdentity._certificate + '\n')
-        //   res.send("User created. Please upload following certificate via blockchain UI: " + user._signingIdentity._certificate)
-        //
-        //   //return user
-        // }).catch((err) => {
-        //   console.error('Failed to enroll and persist admin. Error: ' + err.stack ? err.stack : err);
-        //   throw new Error('Failed to enroll admin');
-        //   });
-        }
-      })
+    async.series([
+      function(callback) {
+        console.log("set CryptoKeyStore")
+        crypto_suite.setCryptoKeyStore(crypto_store)
+        // client.setCryptoSuite(crypto_suite)
+        callback()
+      },
+      function(callback) {
+        console.log("set CryptoSuite")
+        client.setCryptoSuite(crypto_suite)
+        callback()
+      },
+      function(callback) {
+          hfc.newDefaultKeyValueStore({path: storePath}).then( (store) => {
+            console.log("Set default keystore")
+            client.setStateStore(store)
+            callback()
+          })
+      },
+      function(callback) {
+        client.getUserContext(username, true).then ( (user) => {
+        // res.send("Client Initialized")
+        console.log("Loading user context")
+        if (user && user.isEnrolled()) {
+            console.log("Client Loaded From Persistence")
+            // res.send("Client Loaded From Persistence")
+            console.log("Be sure to upload following cert via blockchain UI: \n") //+ req.body.urlRestRoot + "/network/" + req.body.networkId + "/members/certificates")
+            console.log(user._signingIdentity._certificate + '\n')
+            callback()
+          // TODO, render this certificate in UI, and only when admin calls fail
+          } else {
+            enrollUser(username, client, client._network_config._network_config['x-networkId'], client_crypto_suite, req)
+              callback()
+            }
+        })
+      },
+      function(callback) {
+        console.log("Loading user context")
+        peer = client.getPeersForOrgOnChannel()[0]._name
+        channel = client.getChannel()
+        client.queryInstalledChaincodes(peer, true).then( (response) => {
+          console.log(response)
+          chaincodes = response
+        }).then ( (result) =>  {
+          // sec_chaincode = _.where( chaincodes.chaincodes, {name: 'sec', version: 'v7'} )[0]
+          sec_chaincode = _.where( chaincodes.chaincodes, {name: req.body.chaincode_id, version: req.body.chaincode_version} )[0]
+          console.log(chaincodes)
+          res.sendStatus(200)
+        }).catch(
+          console.log("Error loading chaincode, please confirm admin cert has been uploaded and chaincode id/version is correct")
+        );
+      }
+    }],
+    function(err) {
+      console.log(err)
     })
+    // .then( () => {
+    //   console.log("setCryptoKeyStore ")
+    //   username = "monitoring_admin"
+    //   // var crypto_store = hfc.newCryptoKeyStore({path: storePath})
+    //   // crypto_suite.setCryptoKeyStore(crypto_store)
+    //   client.setCryptoSuite(crypto_suite)
+    // }).catch( (err) => {
+    //     console.log("failed to set crypto_store")
+    //     console.log(err)
+    // })
+    // // config.setCryptoSuite(client_crypto_suite);
+    // // if (typeof(client) !== 'undefined') {
+    // setTimeout( function () {
+    //   console.log("Waiting")
+    //
+    //   hfc.newDefaultKeyValueStore({path: storePath}).then( (store) => {
+    //       console.log("Set default keystore")
+    //
+    //       client.setStateStore(store).then(() => {
+    //         client.getUserContext(username, true).then ( (user) => {
+    //         // res.send("Client Initialized")
+    //         console.log("Client Initialized")
+    //         if (user && user.isEnrolled()) {
+    //           console.log("Client Loaded From Persistence")
+    //           // res.send("Client Loaded From Persistence")
+    //           console.log("Be sure to upload following cert via blockchain UI: \n" + req.body.urlRestRoot + "/network/" + req.body.networkId + "/members/certificates")
+    //           console.log(user._signingIdentity._certificate + '\n')
+    //           // TODO, render this certificate in UI, and only when admin calls fail
+    //         } else {
+    //           console.log("Monitoring Client User doesn't exist. Loading CA client to enroll")
+    //           enrollUser(username, client, req.body.urlRestRoot, req.body.networkId)
+    //           }
+    //         })
+    //       })
+    //     })
+    // }, 3000)
+    console.log("end of init_client")
+    // }
+  }
+  else {
+    console.log("connection profile doesn't exist, exiting")
+    return
+  }
+}
+
+// if (typeof(client) !== 'undefined') {
+//   console.log("client loaded")
+//   org = Object.keys(client._network_config._network_config.organizations)[0]
+//   // console.log("loading org")
+//   // console.log(org)
+//   certificateAuthorities = client._network_config._network_config.certificateAuthorities
+//   certificateAuthorityName = Object.keys(certificateAuthorities)[0]
+//   certificateAuthObj = certificateAuthorities[certificateAuthorityName]
+//   mspId = client._network_config._network_config.organizations[org]['mspid']
+//   storePath = './'
+//   client_crypto_suite = hfc.newCryptoSuite()
+//   crypto_store = hfc.newCryptoKeyStore({path: storePath})
+//   crypto_suite = hfc.newCryptoSuite()
+//   crypto_suite.setCryptoKeyStore(crypto_store)
+//   username = "monitoring_admin"
+//   // var crypto_store = hfc.newCryptoKeyStore({path: storePath})
+//   // crypto_suite.setCryptoKeyStore(crypto_store)
+//   client.setCryptoSuite(crypto_suite)
+//   hfc.newDefaultKeyValueStore({path: storePath}).then( (store) => {
+//     client.setStateStore(store)
+//   }).then( (result) => {
+//     client.getUserContext(username, true).then ( (user) => {
+//     // res.send("Client Initialized")
+//     console.log("Client Initialized")
+//     if (user && user.isEnrolled()) {
+//       console.log("Client Loaded From Persistence")
+//       // res.send("Client Loaded From Persistence")
+//       console.log("Be sure to upload following cert via blockchain UI: \n" )
+//       console.log(user._signingIdentity._certificate + '\n')
+//       peer = client.getPeersForOrgOnChannel()[0]._name
+//       channel = client.getChannel()
+//       client.queryInstalledChaincodes(peer, true).then( (response) => {
+//         console.log(response)
+//         chaincodes = response
+//       }).then ( (result) =>  {
+//         sec_chaincode = _.where( chaincodes.chaincodes, {name: 'sec', version: 'v6'} )[0]
+//         console.log(chaincodes)
+//         // res.sendStatus(200)
+//       })
+//     }
+//   })
+// })
+// }
+
+router.post('/init_hfc_client', function (req, res) {
+    console.log("request received to initialize client")
+    // command =  command_prefix + '\'{"Args":["process_payment", "asset1", "3000"]}\' -C myc'
+    // exec(command)
+    if (fs.existsSync('./connection_profile.json')) {
+      console.log("Loading connection profile from local file")
+      // var username = "monitoring_admin"
+      // client = hfc.loadFromConfig('./connection_profile.json')
+      initializeClient(res, req)
+    } else {
+      console.log("Requesting connection profile")
+      // key = req.body.key
+      // secret = req.body.secret
+      // network_id = req.body.networkId
+
+      async.series([
+        function(callback) {
+          console.log("get connection_profile")
+          requestConnectionProfile( req, res )
+          callback()
+        },
+        function(callback) {
+          initializeClient(res, req)
+          callback()
+        }
+      ],
+      function(err) {
+        console.log(err)
+      })
+
+
+      var response = requestConnectionProfile( req, res )
+      console.log("response")
+      console.log("====")
+      console.log(response)
+      console.log("====")
+
+      // client = hfc.loadFromConfig(response)
+    }
+    console.log(client)
     console.log(req)
     res.send(200)
 });
@@ -189,8 +367,6 @@ router.post('/chaincode', function (req, res) {
   console.log("chaincode request received")
   console.log("req.body")
   console.log(req.body)
-
-
   var chaincode = req.body.params.ctorMsg
   console.log(chaincode.function)
   console.log(chaincode.args)
@@ -206,9 +382,10 @@ router.post('/chaincode', function (req, res) {
         console.log("req")
         // console.log(req)
         console.log(req.body)
-        if (req.body.method && req.body.method === 'invoke') {
+        console.log("req.body.method")
+        console.log(req.body.method)
+        if (req.body.method && req.body.method.includes('invoke') ) {
           console.log("invoking request")
-
           var transaction_id = client.newTransactionID(true)
           var txRequest = {
             chaincodeId: sec_chaincode.name, //chaincode.name,
@@ -217,6 +394,7 @@ router.post('/chaincode', function (req, res) {
             fcn: req.body.params.ctorMsg.function, // TODO, uncomment this
             args: req.body.params.ctorMsg.args
           }
+          console.log(txRequest)
           proposeTransaction(txRequest)
           // if ( proposeTransaction(txRequest)) {
           //   submitTransaction(txRequest)
@@ -225,6 +403,8 @@ router.post('/chaincode', function (req, res) {
           // }
       } else { // query
           console.log("query chaincode with hfc client")
+          console.log("req.body.method")
+          console.log(req.body.method)
           // console.log(sec_chaincode)
           // var assetId = JSON.parse(req.body.params.ctorMsg.args).assetID
           var txRequest = {
@@ -234,15 +414,16 @@ router.post('/chaincode', function (req, res) {
             fcn: req.body.params.ctorMsg.function,
             args: req.body.params.ctorMsg.args
           }
+          console.log("txRequest")
           console.log(txRequest)
           channel.queryByChaincode(txRequest).then( (cc_response) => {
             console.log("cc query response received")
             console.log(cc_response[0].toString())
-            // res.send( cc_response[0].toString() )
+            res.send( cc_response[0].toString() )
           }).catch ( (err) => {
             console.log("cc query failed")
             console.log(err)
-            // res.send(err)
+            res.send(err)
           })
       }
   } else {
@@ -281,7 +462,7 @@ router.post('/getchaincodes', function (req, res) {
     console.log(response)
     chaincodes = response
   }).then ( (result) =>  {
-    sec_chaincode = _.where( chaincodes.chaincodes, {name: 'sec', version: 'v2'} )[0]
+    sec_chaincode = _.where( chaincodes.chaincodes, {name: 'sec', version: 'v7'} )[0]
     console.log(chaincodes)
     res.sendStatus(200)
   });

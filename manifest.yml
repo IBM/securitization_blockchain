@@ -1,8 +1,8 @@
 applications:
 - name: blockchain-securitization-${random-word}
-  path: .
+  path: sc-ui
   timeout: 180
-  command: npm start
+  command: npm start | PORT=3001 node react-backend/bin/www
   #port: 8081
   memory: 512M
   engines:

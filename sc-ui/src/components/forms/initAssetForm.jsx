@@ -16,8 +16,8 @@ class InitAssetForm extends React.Component {
       interestrate: '',
       balance: '',
       // monthlypayment: '',
-      remainingpayments: '',
-      underwriting: ''
+      remainingpayments: ''
+      // underwriting: ''
     };
 
     // this.handleChange = this.handleChange.bind(this);
@@ -73,7 +73,7 @@ class InitAssetForm extends React.Component {
           ctorMsg: {
             function: "init_asset",
             // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
-            args: [this.state.id, this.state.balance, String(parseFloat(this.state.interestrate) * 0.01) , this.state.remainingpayments, this.state.underwriting]
+            args: [this.state.id, this.state.balance, String(parseFloat(this.state.interestrate) * 0.01) , this.state.remainingpayments]
             //args: Object.values(this.state)
           }
         }
@@ -81,36 +81,38 @@ class InitAssetForm extends React.Component {
     }
     console.log("initializing asset")
     console.log(Date.now())
-    fetch('http://localhost:3001/chaincode', config).then ( () =>
-    {
-      refreshState()
-      setTimeout( () => {
-        {
-          var config_value = {
-            method: 'POST',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-              //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
-            },
-            body: JSON.stringify({
-              method: "invoke",
-              params: {
-                ctorMsg: {
-                  function: 'value_asset',
-                  // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
-                  args: [this.state.id]
-                  //args: Object.values(this.state)
-                }
-              }
-            })
-          }
-          console.log(Date.now())
-          console.log("value asset")
-          fetch('http://localhost:3001/chaincode', config_value)
-        }
-      }, 10000)
+    fetch('http://localhost:3001/chaincode', config).then ( () => {
+      refreshState(2)
     })
+
+      // setTimeout( () => {
+      //     refreshState()
+    //     {
+    //       var config_value = {
+    //         method: 'POST',
+    //         headers: {
+    //           'Accept': 'application/json',
+    //           'Content-Type': 'application/json',
+    //           //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
+    //         },
+    //         body: JSON.stringify({
+    //           method: "invoke",
+    //           params: {
+    //             ctorMsg: {
+    //               function: 'value_asset',
+    //               // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
+    //               args: [this.state.id]
+    //               //args: Object.values(this.state)
+    //             }
+    //           }
+    //         })
+    //       }
+    //       console.log(Date.now())
+    //       console.log("value asset")
+    //       fetch('http://localhost:3001/chaincode', config_value)
+    //     }
+      // }, 3000)
+    // })
     this.setState({ open: false });
     // event.preventDefault();
   }
@@ -212,7 +214,6 @@ class InitAssetForm extends React.Component {
               onChange={this.handleChange('monthlypayment')}
               fullWidth
             />
-            */}
             <TextField
               autoFocus
               margin="dense"
@@ -221,7 +222,7 @@ class InitAssetForm extends React.Component {
               onChange={this.handleChange('underwriting')}
               fullWidth
             />
-
+            */}
           </DialogContent>
           <DialogActions>
             <Button onClick={this.handleClose} color="primary">

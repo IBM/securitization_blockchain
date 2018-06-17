@@ -69,7 +69,9 @@ class BuySecurityForm extends React.Component {
         })
       }
       console.log(config.body)
-      fetch('http://localhost:3001/chaincode', config)
+      fetch('http://localhost:3001/chaincode', config).then( () => {
+        refreshState(2)
+      })
     // event.preventDefault();
     // event.preventDefault()
       this.setState({ open: false });

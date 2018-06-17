@@ -6,6 +6,8 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import refreshState from '../helpers/refreshState.js'
+
 class PoolAsset extends React.Component {
   constructor(props) {
     super(props);
@@ -37,7 +39,6 @@ class PoolAsset extends React.Component {
   handleSubmit = () =>  {
     // console.log("event")
     // console.log(event)
-    console.log('transferring asset: ' + JSON.stringify(this.state));
     let config = {
       method: 'POST',
       headers: {
@@ -56,9 +57,13 @@ class PoolAsset extends React.Component {
         }
       })
     }
-    console.log(config.body)
-    fetch('http://localhost:3001/chaincode', config).then ( () =>
+    // console.log(config.body)
+    console.log('transferring asset to pool: ')
+    fetch('http://localhost:3001/chaincode', config).then ( () =>  {
+       //+ JSON.stringify(this.state));
+      console.log("submitted request to pool asset")
       setTimeout( () => {
+        console.log("getting values of pool")
         {
           var config_value = {
             method: 'POST',
@@ -81,9 +86,14 @@ class PoolAsset extends React.Component {
           }
           console.log(Date.now())
           console.log("value pool")
-          fetch('http://localhost:3001/chaincode', config_value)
+          fetch('http://localhost:3001/chaincode', config_value).then( () => {
+            console.log("getting values of pool")
+            refreshState()
+          })
         }
-      }, 5000)
+      }, 3000)
+    }).catch(
+      console.log("pool asset request failed")
     )
     // event.preventDefault();
   }

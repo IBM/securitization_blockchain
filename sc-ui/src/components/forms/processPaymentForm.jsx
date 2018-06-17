@@ -50,7 +50,7 @@ class ProcessPaymentForm extends React.Component {
     // console.log("event")
     // console.log(event)
     this.setState({ open: false });
-
+    var asset_id = this.state.id
     console.log('processing payment for asset: ' + JSON.stringify(this.state));
     let config = {
       method: 'POST',
@@ -71,7 +71,8 @@ class ProcessPaymentForm extends React.Component {
       })
     }
     console.log(config.body)
-    fetch('http://localhost:3001/chaincode', config).then ( () =>
+    fetch('http://localhost:3001/chaincode', config).then ( () => {
+      refreshState(1)
       setTimeout( () => {
         {
           var config_value = {
@@ -87,18 +88,21 @@ class ProcessPaymentForm extends React.Component {
                 ctorMsg: {
                   function: 'value_asset_pool',
                   // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
-                  args: [this.state.id]
+                  args: [asset_id]
                   //args: Object.values(this.state)
                 }
               }
             })
           }
           console.log(Date.now())
-          console.log("value pool")
-          fetch('http://localhost:3001/chaincode', config_value)
-
+          console.log("value body")
+          console.log(config_value)
+          fetch('http://localhost:3001/chaincode', config_value).then( () => {
+            refreshState(2)
+          })
         }
-      }, 5000))
+      }, 3000)
+    })
 
 
     // event.preventDefault();

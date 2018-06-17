@@ -17,6 +17,7 @@
     "fabric-client": "1.2.0-snapshot",
     "cors": "2.8.4",
     "grpc": "1.11.0",
-    "nopt": "^4.0.1"
+    "nopt": "^4.0.1",
+    "async": "2.6.1"
   }
 }
