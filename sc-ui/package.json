@@ -12,9 +12,13 @@
     "yarn": "^1.7.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "react-scripts start | PORT=3001 node react-backend/bin/www",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "engines": {
+    "node": "8.11.3",
+    "npm": "5.5.1"
   }
 }

@@ -1,0 +1,10 @@
+applications:
+- name: securitization-blockchain #${random-word}
+  path: .
+  timeout: 180
+  command: npm start
+  port: 3000
+  memory: 512M
+  engines:
+    node: 8.9.0
+  buildpack: https://github.com/cloudfoundry/nodejs-buildpack
