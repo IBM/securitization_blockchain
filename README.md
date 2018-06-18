@@ -365,6 +365,18 @@ The credentials will need to be entered in the configuration form, which can be 
 
 After submitting this form, the UI will fetch a "connection profile" json file, which contains all information needed by our hyperledger client to connect to the blockchain.
 
+Once the connection profile has been retrieved, a certificate will be generated to allow the application to make administrative requests. These elevated privileges are required to make calls to the chaincode service. This PEM encoded certificate will be output in the terminal logs like so.
+
+<p align="center">
+<img src="https://i.imgur.com/Z6WmX59.png" width="600" height="450" style="margin-left: auto; margin-right: auto;">
+</p>
+
+Once the PEM certificate is generated, it can be copied and uploaded by visiting the printed url, or by revisiting the Blockchain Monitor, navigating to Members on the left hand menu, and then clicking "Certificates" and "Add Certificate"
+<p align="center">
+<img src="https://i.imgur.com/kx654rE.png" width="600" height="450" style="margin-left: auto; margin-right: auto;">
+</p>
+
+
 <!-- These credentials will need to be provided to the UI in the next step -->
 
 <!-- We can obtain the Blockchain credentials by downloading
@@ -481,6 +493,9 @@ Once these calculations are complete, the dashboard tables will then be updated 
 * `Error: The gRPC binary module was not installed. This may be fixed by running "npm rebuild"`
 > `grpc` is a requirement for the fabric-client SDK. Confirm that it has been installed in the `react_backend` directory with `npm install grpc@1.11.0`
 
+* `error: [client-utils.js]: sendPeersProposal - Promise is rejected: Error: 2 UNKNOWN: chaincode error (status: 500, message: Authorization for GETINSTALLEDCHAINCODES on channel getinstalledchaincodes has been denied with error Failed verifying that proposal's creator satisfies local MSP principal during channelless check policy with policy [Admins]: [This identity is not an admin])
+`
+> This error occurs if the hosted IBM Blockchain service has not been deployed
 <!-- * Error: Environment {GUID} is still not active, retry once status is active
 
   > This is common during the first run. The app tries to start before the Discovery

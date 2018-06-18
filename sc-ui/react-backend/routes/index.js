@@ -54,45 +54,48 @@ function uploadAdminCert(req, mspId) {
 }
 
 function enrollUser (username, client, networkId, client_crypto_suite, req, res) {
-  console.log("Monitoring Client User doesn't exist. Loading CA client to enroll")
-  var org = Object.keys(client._network_config._network_config.organizations)[0]
-  // console.log("loading org")
-  // console.log(org)
-  var certificateAuthorities = client._network_config._network_config.certificateAuthorities
-  var certificateAuthorityName = Object.keys(certificateAuthorities)[0]
-  var certificateAuthObj = certificateAuthorities[certificateAuthorityName]
-  var registrar = client._network_config._network_config.certificateAuthorities[certificateAuthorityName].registrar[0]
-  var mspId = client._network_config._network_config.organizations[org]['mspid']
-
-  var ca = new CAClient(certificateAuthObj.url, {
-    trustedRoots: [],
-    verify: false
-  }, certificateAuthObj.caName, client_crypto_suite)
-  enrollment = ca.enroll({
-    enrollmentID: registrar.enrollId,
-    enrollmentSecret: registrar.enrollSecret
-  }).then( (result) => {
-    console.log("Enrolling client")
-    // user = new User('admin', config );
-    return client.createUser({
-      username: username,
-      mspid: mspId,
-      cryptoContent: {
-        privateKeyPEM: result.key.toBytes(),
-        signedCertPEM: result.certificate
-      }
-    })
-  }).then((user) => {
-    client.setUserContext(user).then( () => {
-      console.log(username + " enrolled. Upload following certificate via blockchain UI: \n " + certificateAuthObj.url + "/network/" + networkId + "/members/certificates")
-      console.log(user._signingIdentity._certificate + '\n')
-      res.send("Upload this certificate \n" + user._signingIdentity._certificate )
-      // uploadAdminCert(req, mspId)
-    })
-  }).catch((err) => {
-    console.error('Failed to enroll and persist admin. Error: ' + err.stack ? err.stack : err);
-    throw new Error('Failed to enroll admin');
-  });
+  return new Promise((resolve, reject) => {
+    console.log("Monitoring Client User doesn't exist. Loading CA client to enroll")
+    var org = Object.keys(client._network_config._network_config.organizations)[0]
+    // console.log("loading org")
+    // console.log(org)
+    var certificateAuthorities = client._network_config._network_config.certificateAuthorities
+    var certificateAuthorityName = Object.keys(certificateAuthorities)[0]
+    var certificateAuthObj = certificateAuthorities[certificateAuthorityName]
+    var registrar = client._network_config._network_config.certificateAuthorities[certificateAuthorityName].registrar[0]
+    var mspId = client._network_config._network_config.organizations[org]['mspid']
+    var ca = new CAClient(certificateAuthObj.url, {
+      trustedRoots: [],
+      verify: false
+    }, certificateAuthObj.caName, client_crypto_suite)
+    enrollment = ca.enroll({
+      enrollmentID: registrar.enrollId,
+      enrollmentSecret: registrar.enrollSecret
+    }).then( (result) => {
+      console.log("Enrolling client")
+      // user = new User('admin', config );
+      return client.createUser({
+        username: username,
+        mspid: mspId,
+        cryptoContent: {
+          privateKeyPEM: result.key.toBytes(),
+          signedCertPEM: result.certificate
+        }
+      })
+    }).then((user) => {
+      client.setUserContext(user).then( () => {
+        console.log(username + " enrolled. Upload following certificate via blockchain UI: \n " + 'https://ibmblockchain-starter.ng.bluemix.net' + "/network/" + networkId + "/members/certificates")
+        console.log(user._signingIdentity._certificate + '\n')
+        resolve()
+        // res.send("Upload this certificate \n" + user._signingIdentity._certificate )
+        // uploadAdminCert(req, mspId)
+      })
+    }).catch((err) => {
+      reject()
+      console.error('Failed to enroll and persist admin. Error: ' + err.stack ? err.stack : err);
+      throw new Error('Failed to enroll admin');
+    });
+  })
 }
 
 // TODO, let user switch between local deployment and starter plan deployment
@@ -101,43 +104,49 @@ function enrollUser (username, client, networkId, client_crypto_suite, req, res)
 // }
 // var client
 function requestConnectionProfile(req, res) {
-  console.log("requesting connection profile")
-  if ( ! req.body.api_endpoint.includes('/api/v1')) {
-    var api_endpoint = req.body.api_endpoint + '/api/v1'
-  } else {
-    var api_endpoint = req.body.api_endpoint
-  }
-  // initializeClient()
-  // console.log(req.body)
-  var options = {
-      url: api_endpoint + '/networks/' + req.body.network_id + '/connection_profile',
-      // uri: api_endpoint + '/networks/' + req.body.network_id + '/connection_profile',
-      method: 'GET',
-      headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Accept-Charset': 'utf-8',
-          "Authorization": "Basic " + new Buffer(req.body.key + ":" + req.body.secret, "utf8").toString("base64")
-      }
-  }
-  console.log(options)
-  request(options, function(err, res, body) {
-      let json = JSON.parse(body);
-      console.log("body")
-      console.log(body)
-      if (err) {
-        console.log("Error fetching connection profile")
-        res.send(err)
-      }
-      fs.writeFile('./connection_profile.json', body, 'utf8', function(err){
-        if (err) {
-          console.log(err)
-          console.log(err)
+  return new Promise((resolve, reject) => {
+    console.log("requesting connection profile")
+    if ( ! req.body.api_endpoint.includes('/api/v1')) {
+      var api_endpoint = req.body.api_endpoint + '/api/v1'
+    } else {
+      var api_endpoint = req.body.api_endpoint
+    }
+    // initializeClient()
+    // console.log(req.body)
+    var options = {
+        url: api_endpoint + '/networks/' + req.body.network_id + '/connection_profile',
+        // uri: api_endpoint + '/networks/' + req.body.network_id + '/connection_profile',
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Accept-Charset': 'utf-8',
+            "Authorization": "Basic " + new Buffer(req.body.key + ":" + req.body.secret, "utf8").toString("base64")
         }
-        // initializeClient()
-      })
-      // return json
-      // return hfc.loadFromConfig(json)
+    }
+    console.log(options)
+    request(options, function(err, res, body) {
+        let json = JSON.parse(body);
+        console.log("body")
+        console.log(body)
+        if (err) {
+          // console.log("Error fetching connection profile")
+          reject("Error fetching connection profile")
+          // res.send(err)
+        }
+        fs.writeFile('./connection_profile.json', body, 'utf8', function(err){
+          if (err) {
+            console.log(err)
+            console.log(err)
+            reject("Error writing connection profile")
+          } else {
+            resolve()
+          }
+          // initializeClient()
+        })
+        // return json
+        // return hfc.loadFromConfig(json)
+    })
   })
   // TODO, remove this after testing
 }
@@ -149,7 +158,7 @@ function loadConnectionProfile() {
   }
 }
 
-function initializeClient(res, req) {
+function initializeClient(req, res) {
   console.log("Initializing HFC client")
   if (fs.existsSync('./connection_profile.json')) {
     console.log("Local connection profile loading")
@@ -200,31 +209,38 @@ function initializeClient(res, req) {
             // res.send("Client Loaded From Persistence")
             console.log("Be sure to upload following cert via blockchain UI: \n") //+ req.body.urlRestRoot + "/network/" + req.body.networkId + "/members/certificates")
             console.log(user._signingIdentity._certificate + '\n')
+            res.json({"msg": "Please upload following cert to IBM Blockchain UI", "certificate": user._signingIdentity._certificate}) //{msg: "Please upload following cert to IBM Blockchain UI", cert: user._signingIdentity._certificate})
             callback()
           // TODO, render this certificate in UI, and only when admin calls fail
           } else {
-            enrollUser(username, client, client._network_config._network_config['x-networkId'], client_crypto_suite, req)
-              callback()
+              enrollUser(username, client, client._network_config._network_config['x-networkId'], client_crypto_suite, req).then( () => {
+                callback()
+              })
             }
         })
       },
       function(callback) {
-        console.log("Loading user context")
+        console.log("Requesting Chaincode information")
         peer = client.getPeersForOrgOnChannel()[0]._name
         channel = client.getChannel()
-        client.queryInstalledChaincodes(peer, true).then( (response) => {
-          console.log(response)
-          chaincodes = response
-        }).then ( (result) =>  {
-          // sec_chaincode = _.where( chaincodes.chaincodes, {name: 'sec', version: 'v7'} )[0]
-          sec_chaincode = _.where( chaincodes.chaincodes, {name: req.body.chaincode_id, version: req.body.chaincode_version} )[0]
-          console.log(chaincodes)
-          res.sendStatus(200)
-        }).catch(
-          console.log("Error loading chaincode, please confirm admin cert has been uploaded and chaincode id/version is correct")
-        );
+        sec_chaincode = {
+          name: req.body.chaincode_id,
+          version: req.body.chaincode_version
+        }
+        console.log("chaincode info, channel, peers set")
+        // client.queryInstalledChaincodes(peer, true).then( (response) => {
+        //   console.log(response)
+        //   chaincodes = response
+        // }).then ( (result) =>  {
+        //   // sec_chaincode = _.where( chaincodes.chaincodes, {name: 'sec', version: 'v7'} )[0]
+        //   sec_chaincode = _.where( chaincodes.chaincodes, {name: req.body.chaincode_id, version: req.body.chaincode_version} )[0]
+        //   console.log(chaincodes)
+        //   // res.sendStatus(200)
+        // }).catch(
+        //   console.log("Error loading chaincode, please confirm admin cert has been uploaded and chaincode id/version is correct")
+        // );
       }
-    }],
+    ],
     function(err) {
       console.log(err)
     })
@@ -318,47 +334,46 @@ function initializeClient(res, req) {
 // }
 
 router.post('/init_hfc_client', function (req, res) {
-    console.log("request received to initialize client")
+    // console.log("request received to initialize client")
     // command =  command_prefix + '\'{"Args":["process_payment", "asset1", "3000"]}\' -C myc'
     // exec(command)
+
     if (fs.existsSync('./connection_profile.json')) {
       console.log("Loading connection profile from local file")
       // var username = "monitoring_admin"
       // client = hfc.loadFromConfig('./connection_profile.json')
-      initializeClient(res, req)
+      initializeClient(req, res)
     } else {
       console.log("Requesting connection profile")
       // key = req.body.key
       // secret = req.body.secret
       // network_id = req.body.networkId
-
-      async.series([
-        function(callback) {
-          console.log("get connection_profile")
-          requestConnectionProfile( req, res )
-          callback()
-        },
-        function(callback) {
-          initializeClient(res, req)
-          callback()
-        }
-      ],
-      function(err) {
-        console.log(err)
+      requestConnectionProfile(req, res).then( () => {
+        initializeClient(req, res)
       })
-
-
-      var response = requestConnectionProfile( req, res )
-      console.log("response")
-      console.log("====")
-      console.log(response)
-      console.log("====")
+      // async.series([
+      //   function(callback) {
+      //     console.log("get connection_profile")
+      //     requestConnectionProfile( req, res ).then( () =>
+      //      {
+      //        callback()
+      //      }
+      //     )
+      //   },
+      //   function(callback) {
+      //     initializeClient(req, res)
+      //     callback()
+      //   }
+      // ],
+      // function(err) {
+      //   console.log(err)
+      // })
 
       // client = hfc.loadFromConfig(response)
     }
-    console.log(client)
-    console.log(req)
-    res.send(200)
+    // console.log(client)
+    // console.log(req)
+    // res.send(200)
 });
 
 // command = 'docker exec cli peer chaincode invoke -n sec -c '{"Args":["read","asset1"]}' -C myc 2> docker.out ; cat docker.out | grep chaincodeInvokeOrQuery | grep -v ESCC | awk -F \'payload:\' \'{print $2}\''
@@ -405,7 +420,7 @@ router.post('/chaincode', function (req, res) {
           console.log("query chaincode with hfc client")
           console.log("req.body.method")
           console.log(req.body.method)
-          // console.log(sec_chaincode)
+          console.log(sec_chaincode)
           // var assetId = JSON.parse(req.body.params.ctorMsg.args).assetID
           var txRequest = {
             chaincodeId: sec_chaincode.name,
@@ -450,23 +465,23 @@ router.post('/chaincode', function (req, res) {
 
 
 
-var chaincodes, peer, channel, sec_chaincode
-router.post('/getchaincodes', function (req, res) {
-  console.log("in getchaincodes call")
-  client.getUserContext('admin', true)
-  // console.log(req)
-  // res.send('received chaincode call')
-  peer = client.getPeersForOrgOnChannel()[0]._name
-  channel = client.getChannel()
-  client.queryInstalledChaincodes(peer, true).then( (response) => {
-    console.log(response)
-    chaincodes = response
-  }).then ( (result) =>  {
-    sec_chaincode = _.where( chaincodes.chaincodes, {name: 'sec', version: 'v7'} )[0]
-    console.log(chaincodes)
-    res.sendStatus(200)
-  });
-});
+// var chaincodes, peer, channel, sec_chaincode
+// router.post('/getchaincodes', function (req, res) {
+//   console.log("in getchaincodes call")
+//   client.getUserContext('admin', true)
+//   // console.log(req)
+//   // res.send('received chaincode call')
+//   peer = client.getPeersForOrgOnChannel()[0]._name
+//   channel = client.getChannel()
+//   client.queryInstalledChaincodes(peer, true).then( (response) => {
+//     console.log(response)
+//     chaincodes = response
+//   }).then ( (result) =>  {
+//     sec_chaincode = _.where( chaincodes.chaincodes, {name: 'sec', version: 'v7'} )[0]
+//     console.log(chaincodes)
+//     res.sendStatus(200)
+//   });
+// });
 
 // function proposeTransaction(txRequest) {
 //   channel.sendTransactionProposal(txRequest).then ( (proposalRes) => {

@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom'
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -6,6 +7,8 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Modal from '@material-ui/core/Modal';
+import Typography from '@material-ui/core/Typography';
 
 class InitHFCForm extends React.Component {
   constructor(props) {
@@ -69,11 +72,19 @@ class InitHFCForm extends React.Component {
       },
       body: JSON.stringify(this.state)
     }
-    fetch('http://localhost:3001/init_hfc_client', config).then( () =>
-        setTimeout( () => {
-          fetch('http://localhost:3001/getchaincodes', config) // should wait for about 5 seconds for client to initialize
-        }, 10000)
-    )
+    fetch('http://localhost:3001/init_hfc_client', config).then( (response) => {
+        console.log(response.json().then(
+          (body) => {
+            console.log(body)
+            // const element = <h1>Hello, world</h1>
+            // const element =<Modal aria-labelledby="simple-modal-title" aria-describedby="simple-modal-description" open={this.state.open}></Modal>;
+            // ReactDOM.render(element, document.getElementById('root'));
+          }
+
+        ))
+        // body.msg
+        // body.certificate
+    })
     this.setState({ open: false });
     // event.preventDefault();
   }
@@ -124,6 +135,17 @@ class InitHFCForm extends React.Component {
     return (
       <div>
           <Button style={{'float':'right', 'padding':'15px'}} color="secondary" size="small" variant="contained" onClick={this.handleClickOpen}>Configure HF Client</Button>
+          {/*<Modal id="cert_modal" aria-labelledby="simple-modal-title" aria-describedby="simple-modal-description">
+            <div style={getModalStyle()} className={classes.paper}>
+               <Typography variant="title" id="modal-title">
+                 Text in a modal
+               </Typography>
+               <Typography variant="subheading" id="simple-modal-description">
+                 Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+               </Typography>
+               <SimpleModalWrapped />
+             </div>
+          </Modal>;*/}
           <Dialog
             open={this.state.open}
             onClose={this.handleClose}
