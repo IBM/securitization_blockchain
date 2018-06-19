@@ -84,7 +84,7 @@ function SimpleOriginatorTable(props) {
                 <TableCell>{n.processingfee * 100} %</TableCell>
                 <TableCell>{n.company}</TableCell>
                 <TableCell>{  n.assets ? n.assets.join(', ') : '' }</TableCell>
-                <TableCell>$ {n.balance}</TableCell>
+                <TableCell>$ {n.balance ? n.balance : "0.00" }</TableCell>
               </TableRow>
             );
           })}

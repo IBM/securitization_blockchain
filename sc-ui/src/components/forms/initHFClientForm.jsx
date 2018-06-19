@@ -64,16 +64,17 @@ class InitHFCForm extends React.Component {
     // console.log(event)
     console.log('creating hyperledger client: ' + JSON.stringify(this.state));
     var config = {
+      // mode: "cors",
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
+        'Content-Type': 'text/plain'
+        // 'Content-Type': 'application/json'
       },
       body: JSON.stringify(this.state)
     }
     fetch('http://localhost:3001/init_hfc_client', config).then( (response) => {
-        console.log(response.json().then(
+        response.json().then(
           (body) => {
             console.log(body)
             // const element = <h1>Hello, world</h1>
@@ -81,7 +82,7 @@ class InitHFCForm extends React.Component {
             // ReactDOM.render(element, document.getElementById('root'));
           }
 
-        ))
+        )
         // body.msg
         // body.certificate
     })

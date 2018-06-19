@@ -56,7 +56,7 @@ class ProcessPaymentForm extends React.Component {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
         //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
       },
       body: JSON.stringify({
@@ -79,7 +79,7 @@ class ProcessPaymentForm extends React.Component {
             method: 'POST',
             headers: {
               'Accept': 'application/json',
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/json'
               //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
             },
             body: JSON.stringify({

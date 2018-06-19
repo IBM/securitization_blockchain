@@ -40,10 +40,11 @@ class PoolAsset extends React.Component {
     // console.log("event")
     // console.log(event)
     let config = {
+      mode: "cors",
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
         //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
       },
       body: JSON.stringify({
@@ -62,14 +63,14 @@ class PoolAsset extends React.Component {
     fetch('http://localhost:3001/chaincode', config).then ( () =>  {
        //+ JSON.stringify(this.state));
       console.log("submitted request to pool asset")
-      setTimeout( () => {
+      // setTimeout( () => {
         console.log("getting values of pool")
         {
           var config_value = {
             method: 'POST',
             headers: {
               'Accept': 'application/json',
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/json'
               //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
             },
             body: JSON.stringify({
@@ -88,10 +89,10 @@ class PoolAsset extends React.Component {
           console.log("value pool")
           fetch('http://localhost:3001/chaincode', config_value).then( () => {
             console.log("getting values of pool")
-            refreshState()
+            refreshState(3)
           })
         }
-      }, 3000)
+      // }, 3000)
     }).catch(
       console.log("pool asset request failed")
     )

@@ -188,13 +188,15 @@ docker run -d -p 8081:8081 monitoring_ui
 
 ## 2. Deploy Application (**hosted**)
 
-1. To deploy the application to IBM Cloud, we'll need to leverage the IBM Cloud CLI. Ensure the cli is installed using the prerequisites section above, and then run the following command to deploy the application
+[![Deploy to IBM Cloud](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://github.com/IBM/securitization_blockchain.git&branch=master)
+
+1. We can deploy the application to IBM Cloud, by either leveraging the "Deploy to IBM Cloud" button directly above, or by using the IBM Cloud CLI. Ensure the cli is installed using the prerequisites section above, and then run the following command to deploy the application
 ```
 # Log in using IBM Cloud credentials
 bx login
 
 # Push application to IBM Cloud
-bx cf push
+bx cf push blockchain-securitization --random-route
 ```
 
 2. To see the app and services created and configured for this Code Pattern, use the IBM Cloud dashboard, or run `bx cf apps` and `bx cf services` in the terminal. The app should be named `securitization-blockchain` with a unique suffix.
@@ -368,9 +370,9 @@ The credentials will need to be entered in the configuration form, which can be 
 <img src="https://i.imgur.com/zsxkXHA.png" width="600" height="450" style="margin-left: auto; margin-right: auto;">
 </p>
 
-After submitting this form, the UI will fetch a "connection profile" json file, which contains all information needed by our hyperledger client to connect to the blockchain.
+After submitting this form, the UI will fetch a "connection profile" json file, which contains all information needed by our hyperledger client to connect to the blockchain ledger.
 
-Once the connection profile has been retrieved, a certificate will be generated to allow the application to make administrative requests. These elevated privileges are required to make calls to the chaincode service. This PEM encoded certificate will be output in the terminal logs like so.
+Once the connection profile has been retrieved, a certificate will be generated to allow the application to make administrative requests. These elevated privileges are required to make calls to the chaincode service. This PEM encoded certificate will be output in the terminal logs like so. If deploying on IBM Cloud, this terminal can be viewed by running `bx cf logs <app_name>`, or by opening the developer console in your browser  
 
 <p align="center">
 <img src="https://i.imgur.com/Z6WmX59.png" width="600" height="450" style="margin-left: auto; margin-right: auto;">
@@ -437,7 +439,7 @@ The securitization flow generally occurs in the following format
 
 5. Each payment is split up and distributed amongst investors who own "securities" associated with the pool. When all mortgages in the pool are paid off, each investor should have received their original investment back plus the agreed "Yield" amount. Each payment will also have a processing fee which will be dispersed to the originator
 
-This securitization process can be replicated with this application by visiting the dashboard and creating Originators, Assets, Pools, Securities, and Investors using the provided forms.
+This securitization process can be replicated with this application by visiting the dashboard and creating Originators, Assets, Pools, Securities, and Investors using the provided forms. Each form requests an unique id format with the name of the object type followed by an integer **asset1**, **pool123**, **security15**
 
 First, we'll need to create a loan "Originator", which will require an ID, Processing Fee (percentage), and (optional) Company Name. This form can be loaded by selecting the "Create Originator" button. (Note: There is a known intermittent issue with this Originator creation process, so the initial submission may fail. If this occurs, please try submitting again)
 

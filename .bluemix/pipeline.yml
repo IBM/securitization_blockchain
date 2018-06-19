@@ -1,0 +1,56 @@
+---
+stages:
+- name: Build
+  inputs:
+  - type: git
+    branch: master
+  triggers:
+  - type: commit
+  jobs:
+  - name: Build
+    type: builder
+    build_type: npm
+    script: |-
+      #!/bin/bash
+      pwd
+      # Set up required version of Node and NPM
+      # export NVM_DIR=/home/pipeline/nvm
+      # export NODE_VERSION=8.9.0
+      # export NVM_VERSION=5.5.1
+      #
+      # npm config delete prefix \
+      #   && curl https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | sh \
+      #   && . $NVM_DIR/nvm.sh \
+      #   && nvm install $NODE_VERSION \
+      #   && nvm alias default $NODE_VERSION \
+      #   && nvm use default \
+      #   && node -v \
+      #   && npm -v
+      #
+      # Install & Build
+      # npm install @angular/cli
+      # npm install
+      # npm run dist-prod
+- name: Deploy
+  inputs:
+  - type: job
+    stage: Build
+    job: Build
+  triggers:
+  - type: stage
+  jobs:
+  - name: Deploy
+    type: deployer
+    target:
+      url: https://api.ng.bluemix.net
+      organization: ${CF_ORGANIZATION}
+      space: ${CF_SPACE}
+      application: ${CF_APP}
+    script: |-
+      #!/bin/bash
+      # cf create-service dynamic-dashboard-embedded lite sample-dde-demo-dde-service
+      cf push "${CF_APP}"
+      # cf set-env "${CF_APP}" APP_BASE_URL https://"${CF_APP}".mybluemix.net/
+      cf restage ${CF_APP}
+      # view logs
+      #cf logs "${CF_APP}" --recent

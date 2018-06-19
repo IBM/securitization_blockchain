@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import './App.css';
 
 import BuySecurityForm from './components/forms/buySecurityForm.jsx'
@@ -95,7 +95,7 @@ function refreshState() {
     method: 'POST',
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
       //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
     },
     body: JSON.stringify({
@@ -166,7 +166,7 @@ class App extends Component {
           //     // console.log('refreshing state');
           //     // return { unseen: "does not display" }
           // });
-      }, 20000);
+      }, 1500);
   }
 
   handleChange = (event, value) => {
