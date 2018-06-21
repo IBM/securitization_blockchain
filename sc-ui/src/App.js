@@ -109,7 +109,7 @@ function refreshState() {
     })
   }
   // console.log(config.body)
-  fetch('http://localhost:3001/chaincode', config)
+  fetch('/api/chaincode', config)
     .then(response => response.json() )
     .then((json) =>{
       console.log("in refresh state method")
@@ -166,7 +166,7 @@ class App extends Component {
           //     // console.log('refreshing state');
           //     // return { unseen: "does not display" }
           // });
-      }, 1500);
+      }, 15000);
   }
 
   handleChange = (event, value) => {

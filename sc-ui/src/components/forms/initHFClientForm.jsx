@@ -68,12 +68,12 @@ class InitHFCForm extends React.Component {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'text/plain'
-        // 'Content-Type': 'application/json'
+        // 'Content-Type': 'text/plain'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(this.state)
     }
-    fetch('http://localhost:3001/init_hfc_client', config).then( (response) => {
+    fetch('/api/init_hfc_client', config).then( (response) => {
         response.json().then(
           (body) => {
             console.log(body)

@@ -81,7 +81,7 @@ class InitAssetForm extends React.Component {
     }
     console.log("initializing asset")
     console.log(Date.now())
-    fetch('http://localhost:3001/chaincode', config).then ( () => {
+    fetch('/api/chaincode', config).then ( () => {
       refreshState(2)
     })
 
@@ -109,7 +109,7 @@ class InitAssetForm extends React.Component {
     //       }
     //       console.log(Date.now())
     //       console.log("value asset")
-    //       fetch('http://localhost:3001/chaincode', config_value)
+    //       fetch('/api/chaincode', config_value)
     //     }
       // }, 3000)
     // })

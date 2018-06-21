@@ -21,7 +21,7 @@ function refreshState(seconds) {
   var ms = 1000 + (1000 * seconds)
   var objects = localStorage.getItem('objects')
   setTimeout( () => {
-    fetch('http://localhost:3001/chaincode', config)
+    fetch('/api/chaincode', config)
       .then(response => response.json())
       .then((json) =>{
         console.log("in refreshState helper")

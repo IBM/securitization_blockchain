@@ -40,7 +40,7 @@ class DeleteObjectForm extends React.Component {
       })
     }
     console.log(config.body)
-    fetch('http://localhost:3001/chaincode', config)
+    fetch('/api/chaincode', config)
     this.setState({ open: false });
     // event.preventDefault();
   }

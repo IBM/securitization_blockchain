@@ -49,7 +49,7 @@ class SetOriginatorForm extends React.Component {
       })
     }
     console.log(config.body)
-    fetch('http://localhost:3001/chaincode', config).then( () => {
+    fetch('/api/chaincode', config).then( () => {
       refreshState(2)
     })
 

@@ -337,7 +337,8 @@ router.post('/init_hfc_client', function (req, res) {
     // console.log("request received to initialize client")
     // command =  command_prefix + '\'{"Args":["process_payment", "asset1", "3000"]}\' -C myc'
     // exec(command)
-
+    console.log("req")
+    console.log(req)
     if (fs.existsSync('./connection_profile.json')) {
       console.log("Loading connection profile from local file")
       // var username = "monitoring_admin"

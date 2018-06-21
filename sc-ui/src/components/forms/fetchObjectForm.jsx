@@ -41,7 +41,7 @@ class FetchObject extends React.Component {
          // JSON.stringify( 'read' +  Object.values(this.state))
     }
 
-    fetch('http://localhost:3001/chaincode', config)
+    fetch('/api/chaincode', config)
       .then(response => response.json())
       .then((json) =>{
         console.log(json)

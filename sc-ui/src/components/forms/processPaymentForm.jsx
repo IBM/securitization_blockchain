@@ -71,7 +71,7 @@ class ProcessPaymentForm extends React.Component {
       })
     }
     console.log(config.body)
-    fetch('http://localhost:3001/chaincode', config).then ( () => {
+    fetch('/api/chaincode', config).then ( () => {
       refreshState(1)
       setTimeout( () => {
         {
@@ -97,7 +97,7 @@ class ProcessPaymentForm extends React.Component {
           console.log(Date.now())
           console.log("value body")
           console.log(config_value)
-          fetch('http://localhost:3001/chaincode', config_value).then( () => {
+          fetch('/api/chaincode', config_value).then( () => {
             refreshState(2)
           })
         }

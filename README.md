@@ -155,6 +155,7 @@ Install the Securitization UI node packages by running `npm install` in the proj
 # install react dependencies
 cd sc-ui
 npm install
+npm run build
 
 # install express/hyperledger dependencies
 cd react-backend
@@ -372,7 +373,7 @@ The credentials will need to be entered in the configuration form, which can be 
 
 After submitting this form, the UI will fetch a "connection profile" json file, which contains all information needed by our hyperledger client to connect to the blockchain ledger.
 
-Once the connection profile has been retrieved, a certificate will be generated to allow the application to make administrative requests. These elevated privileges are required to make calls to the chaincode service. This PEM encoded certificate will be output in the terminal logs like so. If deploying on IBM Cloud, this terminal can be viewed by running `bx cf logs <app_name>`, or by opening the developer console in your browser  
+Once the connection profile has been retrieved, a certificate will be generated to allow the application to make administrative requests. These elevated privileges are required to make calls to the chaincode service. This PEM encoded certificate will be output in the terminal logs like so. If deploying on IBM Cloud, this certificate can be found parsing the logs using `bx cf logs <app_name>`, or by opening the developer console in your browser  
 
 <p align="center">
 <img src="https://i.imgur.com/Z6WmX59.png" width="600" height="450" style="margin-left: auto; margin-right: auto;">

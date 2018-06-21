@@ -70,7 +70,7 @@ class TransferAssetForm extends React.Component {
         })
       }
       console.log(config.body)
-      fetch('http://localhost:3001/chaincode', config).then( () => {
+      fetch('/api/chaincode', config).then( () => {
         setTimeout( () => {
           console.log("getting values of pool")
           {
@@ -95,7 +95,7 @@ class TransferAssetForm extends React.Component {
             }
             console.log(Date.now())
             console.log("value pool")
-            fetch('http://localhost:3001/chaincode', config_value).then( () => {
+            fetch('/api/chaincode', config_value).then( () => {
               console.log("getting values of pool")
               refreshState(1)
             })
@@ -127,7 +127,7 @@ class TransferAssetForm extends React.Component {
       }
       console.log(config.body)
       console.log("refreshing")
-      fetch('http://localhost:3001/chaincode', config).then(
+      fetch('/api/chaincode', config).then(
         () => {
           refreshState(2)
         }
