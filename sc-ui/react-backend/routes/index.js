@@ -377,6 +377,28 @@ router.post('/init_hfc_client', function (req, res) {
     // res.send(200)
 });
 
+router.post('/api/init_hfc_client', function (req, res) {
+    // console.log("request received to initialize client")
+    // command =  command_prefix + '\'{"Args":["process_payment", "asset1", "3000"]}\' -C myc'
+    // exec(command)
+    console.log("req")
+    console.log(req)
+    if (fs.existsSync('./connection_profile.json')) {
+      console.log("Loading connection profile from local file")
+      // var username = "monitoring_admin"
+      // client = hfc.loadFromConfig('./connection_profile.json')
+      initializeClient(req, res)
+    } else {
+      console.log("Requesting connection profile")
+      // key = req.body.key
+      // secret = req.body.secret
+      // network_id = req.body.networkId
+      requestConnectionProfile(req, res).then( () => {
+        initializeClient(req, res)
+      })
+    }
+});
+
 // command = 'docker exec cli peer chaincode invoke -n sec -c '{"Args":["read","asset1"]}' -C myc 2> docker.out ; cat docker.out | grep chaincodeInvokeOrQuery | grep -v ESCC | awk -F \'payload:\' \'{print $2}\''
 
 router.post('/chaincode', function (req, res) {
@@ -465,6 +487,92 @@ router.post('/chaincode', function (req, res) {
 });
 
 
+
+
+router.post('/api/chaincode', function (req, res) {
+  console.log("chaincode request received")
+  console.log("req.body")
+  console.log(req.body)
+  var chaincode = req.body.params.ctorMsg
+  console.log(chaincode.function)
+  console.log(chaincode.args)
+  // console.log(req.body.params.ctorMsg.function)
+  // console.log(req.body.params.ctorMsg.args)
+  var chaincode_query = JSON.stringify( {"Args" : [chaincode.function].concat(chaincode.args)} )
+  console.log("chaincode_query")
+  console.log(chaincode_query)
+
+  // TODO, add check here for valid hfc client. If client not initialized, use docker
+  if (typeof(client) !== 'undefined') {
+        console.log("invoking chaincode with hfc client")
+        console.log("req")
+        // console.log(req)
+        console.log(req.body)
+        console.log("req.body.method")
+        console.log(req.body.method)
+        if (req.body.method && req.body.method.includes('invoke') ) {
+          console.log("invoking request")
+          var transaction_id = client.newTransactionID(true)
+          var txRequest = {
+            chaincodeId: sec_chaincode.name, //chaincode.name,
+            chaincodeVersion: sec_chaincode.version, //chaincode.version,
+            txId: transaction_id,
+            fcn: req.body.params.ctorMsg.function, // TODO, uncomment this
+            args: req.body.params.ctorMsg.args
+          }
+          console.log(txRequest)
+          proposeTransaction(txRequest)
+          // if ( proposeTransaction(txRequest)) {
+          //   submitTransaction(txRequest)
+          // } else {
+          //   console.log("transaction rejected")
+          // }
+      } else { // query
+          console.log("query chaincode with hfc client")
+          console.log("req.body.method")
+          console.log(req.body.method)
+          console.log(sec_chaincode)
+          // var assetId = JSON.parse(req.body.params.ctorMsg.args).assetID
+          var txRequest = {
+            chaincodeId: sec_chaincode.name,
+            chaincodeVersion: sec_chaincode.version,
+            // txId: transaction_id,
+            fcn: req.body.params.ctorMsg.function,
+            args: req.body.params.ctorMsg.args
+          }
+          console.log("txRequest")
+          console.log(txRequest)
+          channel.queryByChaincode(txRequest).then( (cc_response) => {
+            console.log("cc query response received")
+            console.log(cc_response[0].toString())
+            res.send( cc_response[0].toString() )
+          }).catch ( (err) => {
+            console.log("cc query failed")
+            console.log(err)
+            res.send(err)
+          })
+      }
+  } else {
+  // if (client == null) {
+    console.log("hfc client not defined, invoking chaincode with docker")
+    // if hyperledger client not initialized, assume local Docker network is running
+    var command = 'docker exec cli peer chaincode invoke -n sec -c \'' + chaincode_query +  '\' -C myc 2> docker.out ; cat docker.out | grep chaincodeInvokeOrQuery | grep -v ESCC | awk -F \'payload:\' \'{print $2}\''
+    console.log(command)
+    exec(command, (err, stdout, stderr) => {
+      if (err) {
+        console.error(err);
+        res.send(500)
+        return;
+      }
+      res.send(stdout)
+      console.log(stdout);
+    });
+  }
+  // payload=$(docker exec cli peer chaincode invoke -n sec -c '{"Args":["read","asset1"]}' -C myc 2> docker.out ; cat docker.out | grep chaincodeInvokeOrQuery | grep -v ESCC | awk -F 'payload:' '{print $2}')
+  // echo -e $payload
+  // output=$(cat docker.out | grep chaincodeInvokeOrQuery | grep -v ESCC | awk -F 'payload:' '{print $2}' )
+  // res.send(200)
+});
 
 // var chaincodes, peer, channel, sec_chaincode
 // router.post('/getchaincodes', function (req, res) {

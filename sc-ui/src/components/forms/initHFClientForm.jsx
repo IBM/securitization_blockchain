@@ -73,7 +73,7 @@ class InitHFCForm extends React.Component {
       },
       body: JSON.stringify(this.state)
     }
-    fetch('/api/init_hfc_client', config).then( (response) => {
+    fetch(window.location.href.replace('3000', '3001') + 'api/init_hfc_client', config).then( (response) => {
         response.json().then(
           (body) => {
             console.log(body)
@@ -81,7 +81,6 @@ class InitHFCForm extends React.Component {
             // const element =<Modal aria-labelledby="simple-modal-title" aria-describedby="simple-modal-description" open={this.state.open}></Modal>;
             // ReactDOM.render(element, document.getElementById('root'));
           }
-
         )
         // body.msg
         // body.certificate

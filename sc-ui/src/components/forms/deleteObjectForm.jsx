@@ -40,7 +40,8 @@ class DeleteObjectForm extends React.Component {
       })
     }
     console.log(config.body)
-    fetch('/api/chaincode', config)
+    fetch(window.location.href.replace('3000', '3001') + 'api/chaincode', config)
+    // fetch(window.location.href.replace('3000', '3001') + 'api/chaincode', config)
     this.setState({ open: false });
     // event.preventDefault();
   }

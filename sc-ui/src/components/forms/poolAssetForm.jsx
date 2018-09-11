@@ -60,7 +60,7 @@ class PoolAsset extends React.Component {
     }
     // console.log(config.body)
     console.log('transferring asset to pool: ')
-    fetch('/api/chaincode', config).then ( () =>  {
+    fetch(window.location.href.replace('3000', '3001') + 'api/chaincode', config).then ( () =>  {
        //+ JSON.stringify(this.state));
       console.log("submitted request to pool asset")
       // setTimeout( () => {
@@ -87,7 +87,7 @@ class PoolAsset extends React.Component {
           }
           console.log(Date.now())
           console.log("value pool")
-          fetch('/api/chaincode', config_value).then( () => {
+          fetch(window.location.href.replace('3000', '3001') + 'api/chaincode', config_value).then( () => {
             console.log("getting values of pool")
             refreshState(3)
           })

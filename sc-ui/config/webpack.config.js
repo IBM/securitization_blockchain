@@ -48,11 +48,13 @@ module.exports = {
     progress: true,
     stats: 'errors-only',
     host: "0.0.0.0", //process.env.HOST,
-    port: process.env.PORT,
+    port: process.env.PORT || 3001,
     disableHostCheck: true,
     proxy: {
+      "/api/chaincode": "http://localhost:3001/api/chaincode",
       "/chaincode": "http://localhost:3001/chaincode",
-      "/init_hfc_client": "http://localhost:3001/init_hfc_client"
+      "/init_hfc_client": "http://localhost:3001/init_hfc_client",
+      "/api/init_hfc_client": "http://localhost:3001/init_hfc_client"
     },
     setup: function (app) { app.use(require('body-parser').json()); }
   },

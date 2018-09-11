@@ -41,7 +41,7 @@ class FetchObject extends React.Component {
          // JSON.stringify( 'read' +  Object.values(this.state))
     }
 
-    fetch('/api/chaincode', config)
+    fetch(window.location.href.replace('3000', '3001') + 'api/chaincode', config)
       .then(response => response.json())
       .then((json) =>{
         console.log(json)
