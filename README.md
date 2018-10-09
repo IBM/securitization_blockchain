@@ -8,7 +8,7 @@
 
 In this Code Pattern, we'll demonstrate how to simulate a securitization process using React.js, Hyperledger Fabric Node SDK, and an IBM Blockchain service instance.
 
-Securitization is a financial process that can be used to consolidate a set of illquid assets into a set of tradable securities. A common example of an illquid asset would be a home mortgage, as they cannot be readily bought and sold. An example of a tradable asset can be a stock or bond. This process can be useful for financial institutions that are looking to increase the liquidity of their assets and free up capital. This application provides a dashboard that'll allow users to create and view the relationship between Assets, Pools, Investors, and Securities.
+Securitization is a financial process that can be used to consolidate a set of illiquid assets into a set of tradable securities. A common example of an illiquid asset would be a home mortgage, as they cannot be readily bought and sold. An example of a tradable asset can be a stock or bond. This process can be useful for financial institutions that are looking to increase the liquidity of their assets and free up capital. This application provides a dashboard that will allow users to create and view the relationship between Assets, Pools, Investors, and Securities.
 
 When the reader has completed this Code Pattern, they will understand how to:
 
@@ -17,9 +17,7 @@ When the reader has completed this Code Pattern, they will understand how to:
 * Deploy and Instantiate a set of smart contracts to handle transactions and pool assets
 
 <!--Remember to dump an image in this path-->
-<p align="center">
-<img src="https://i.imgur.com/aHtB4G8.png"  />
-</p>
+<img src="https://i.imgur.com/aHtB4G8.png">
 
 ## Flow
 <!--Add new flow steps based on the architecture diagram-->
@@ -211,14 +209,10 @@ Next, we'll need to deploy our service instances using the IBM Cloud dashboard. 
 
 The IBM Blockchain service can be found by logging in to the IBM Cloud [dashboard](https://console.bluemix.net/), selecting the "Catalog" button, searching for "Blockchain", and clicking on the resulting icon. Or click this [*link*](https://console.bluemix.net/catalog/services/blockchain).
 
-<p align="center">
-<img src="https://i.imgur.com/qWQOXq5.png"  data-canonical-src="https://i.imgur.com/qWQOXq5.png">
-</p>
+<img src="https://i.imgur.com/qWQOXq5.png">
 
 After selecting the blockchain icon, a form will be presented for configuring the service name, region, and pricing plan. The default values for these fields can be left as is. Also, be sure that the free pricing tier is selected, which is titled "Starter Membership Plan". If you are using an IBM Cloud Lite account, this plan can be used for free for up to 30 days. After validating that the information in the form is correct, scroll down and click the "Create" button in the lower right corner
-<p align="center">
-<img src="https://i.imgur.com/ROAjOzr.png"  data-canonical-src="https://i.imgur.com/ROAjOzr.png">
-</p>
+<img src="https://i.imgur.com/ROAjOzr.png">
 
 <!-- Provision the following services:
 * [**IBM Blockchain**](https://console.bluemix.net/catalog/services/blockchain)
@@ -233,25 +227,16 @@ If you're manually deploying the application and services, -->
 
 ### IBM Cloud Hosted Hyperledger (**hosted**)
 To begin the process of uploading the smart contracts to the hosted blockchain service, we can start by opening the IBM Cloud dashboard, selecting your provisioned Blockchain service, and accessing the blockchain network monitor by clicking "Enter Monitor"
-<p align="center">
-<img src="https://i.imgur.com/BpUjPhe.png"  data-canonical-src="https://i.imgur.com/BpUjPhe.png" width="650" height="450" style="margin-left: auto; margin-right: auto;">
-</p>
+<img src="https://i.imgur.com/BpUjPhe.png">
 
 Next, click the "Install code" option on the left hand menu, and then the "Install Chaincode" button on the right of the page
-<p align="center">
-<img src="https://i.imgur.com/HmdDsgm.png"  data-canonical-src="https://i.imgur.com/HmdDsgm.png" width="650" height="450" style="margin-left: auto; margin-right: auto;">
-</p>
+<img src="https://i.imgur.com/HmdDsgm.png">
 
 Enter an id and a version (here we'll use "sec" and "v1"). Then, select the "Choose Files" button to upload the smart contracts, which are titled [lib.go](chaincode/src/lib.go), [read_ledger.go](chaincode/src/read_ledger.go), [write_ledger.go](chaincode/src/write_ledger.go), and [securitization.go](chaincode/src/securitization.go). These files are located in the `chaincode/src` directory of this project
-
-<p align="center">
-<img src="https://i.imgur.com/NJgMwPm.png"  data-canonical-src="https://i.imgur.com/NJgMwPm.png" width="650" height="450" style="margin-left: auto; margin-right: auto;">
-</p>
+<img src="https://i.imgur.com/NJgMwPm.png">
 
 Finally, we'll need to Instantiate the chaincode. This can be done by opening the chaincode "Actions" menu and selecting "Instantiate". This will present a form where arguments can be provided to the chaincode `init` function. In this case, we'll just need to provide an integer (we used `"101"`) to the Arguments section, and then click "Next" and then "Submit"
-<p align="center">
-<img src="https://i.imgur.com/eh1Djmj.png"  data-canonical-src="https://i.imgur.com/eh1Djmj.png" width="450" height="450" style="margin-left: auto; margin-right: auto;">
-</p>
+<img src="https://i.imgur.com/eh1Djmj.png">
 
 ### Hyperledger Network Setup (**local**)
 <!-- If you're planning to make custom changes to the smart contracts, it may be faster to develop and test chaincode locally before pushing to a hosted service.  -->
@@ -348,9 +333,7 @@ docker run -it -p 3000:3000 -p 3001:3001 -v /var/run/docker.sock:/var/run/docker
 2. To access the Securitization application, open the following URL in a browser: `http://localhost:3000/`
 <!--Add a section that explains to the reader what typical output looks like, include screenshots -->
 <!-- TODO, update dashboard view -->
-<p align="center">
-<img src="https://i.imgur.com/nljtWdf.png"  data-canonical-src="https://i.imgur.com/nljtWdf.png" width="750" height="450" style="margin-left: auto; margin-right: auto;">
-</p>
+<img src="https://i.imgur.com/nljtWdf.png">
 
 <!--Include any troubleshooting tips (driver issues, etc)-->
 
@@ -360,29 +343,21 @@ This section is only necessary for working on the hosted IBM Cloud blockchain of
 
 The Blockchain credentials consist of the `key`, `secret`, and `network_id` parameters.
 <!-- ![]("https://i.imgur.com/Qof7sve.png" width="250" height="400") -->
-<p align="center">
-<img src="https://i.imgur.com/Qof7sve.png"  data-canonical-src="https://i.imgur.com/Qof7sve.png" width="450" height="450" style="margin-left: auto; margin-right: auto;">
-</p>
+<img src="https://i.imgur.com/Qof7sve.png">
 
 We'll also need to provide the Chaincode Id and Version, which is "sec" and "v1" in this example
 
 The credentials will need to be entered in the configuration form, which can be opened by clicking the button in the upper right of the UI
-<p align="center">
-<img src="https://i.imgur.com/zsxkXHA.png" width="600" height="450" style="margin-left: auto; margin-right: auto;">
-</p>
+<img src="https://i.imgur.com/zsxkXHA.png">
 
 After submitting this form, the UI will fetch a "connection profile" json file, which contains all information needed by our hyperledger client to connect to the blockchain ledger.
 
 Once the connection profile has been retrieved, a certificate will be generated to allow the application to make administrative requests. These elevated privileges are required to make calls to the chaincode service. This PEM encoded certificate will be output in the terminal logs like so. If deploying on IBM Cloud, this certificate can be found parsing the logs using `bx cf logs <app_name>`, or by opening the developer console in your browser  
 
-<p align="center">
-<img src="https://i.imgur.com/Z6WmX59.png" width="600" height="450" style="margin-left: auto; margin-right: auto;">
-</p>
+<img src="https://i.imgur.com/Z6WmX59.png">
 
 Once the PEM certificate is generated, it can be copied and uploaded by visiting the printed url, or by revisiting the Blockchain Monitor, navigating to Members on the left hand menu, and then clicking "Certificates" and "Add Certificate"
-<p align="center">
-<img src="https://i.imgur.com/kx654rE.png" width="600" height="450" style="margin-left: auto; margin-right: auto;">
-</p>
+<img src="https://i.imgur.com/kx654rE.png">
 
 
 <!-- These credentials will need to be provided to the UI in the next step -->
@@ -444,31 +419,21 @@ This securitization process can be replicated with this application by visiting 
 
 First, we'll need to create a loan "Originator", which will require an ID, Processing Fee (percentage), and (optional) Company Name. This form can be loaded by selecting the "Create Originator" button. (Note: There is a known intermittent issue with this Originator creation process, so the initial submission may fail. If this occurs, please try submitting again)
 
-<p align="center">
-<img src="https://i.imgur.com/GrNQTyH.png" width="700" height="250" style="margin-left: auto; margin-right: auto;">
-</p>
+<img src="https://i.imgur.com/GrNQTyH.png">
 
-<p align="center">
-<img src="https://i.imgur.com/QkGzhRj.png" width="350" height="250" style="margin-left: auto; margin-right: auto;">
-</p>
+<img src="https://i.imgur.com/QkGzhRj.png">
+
 
 Note that the Balance and Assets fields in the table are initially blank, but will be filled in as we associate assets with the originator. And as the originator receives processing fees and security sale proceeds, their Balance will increase as well
 
 Next, we'll create an Asset, which will require an outstanding balance, interest rate, and a payment period, which defines how many monthly payments they'll need to pay off their entire balance. This can be done by scrolling directly down to the "Assets" Table, clicking the "Create New Asset" button.
-
-<p align="center">
-<img src="https://i.imgur.com/BG8JMsq.png" width="350" height="250" style="margin-left: auto; margin-right: auto;">
-</p>
+<img src="https://i.imgur.com/BG8JMsq.png">
 
 Once the Asset has been created, we can also link it to an originator using the "Transfer Asset" button
-<p align="center">
-<img src="https://i.imgur.com/N6PHrsr.png" width="350" height="250" style="margin-left: auto; margin-right: auto;">
-</p>
+<img src="https://i.imgur.com/N6PHrsr.png">
 
 The resulting table should then reflect the following
-<p align="center">
-<img src="https://i.imgur.com/ICd3Qt9.png" width="900" height="450" style="margin-left: auto; margin-right: auto;">
-</p>
+<img src="https://i.imgur.com/ICd3Qt9.png">
 
 Create an Asset Pool via the "Create Pool" form by providing an ID. We can also transfer our asset(s) to the pool using the "Transfer Asset" button in the Assets table
 
@@ -478,9 +443,7 @@ Finally, we can create our Investors, which have the ability to buy and sell sec
 
 Now we can simulate a mortgage payment and view the corresponding payment distributions. We can do so by scrolling back up to the Assets table selecting the "Process Payment" view, and entering an Asset Id and Payment Amount.
 
-<p align="center">
-<img src="https://i.imgur.com/vNDtCsl.png" width="650" height="450" style="margin-left: auto; margin-right: auto;">
-</p>
+<img src="https://i.imgur.com/vNDtCsl.png">
 
 Submitting the payment will then:
 - Calculate the payment amount allocated to interest and principal
@@ -489,9 +452,7 @@ Submitting the payment will then:
 <!-- - Place remainder in Excess Spread -->
 Once these calculations are complete, the dashboard tables will then be updated with the latest ledger state
 
-<p align="center">
-<img src="https://i.imgur.com/nljtWdf.png" width="700" height="450" style="margin-left: auto; margin-right: auto;">
-</p>
+<img src="https://i.imgur.com/nljtWdf.png">
 
 # Troubleshooting
 
