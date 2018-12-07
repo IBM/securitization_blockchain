@@ -18,7 +18,7 @@ When the reader has completed this Code Pattern, they will understand how to:
 
 <!--Remember to dump an image in this path-->
 <p align="center">
-<img src="https://i.imgur.com/aHtB4G8.png"  />
+<img src="./readme-images/arch-flow-securitization.png"  />
 </p>
 
 ## Flow
