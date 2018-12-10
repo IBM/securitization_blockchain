@@ -1,9 +1,3 @@
-<!--Put badges at the very top -->
-<!--change the repos -->
-<!--change the tracking number -->
-<!-- [![Build Status](https://travis-ci.org/IBM/watson-banking-chatbot.svg?branch=master)](https://travis-ci.org/IBM/watson-banking-chatbot) -->
-
-<!--Add a new Title and fill in the blanks -->
 # Implement Asset Securitization on a Blockchain Ledger
 
 In this Code Pattern, we'll demonstrate how to simulate a securitization process using React.js, Hyperledger Fabric Node SDK, and an IBM Blockchain service instance.
@@ -16,45 +10,36 @@ When the reader has completed this Code Pattern, they will understand how to:
 * Create and enroll a administrative client using the Hyperledger Node SDK
 * Deploy and Instantiate a set of smart contracts to handle transactions and pool assets
 
-<!--Remember to dump an image in this path-->
-<img src="https://i.imgur.com/aHtB4G8.png">
+![](readme-images/arch-flow-securitization.png)
 
 ## Flow
-<!--Add new flow steps based on the architecture diagram-->
-<!-- 1. Upload and Instantiate smart contracts via the Bluemix Network Monitor
-2. Deploy the node application locally or on bluemix
-3. Input connection information such as service credentials, endpoint, etc into configuration form
-4. Submitting form sends a request to pull a json file containing the connection profile. The information from this profile is used to create a "monitoring" client with administrative privileges
-
-5. If form data is valid, user should be able to execute Chaincode operations, view individual blocks and their data, and request state of registered Assets -->
 
 1. A homebuyer leverages the services of a Loan Originator to secure financing for a home mortgage
 
 2. The Loan Originator loads the application, and submits requests to update the Blockchain ledger state with a new Asset
 
 This request is handled by the node.js Express backend formats CRUD request into a [jsonrpc](http://www.jsonrpc.org/specification#examples) object like below, and submits it to a Hyperledger peer as a transaction proposal. The request below would register a mortgage with a value of $540000, an interest rate of 3.3%, and a credit score of 720. The credit score is used to calculate risk for potential investors.
-```
+
+```json
 {
-    jsonrpc: '2.0',
-    method: 'invoke',
-    params: {
-        type: 1,
-        chaincodeID: {
-            name: 'securitization_contracts'
+    "jsonrpc": "2.0",
+    "method": "invoke",
+    "params": {
+        "type": "1",
+        "chaincodeID": {
+            "name": "securitization_contracts"
         },
-        ctorMsg: {
-            function: 'init_asset',
-            args: '["asset1" , "540000", "0.033", "720"]'
+        "ctorMsg": {
+            "function": 'init_asset',
+            "args": '["asset1" , "540000", "0.033", "720"]'
         },
-        secureContext: 'kkbankol@us.ibm.com'
+        "secureContext": "kkbankol@us.ibm.com"
     },
-    id: 5
+    "id": "5"
 }
 ```
-<!-- 3. Fabric Node SDK submits CRUD request to Hyperledger peer as a transaction proposal -->
 
 3. Peer uses an "endorsement" service to simulate the proposed transaction against the relevant smart contracts. This endorsement service is used to confirm that the transaction is possible given the current state of the ledger. Examples of invalid proposals might be creating an asset that already exists, querying the state of an asset that does not exist, etc.
-<!-- to simulate the transaction request against smart contracts and the current ledger state -->
 
 4. If the simulation is successful, the proposal is then "signed" by the peer's endorser.
 
@@ -67,15 +52,12 @@ This request is handled by the node.js Express backend formats CRUD request into
 8. If the Asset Pool has been split up into "Securities", an investor has the ability to buy and sell them. The security price should be updated every time there is a change to the ledger state
 
 9. A creditor checks the ledger state to determine the risk of losses by late payments or mortgages going into default. If a significant change is found, the security credit rating will be recalculated by the creditor and updated in the ledger.
-<!-- The response is sent back to the Monitoring UI and printed in the "Response Payloads" view.  to show latest blockchain transactions -->
-
-<!-- TODO expand on this -->
 
 ## Install Prerequisites:
 ### IBM Cloud CLI
 To interact with the hosted offerings, the IBM Cloud CLI will need to be installed beforehand. The latest CLI releases can be found at the link [here](https://console.bluemix.net/docs/cli/reference/bluemix_cli/download_cli.html#download_install). An install script is maintained at the mentioned link, which can be executed with one of the following commands
 
-```
+```bash
 # Mac OSX
 curl -fsSL https://clis.ng.bluemix.net/install/osx | sh
 
@@ -86,13 +68,16 @@ curl -fsSL https://clis.ng.bluemix.net/install/linux | sh
 iex(New-Object Net.WebClient).DownloadString('https://clis.ng.bluemix.net/install/powershell')
 ```
 After installation is complete, confirm the CLI is working by printing the version like so
-```
+
+```bash
 bx -v
 ```
 
 ### Node.js packages
+
 If expecting to run this application locally, please continue by installing [Node.js](https://nodejs.org/en/) runtime and NPM. Currently the Hyperledger Fabric SDK only appears to work with node v8.9.0+, but [is not yet supported](https://github.com/hyperledger/fabric-sdk-node#build-and-test) on node v9.0+. If your system requires newer versions of node for other projects, we'd suggest using [nvm](https://github.com/creationix/nvm) to easily switch between node versions. We did so with the following commands
-```
+
+```bash
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
 # Place next three lines in ~/.bash_profile
 export NVM_DIR="$HOME/.nvm"
@@ -107,30 +92,22 @@ To run the Securitization UI locally, we'll need to install a few node libraries
 - [MQTT](http://mqtt.org/): Client package to subscribe to Watson IoT Platform and handle incoming messages
 - [Hyperledger Fabric SDK](https://fabric-sdk-node.github.io/): Enables backend to connect to IBM Blockchain service
 
-<!--Update this section-->
 ## Included components
 * [IBM Blockchain](https://console.bluemix.net/catalog/services/blockchain)
 
-<!--Update this section-->
 ## Featured technologies
-<!-- Select components from [here](https://github.ibm.com/developer-journeys/journey-docs/tree/master/_content/dev#technologies), copy and paste the raw text for ease -->
 * [Hyperledger Fabric](https://hyperledger-fabric.readthedocs.io/en/release-1.1/)
 * [Hyperledger Node.js SDK](https://github.com/hyperledger/fabric-sdk-node)
 * [NPM](https://www.npmjs.com/)
 * [Node.js](https://nodejs.org/en/)
 * [React.js](https://reactjs.org/)
 
-<!--Update this section when the video is created-->
-<!-- # Watch the Video
-In progress
-
-https://www.youtube.com/watch?v=DYvdN_p_Ldk
-
-https://www.youtube.com/watch?v=Mw6924hCAIc -->
 
 
 # Steps
+
 There are two methods we can use to deploy the application, either run everything locally on your development machine, *OR* initialize a hosted blockchain service and run in IBM Cloud. These seperate steps are labeled as **local** or **hosted**, respectively
+
 1. [Clone repository](#1-clone-the-repository)
 2. [Setup repository codebase locally](#2-deploy-application-locally) OR [Deploy to IBM Cloud](#2-deploy-application-to-ibm-cloud)
 3. [Create Watson services with IBM Cloud](#3-create-services)
@@ -143,13 +120,14 @@ There are two methods we can use to deploy the application, either run everythin
 
 Clone the `securitization_blockchain` project locally. In a terminal, run:
 
-```
+```bash
 git clone github.com/IBM/securitization_blockchain
 ```
 
 ## 2. Deploy Application (**local**)
 Install the Securitization UI node packages by running `npm install` in the project root directory and in the [react-backend](sc-ui/react-backend) directory. Both `python` and `build-essential` are required for these dependencies to install properly:
-```
+
+```bash
 # install react dependencies
 cd sc-ui
 npm install
@@ -164,7 +142,8 @@ cd ../../
 ```
 
 As an alternative to installing these additional dependencies on your system, you can build the application and dependencies in a docker container like so
-```
+
+```bash
 docker build -t securitization_blockchain .
 ```
 
@@ -190,7 +169,8 @@ docker run -d -p 8081:8081 monitoring_ui
 [![Deploy to IBM Cloud](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://github.com/IBM/securitization_blockchain.git&branch=master)
 
 1. We can deploy the application to IBM Cloud, by either leveraging the "Deploy to IBM Cloud" button directly above, or by using the IBM Cloud CLI. Ensure the cli is installed using the prerequisites section above, and then run the following command to deploy the application
-```
+
+```bash
 # Log in using IBM Cloud credentials
 bx login
 
@@ -218,10 +198,6 @@ After selecting the blockchain icon, a form will be presented for configuring th
 * [**IBM Blockchain**](https://console.bluemix.net/catalog/services/blockchain)
 * [**Watson IoT Platform**](https://console.bluemix.net/catalog/services/internet-of-things-platform) -->
 
-<!-- If you're deploying the application via the "Delivery Pipeline" on IBM Cloud, these services should be created automatically.
-
-If you're manually deploying the application and services, -->
-
 ## 4. Upload and Instantiate Chaincode
 "Smart contracts", commonly referred to as "Chaincode", can be used to execute business logic and validate incoming requests. In this context, the contracts are used to initialize all participants of the securitization process, define their relationships, and verify transactions. These contracts can be hosted either on IBM Cloud or on a local Hyperledger network managed by Docker.
 
@@ -242,7 +218,7 @@ Finally, we'll need to Instantiate the chaincode. This can be done by opening th
 <!-- If you're planning to make custom changes to the smart contracts, it may be faster to develop and test chaincode locally before pushing to a hosted service.  -->
 As an alternative to the hosted IBM Blockchain service, we can deploy a local Hyperledger network using docker-compose like so
 
-```
+```bash
 git clone https://github.com/hyperledger/fabric-samples.git
 cd fabric-samples/chaincode-docker-devmode
 
@@ -255,7 +231,8 @@ docker-compose -f docker-compose-simple.yaml up
 By default, this will stay open and aggregate the logs from the container. If you'd prefer it to run in headless mode, please add the `-d` flag to the command
 
 In a separate tab, run the following commands from the *root directory* of this project to copy the chaincode files into the "chaincode" container, build the binary, and start the chaincode service. The last command will run as a daemon, and will not exit
-```
+
+```bash
 docker exec -it chaincode mkdir -p securitization
 docker cp ./chaincode/src/. chaincode:/opt/gopath/src/chaincode/securitization/
 docker exec -it chaincode bash -c 'cd securitization && go build'
@@ -263,13 +240,15 @@ docker exec -it chaincode bash -c 'CORE_PEER_ADDRESS=peer:7052 CORE_CHAINCODE_ID
 ```
 
 In a third tab, run the following commands to install and instantiate the chaincode
-```
+
+```bash
 docker exec cli peer chaincode install -p chaincodedev/chaincode/securitization -n sec -v 0
 docker exec cli peer chaincode instantiate -n sec  -v 0 -c '{"Args":["101"]}' -C myc
 ```
 
 Finally, run an invoke command to ensure the chaincode was installed successfully
-```
+
+```bash
 docker exec cli peer chaincode invoke -n sec -c '{"Args":["read_everything"]}' -C myc
 ```
 
@@ -287,6 +266,7 @@ nvm use 8.9.0
 ```
 
 Install the Monitoring UI node packages by running `npm install` in the project root directory and in the [react-backend](react-backend) directory. Both `python` and `build-essential` are required for these dependencies to install properly:
+
 ```
 npm install
 cd react-backend && npm install
