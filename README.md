@@ -22,20 +22,20 @@ This request is handled by the node.js Express backend formats CRUD request into
 
 ```json
 {
-    jsonrpc: '2.0',
-    method: 'invoke',
-    params: {
-        type: 1,
-        chaincodeID: {
-            name: 'securitization_contracts'
+    "jsonrpc": "2.0",
+    "method": "invoke",
+    "params": {
+        "type": "1",
+        "chaincodeID": {
+            "name": "securitization_contracts"
         },
-        ctorMsg: {
-            function: 'init_asset',
-            args: '["asset1" , "540000", "0.033", "720"]'
+        "ctorMsg": {
+            "function": 'init_asset',
+            "args": '["asset1" , "540000", "0.033", "720"]'
         },
-        secureContext: 'kkbankol@us.ibm.com'
+        "secureContext": "kkbankol@us.ibm.com"
     },
-    id: 5
+    "id": "5"
 }
 ```
 
