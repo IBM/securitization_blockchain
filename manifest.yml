@@ -8,7 +8,7 @@ applications:
   #port: 8081
   memory: 512M
   engines:
-    node: 8.9.0
+    node: 8.14.1
   buildpack: https://github.com/cloudfoundry/nodejs-buildpack
   env:
     HOST: 0.0.0.0

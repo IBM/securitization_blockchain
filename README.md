@@ -173,6 +173,7 @@ docker run -d -p 8081:8081 monitoring_ui
 ```bash
 # Log in using IBM Cloud credentials
 bx login
+bx target --cf
 
 # Push application to IBM Cloud
 bx cf push blockchain-securitization --random-route
