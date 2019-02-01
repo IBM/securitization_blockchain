@@ -96,7 +96,6 @@ function refreshState() {
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
-      //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
     },
     body: JSON.stringify({
       method: "query",
@@ -132,21 +131,25 @@ function refreshState() {
       // console.log("setting state")
       // console.log({"objects": JSON.parse(json)})
       // this.setState({"objects": JSON.parse(json)})
+      /*
       if (typeof(json) == "string") {
         localStorage.setItem('objects', json)
         // localStorage.setItem('objects', JSON.parse(json))
       } else {
         localStorage.setItem('objects', JSON.stringify(json))
-      }
+      }*/
+      console.log("json type: ", typeof(json))
+      localStorage.setItem('objects', json)
+
       // }
       // console.log("this.props")
       // console.log(this.props)
       // this.props.objects = json
-      if (JSON.parse(json)) {
-        return JSON.parse(json)
-      } else {
-        return json
-      }
+      // if (JSON.parse(json)) {
+      //   return JSON.parse(json)
+      // } else {
+      return json
+      // }
   }).catch( (err) => {
       console.log("fetch failed")
       console.log(err)

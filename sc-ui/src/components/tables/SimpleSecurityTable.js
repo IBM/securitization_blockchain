@@ -48,7 +48,7 @@ function createData( id, rating, couponrate, pool, value, remainingpayments, mat
 
 function generateData() {
 
-  if (JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).securities ) {
+  if ( (localStorage.getItem('objects') != "undefined") && JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).securities ) {
     var securities = JSON.parse(localStorage.getItem('objects')).securities
   } else {
     var securities = []

@@ -1,20 +1,16 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 const request = require('request')
 const hfc = require('fabric-client')
-var CAClient = require('fabric-ca-client')
-var fs = require('fs')
-var _ = require('underscore')
-var util = require('util')
-var async = require('async')
-/* GET home page. */
-// router.get('/', function(req, res, next) {
-//   res.render('index', { title: 'Express' });
-// });
+const CAClient = require('fabric-ca-client')
+const fs = require('fs')
+const cors = require('cors')
+const _ = require('underscore')
+const util = require('util')
+const async = require('async')
+const exec = require('child_process').exec;
 
-var exec = require('child_process').exec;
-
-
+router.all('*', cors())
 module.exports = router;
 command_prefix = 'docker exec cli peer chaincode invoke -n sec -c \'{"Args":'
 
@@ -157,6 +153,8 @@ function loadConnectionProfile() {
     client = hfc.loadFromConfig('./connection_profile.json')
   }
 }
+
+loadConnectionProfile()
 
 function initializeClient(req, res) {
   console.log("Initializing HFC client")
@@ -486,9 +484,6 @@ router.post('/chaincode', function (req, res) {
   // res.send(200)
 });
 
-
-
-
 router.post('/api/chaincode', function (req, res) {
   console.log("chaincode request received")
   console.log("req.body")
@@ -503,6 +498,7 @@ router.post('/api/chaincode', function (req, res) {
   console.log(chaincode_query)
 
   // TODO, add check here for valid hfc client. If client not initialized, use docker
+  // Looks for connection_profile.json and admin_cert
   if (typeof(client) !== 'undefined') {
         console.log("invoking chaincode with hfc client")
         console.log("req")
@@ -545,11 +541,14 @@ router.post('/api/chaincode', function (req, res) {
           channel.queryByChaincode(txRequest).then( (cc_response) => {
             console.log("cc query response received")
             console.log(cc_response[0].toString())
-            res.send( cc_response[0].toString() )
+            // res.setHeader('Content-Type', 'application/json');
+            // res.send( JSON.stringify(cc_response[0].toString()) )
+            res.json(cc_response[0].toString())
           }).catch ( (err) => {
             console.log("cc query failed")
             console.log(err)
-            res.send(err)
+            // res.setHeader('Content-Type', 'application/json');
+            res.json(err)
           })
       }
   } else {

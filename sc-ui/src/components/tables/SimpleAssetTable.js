@@ -46,7 +46,7 @@ function createData( id, balance, interest, state, remainingpayments, originator
 function generateData() {
   console.log("localStorage.getItem('objects')")
   console.log(localStorage.getItem('objects'))
-  if (JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).assets ) {
+  if ( (localStorage.getItem('objects') != "undefined") && JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).assets ) {
     var assets = JSON.parse(localStorage.getItem('objects')).assets
   } else {
     var assets = []

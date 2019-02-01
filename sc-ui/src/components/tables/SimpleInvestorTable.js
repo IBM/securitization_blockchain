@@ -47,7 +47,8 @@ function createData( id, balance, securities ) {
 
 function generateData() {
 
-  if  (JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).investors ) {
+  if ( (localStorage.getItem('objects') != "undefined") && JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).investors ) {
+    console.log("setting investor var")
     var investors = JSON.parse(localStorage.getItem('objects')).investors
   } else {
     var investors = []
