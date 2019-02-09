@@ -121,7 +121,7 @@ There are two methods we can use to deploy the application, either run everythin
 Clone the `securitization_blockchain` project locally. In a terminal, run:
 
 ```bash
-git clone github.com/IBM/securitization_blockchain
+git clone https://github.com/IBM/securitization_blockchain.git
 ```
 
 ## 2. Deploy Application (**local**)
