@@ -149,11 +149,11 @@ Next, we'll need to deploy our service instances using the IBM Cloud dashboard. 
 
 ### Blockchain
 
-The IBM Blockchain service can be found by logging in to the IBM Cloud [dashboard](https://console.bluemix.net/), selecting the "Catalog" button, searching for "Blockchain", and clicking on the resulting icon. Or click this [*link*](https://console.bluemix.net/catalog/services/blockchain).
+The IBM Blockchain service can be found by logging in to the IBM Cloud [dashboard](https://console.bluemix.net/), selecting the `Catalog` button, searching for `Blockchain`, and clicking on the resulting icon. Or click this [*link*](https://console.bluemix.net/catalog/services/blockchain).
 
 <img src="https://i.imgur.com/qWQOXq5.png">
 
-After selecting the blockchain icon, a form will be presented for configuring the service name, region, and pricing plan. The default values for these fields can be left as is. Also, be sure that the free pricing tier is selected, which is titled "Starter Membership Plan". If you are using an IBM Cloud Lite account, this plan can be used for free for up to 30 days. After validating that the information in the form is correct, scroll down and click the "Create" button in the lower right corner
+After selecting the blockchain icon, a form will be presented for configuring the service name, region, and pricing plan. The default values for these fields can be left as is. Also, be sure that the free pricing tier is selected, which is titled `Starter Membership Plan`. If you are using an IBM Cloud Lite account, this plan can be used for free for up to 30 days. After validating that the information in the form is correct, scroll down and click the `Create` button in the lower right corner
 <img src="https://i.imgur.com/ROAjOzr.png">
 
 ### Kubernetes
@@ -192,16 +192,16 @@ In this section, we'll be uploading our securitization logic to the Blockchain s
 "Smart contracts", commonly referred to as "Chaincode", can be used to execute business logic and validate incoming requests. In this context, the contracts are used to initialize all participants of the securitization process, define their relationships, and verify transactions. These contracts can be hosted either on IBM Cloud or on a local Hyperledger network managed by Docker.
 
 ### IBM Cloud Hosted Hyperledger (**hosted**)
-To begin the process of uploading the smart contracts to the hosted blockchain service, we can start by opening the IBM Cloud dashboard, selecting your provisioned Blockchain service, and accessing the blockchain network monitor by clicking "Enter Monitor"
+To begin the process of uploading the smart contracts to the hosted blockchain service, we can start by opening the IBM Cloud dashboard, selecting your provisioned Blockchain service, and accessing the blockchain network monitor by clicking `Enter Monitor`
 <img src="https://i.imgur.com/BpUjPhe.png">
 
-Next, click the "Install code" option on the left hand menu, and then the "Install Chaincode" button on the right of the page
+Next, click the `Install code` option on the left hand menu, and then the `Install Chaincode` button on the right of the page
 <img src="https://i.imgur.com/HmdDsgm.png">
 
-Enter an id and a version (here we'll use "sec" and "v1"). Then, select the "Choose Files" button to upload the smart contracts, which are titled [lib.go](chaincode/src/lib.go), [read_ledger.go](chaincode/src/read_ledger.go), [write_ledger.go](chaincode/src/write_ledger.go), and [securitization.go](chaincode/src/securitization.go). These files are located in the `chaincode/src` directory of this project
+Enter an id and a version (here we'll use "sec" and "v1"). Then, select the `Choose Files` button to upload the smart contracts, which are titled [lib.go](chaincode/src/lib.go), [read_ledger.go](chaincode/src/read_ledger.go), [write_ledger.go](chaincode/src/write_ledger.go), and [securitization.go](chaincode/src/securitization.go). These files are located in the `chaincode/src` directory of this project
 <img src="https://i.imgur.com/NJgMwPm.png">
 
-Finally, we'll need to Instantiate the chaincode. This can be done by opening the chaincode "Actions" menu and selecting "Instantiate". This will present a form where arguments can be provided to the chaincode `init` function. In this case, we'll just need to provide an integer (we used `"101"`) to the Arguments section, then click "Next" and then "Submit"
+Finally, we'll need to Instantiate the chaincode. This can be done by opening the chaincode `Actions` menu and selecting `Instantiate`. This will present a form where arguments can be provided to the chaincode `init` function. In this case, we'll just need to provide an integer (we used `"101"`) to the Arguments section, then click `Next` and then `Submit`
 <img src="https://i.imgur.com/eh1Djmj.png">
 
 ### Hyperledger Network Setup (**local**)
@@ -244,6 +244,7 @@ docker exec cli peer chaincode invoke -n sec -c '{"Args":["read_everything"]}' -
 
 
 <!-- ### Manual installation
+
 Otherwise, continue by installing [Node.js](https://nodejs.org/en/) runtime and NPM. Currently the Hyperledger Fabric SDK only appears to work with node v8.9.0+, but [is not yet supported](https://github.com/hyperledger/fabric-sdk-node#build-and-test) on node v9.0+. If your system requires newer versions of node for other projects, we'd suggest using [nvm](https://github.com/creationix/nvm) to easily switch between node versions. We did so with the following commands
 ```
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
@@ -279,6 +280,7 @@ workspace and select **View details**. Save this ID for later.
 
 *Optionally*, to view the conversation dialog select the workspace and choose the
 **Dialog** tab, here's a snippet of the dialog: -->
+
 ## 3. Clone the repository
 
 Clone the `securitization_blockchain` project locally. In a terminal, run:
@@ -291,7 +293,7 @@ git clone https://github.com/IBM/securitization_blockchain.git
 
 <!-- [![Deploy to IBM Cloud](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://github.com/IBM/securitization_blockchain.git&branch=master) -->
 
-<!-- 1. We can deploy the application to IBM Cloud, by either leveraging the "Deploy to IBM Cloud" button directly above, or by using the IBM Cloud CLI. Ensure the cli is installed using the prerequisites section above, and then run the following command to deploy the application -->
+<!-- 1. We can deploy the application to IBM Cloud, by either leveraging the `Deploy to IBM Cloud` button directly above, or by using the IBM Cloud CLI. Ensure the cli is installed using the prerequisites section above, and then run the following command to deploy the application -->
 <!-- Before running this section, please confirm that the -->
 
 <!-- ```bash
@@ -311,7 +313,7 @@ service/api-service created
 pod/securitization-pod created
 ```
 
-This may take a few minutes. In a different tab, folloing along by running the `logs` command like so.
+This may take a few minutes. In a different tab, following along by running the `logs` command like so.
 ```bash
 kubectl logs -f securitization-pod
 ```
@@ -483,7 +485,7 @@ The securitization flow generally occurs in the following format
 
 This securitization process can be replicated with this application by visiting the dashboard and creating Originators, Assets, Pools, Securities, and Investors using the provided forms. Each form requests an unique id format with the name of the object type followed by an integer **asset1**, **pool123**, **security15**
 
-First, we'll need to create a loan "Originator", which will require an ID, Processing Fee (percentage), and (optional) Company Name. This form can be loaded by selecting the "Create Originator" button. (Note: There is a known intermittent issue with this Originator creation process, so the initial submission may fail. If this occurs, please try submitting again)
+First, we'll need to create a loan "Originator", which will require an ID, Processing Fee (percentage), and (optional) Company Name. This form can be loaded by selecting the `Create Originator` button. (Note: There is a known intermittent issue with this Originator creation process, so the initial submission may fail. If this occurs, please try submitting again)
 
 <img src="https://i.imgur.com/GrNQTyH.png">
 
@@ -492,20 +494,20 @@ First, we'll need to create a loan "Originator", which will require an ID, Proce
 
 Note that the Balance and Assets fields in the table are initially blank, but will be filled in as we associate assets with the originator. And as the originator receives processing fees and security sale proceeds, their Balance will increase as well
 
-Next, we'll create an Asset, which will require an outstanding balance, interest rate, and a payment period, which defines how many monthly payments they'll need to pay off their entire balance. This can be done by scrolling directly down to the "Assets" Table, clicking the "Create New Asset" button.
+Next, we'll create an Asset, which will require an outstanding balance, interest rate, and a payment period, which defines how many monthly payments they'll need to pay off their entire balance. This can be done by scrolling directly down to the `Assets` Table, clicking the `Create New Asset` button.
 <img src="https://i.imgur.com/BG8JMsq.png">
 
-Once the Asset has been created, we can also link it to an originator using the "Transfer Asset" button
+Once the Asset has been created, we can also link it to an originator using the `Transfer Asset` button
 <img src="https://i.imgur.com/N6PHrsr.png">
 
 The resulting table should then reflect the following
 <img src="https://i.imgur.com/ICd3Qt9.png">
 
-Create an Asset Pool via the "Create Pool" form by providing an ID. We can also transfer our asset(s) to the pool using the "Transfer Asset" button in the Assets table
+Create an Asset Pool via the `Create Pool` form by providing an ID. We can also transfer our asset(s) to the pool using the `Transfer Asset` button in the Assets table
 
 Create one or more "Securities". The create security form will require a ID, associated Asset Pool, and "Coupon Rate". The Coupon Rate defines the return on investment.
 
-Finally, we can create our Investors, which have the ability to buy and sell securities. This can be done by clicking the "Create Investor" button and providing a unique id. Once the investor is created, we can then buy and sell securities using the respective buttons. So in this example, we'll do so by clicking the "Buy Security" button and providing the Security and Investor Id.
+Finally, we can create our Investors, which have the ability to buy and sell securities. This can be done by clicking the `Create Investor` button and providing a unique id. Once the investor is created, we can then buy and sell securities using the respective buttons. So in this example, we'll do so by clicking the `Buy Security` button and providing the Security and Investor Id.
 
 Now we can simulate a mortgage payment and view the corresponding payment distributions. We can do so by scrolling back up to the Assets table selecting the "Process Payment" view, and entering an Asset Id and Payment Amount.
 
