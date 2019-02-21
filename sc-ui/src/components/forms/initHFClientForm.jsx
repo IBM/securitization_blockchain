@@ -73,10 +73,11 @@ class InitHFCForm extends React.Component {
       },
       body: JSON.stringify(this.state)
     }
-    fetch(window.location.href.replace('3000', '3001') + 'api/init_hfc_client', config).then( (response) => {
+    fetch(window.location.href.replace('30000', '30001') + 'api/init_hfc_client', config).then( (response) => {
         response.json().then(
           (body) => {
             console.log(body)
+
             // const element = <h1>Hello, world</h1>
             // const element =<Modal aria-labelledby="simple-modal-title" aria-describedby="simple-modal-description" open={this.state.open}></Modal>;
             // ReactDOM.render(element, document.getElementById('root'));
@@ -159,6 +160,7 @@ class InitHFCForm extends React.Component {
               margin="dense"
               id="id"
               label="API Endpoint"
+              type="password"
               onChange={this.handleChange('api_endpoint')}
               fullWidth
             />
@@ -168,6 +170,7 @@ class InitHFCForm extends React.Component {
               margin="dense"
               id="key"
               label="Key"
+              type="password"
               onChange={this.handleChange('key')}
               fullWidth
             />
@@ -177,6 +180,7 @@ class InitHFCForm extends React.Component {
               margin="dense"
               id="secret"
               label="Secret"
+              type="password"
               onChange={this.handleChange('secret')}
               fullWidth
             />
@@ -186,6 +190,7 @@ class InitHFCForm extends React.Component {
               margin="dense"
               id="network_id"
               label="Network ID"
+              type="password"
               onChange={this.handleChange('network_id')}
               fullWidth
             />

@@ -34,7 +34,9 @@ spec:
       image: kkbankol/securitization_blockchain
       imagePullPolicy: Always
       command: ["bash"]
-      args: ["-c", "cd /root/securitization_blockchain/sc-ui && npm start | PORT=30001 node react-backend/bin/www"]
+      stdin: true 
+      tty: true 
+      #args: ["-c", "cd /root/securitization_blockchain/sc-ui && npm start | PORT=30001 node react-backend/bin/www"]
       # envFrom:
       #   - secretRef:
       #      name: cloudant-auth

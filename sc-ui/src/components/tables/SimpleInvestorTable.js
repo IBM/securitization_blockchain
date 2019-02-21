@@ -35,25 +35,21 @@ function createData( id, balance, securities ) {
   return { id, balance, securities };
 }
 
-
-// var data = [
-//   createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-//   createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-//   createData('Eclair', 262, 16.0, 24, 6.0),
-//   createData('Cupcake', 305, 3.7, 67, 4.3),
-//   createData('Gingerbread', 356, 16.0, 49, 3.9),
-//   createData('Gingerbread', 356, 16.0, 49, 3.9)
-// ];
-
 function generateData() {
 
-  if ( (localStorage.getItem('objects') != "undefined") && JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).investors ) {
-    console.log("setting investor var")
-    var investors = JSON.parse(localStorage.getItem('objects')).investors
-  } else {
+  try {
+    if ((localStorage.getItem('objects') != "undefined") && JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).investors) {
+      var investors = JSON.parse(localStorage.getItem('objects')).investors
+    } else {
+      throw "no investors found"
+    }
+  } catch (err) {
     var investors = []
+    console.log(err)
   }
-  // console.log(investors)
+
+  console.log("investors")
+  console.log(investors)
   var data = []
   if (!investors || investors.length == 0) {
     return data
@@ -65,8 +61,6 @@ function generateData() {
       )
     )
     if (idx == (investors.length -1)) {
-      // console.log("data")
-      // console.log(data)
       return data
     }
   }

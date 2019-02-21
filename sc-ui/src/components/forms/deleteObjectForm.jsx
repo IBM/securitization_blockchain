@@ -40,8 +40,8 @@ class DeleteObjectForm extends React.Component {
       })
     }
     console.log(config.body)
-    fetch(window.location.href.replace('3000', '3001') + 'api/chaincode', config)
-    // fetch(window.location.href.replace('3000', '3001') + 'api/chaincode', config)
+    fetch(window.location.href.replace('30000', '30001') + 'api/chaincode', config)
+    // fetch(window.location.href.replace('30000', '30001') + 'api/chaincode', config)
     this.setState({ open: false });
     // event.preventDefault();
   }
@@ -86,7 +86,7 @@ class DeleteObjectForm extends React.Component {
               Cancel
             </Button>
             <Button onClick={this.handleSubmit} color="primary" variant="contained">
-              Create
+              Delete
             </Button>
           </DialogActions>
         </Dialog>

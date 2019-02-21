@@ -33,26 +33,21 @@ function createData( id, balance, interest, state, remainingpayments, originator
   return { id, balance, interest, state, remainingpayments, originator, pool, payoffamount };
 }
 
-
-// var data = [
-//   createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-//   createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-//   createData('Eclair', 262, 16.0, 24, 6.0),
-//   createData('Cupcake', 305, 3.7, 67, 4.3),
-//   createData('Gingerbread', 356, 16.0, 49, 3.9),
-//   createData('Gingerbread', 356, 16.0, 49, 3.9)
-// ];
-
 function generateData() {
   console.log("localStorage.getItem('objects')")
   console.log(localStorage.getItem('objects'))
-  if ( (localStorage.getItem('objects') != "undefined") && JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).assets ) {
-    var assets = JSON.parse(localStorage.getItem('objects')).assets
-  } else {
-    var assets = []
+  var data = []
+  try {
+    if ( (localStorage.getItem('objects')) && (localStorage.getItem('objects') != "undefined") && JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).assets ) {
+      var assets = JSON.parse(localStorage.getItem('objects')).assets
+    } else {
+      throw "no assets found"
+    }
+  } catch(err) {
+     console.log("Setting 'assets' var to an empty array")
+     var assets = []
   }
   console.log(assets)
-  var data = []
   if (assets.length == 0) {
     return data
   }

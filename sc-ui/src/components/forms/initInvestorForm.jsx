@@ -73,7 +73,7 @@ class InitInvestorForm extends React.Component {
       })
     }
     console.log(config.body)
-    fetch(window.location.href.replace('3000', '3001') + 'api/chaincode', config)
+    fetch(window.location.href.replace('30000', '30001') + 'api/chaincode', config)
     this.setState({ open: false });
 
     // event.preventDefault();

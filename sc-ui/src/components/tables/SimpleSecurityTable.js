@@ -36,23 +36,20 @@ function createData( id, rating, couponrate, pool, value, remainingpayments, mat
   return { id, rating, couponrate, pool, value, remainingpayments, maturity, investor };
 }
 
-
-// var data = [
-//   createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-//   createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-//   createData('Eclair', 262, 16.0, 24, 6.0),
-//   createData('Cupcake', 305, 3.7, 67, 4.3),
-//   createData('Gingerbread', 356, 16.0, 49, 3.9),
-//   createData('Gingerbread', 356, 16.0, 49, 3.9)
-// ];
-
 function generateData() {
 
-  if ( (localStorage.getItem('objects') != "undefined") && JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).securities ) {
-    var securities = JSON.parse(localStorage.getItem('objects')).securities
-  } else {
+  try {
+    if ((localStorage.getItem('objects') != "undefined") && JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).securities) {
+      console.log("securities found, setting variable")
+      var securities = JSON.parse(localStorage.getItem('objects')).securities
+    } else {
+      throw "no securities found"
+    }
+  } catch (err) {
     var securities = []
+    console.log(err)
   }
+
   var data = []
   if (!securities || securities.length == 0) {
     return data

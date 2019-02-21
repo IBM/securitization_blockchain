@@ -81,38 +81,9 @@ class InitAssetForm extends React.Component {
     }
     console.log("initializing asset")
     console.log(Date.now())
-    fetch(window.location.href.replace('3000', '3001') + 'api/chaincode', config).then ( () => {
+    fetch(window.location.href.replace('30000', '30001') + 'api/chaincode', config).then ( () => {
       refreshState(2)
     })
-
-      // setTimeout( () => {
-      //     refreshState()
-    //     {
-    //       var config_value = {
-    //         method: 'POST',
-    //         headers: {
-    //           'Accept': 'application/json',
-    //           'Content-Type': 'application/json',
-    //           //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
-    //         },
-    //         body: JSON.stringify({
-    //           method: "invoke",
-    //           params: {
-    //             ctorMsg: {
-    //               function: 'value_asset',
-    //               // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
-    //               args: [this.state.id]
-    //               //args: Object.values(this.state)
-    //             }
-    //           }
-    //         })
-    //       }
-    //       console.log(Date.now())
-    //       console.log("value asset")
-    //       fetch(window.location.href.replace('3000', '3001') + 'api/chaincode', config_value)
-    //     }
-      // }, 3000)
-    // })
     this.setState({ open: false });
     // event.preventDefault();
   }

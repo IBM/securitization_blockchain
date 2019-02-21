@@ -7,7 +7,7 @@ RUN mkdir -p /root/securitization_blockchain/
 COPY . /root/securitization_blockchain/.
 # build image from git repo
 # RUN git clone https://github.com/IBM/securitization_blockchain.git
-RUN /root/securitization_blockchain/install_deps.sh
+#RUN /root/securitization_blockchain/install_deps.sh
 ENV PATH="/root/.nvm/versions/node/v8.9.0/bin/:${PATH}"
 ENV PORT="30000"
 

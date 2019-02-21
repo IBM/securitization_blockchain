@@ -33,11 +33,17 @@ function createData( id, processingfee, company, assets, balance ) {
 }
 
 function generateData() {
-  if ( (localStorage.getItem('objects') != "undefined") && JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).originators ) {
-    console.log("originators found, setting variable")
-    var originators = JSON.parse(localStorage.getItem('objects')).originators
-  } else {
+
+  try {
+    if ((localStorage.getItem('objects') != "undefined") && JSON.parse(localStorage.getItem('objects')) && JSON.parse(localStorage.getItem('objects')).originators) {
+      console.log("originators found, setting variable")
+      var originators = JSON.parse(localStorage.getItem('objects')).originators
+    } else {
+      throw "no originators found"
+    }
+  } catch (err) {
     var originators = []
+    console.log(err)
   }
 
   // console.log(originators)

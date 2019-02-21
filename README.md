@@ -385,7 +385,7 @@ nvm use 8.9.0
 Start the app locally
 ```
 cd sc-ui
-npm start | PORT=3001 node react-backend/bin/www
+npm start | PORT=30001 node react-backend/bin/www
 ```
 
 If you built the application using docker, then simply run

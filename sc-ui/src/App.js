@@ -109,47 +109,22 @@ function refreshState() {
   }
   // console.log(config.body)
 
-  fetch(window.location.href.replace('3000', '3001') + 'api/chaincode', config)
+  fetch(window.location.href.replace('30000', '30001') + 'api/chaincode', config)
     .then(response => response.json() )
     .then((json) =>{
       console.log("in refresh state method")
       // const element = GenerateCards(JSON.parse(json))
       // ReactDOM.render(element, document.getElementById('test'));
-      // console.log("this")
-      // console.log(this)
-      console.log("JSON")
-      console.log(json)
-      // if (typeof(json) == "string") {
-      // var stateObjects = JSON.parse(json)
-      // } else {
-      //   var stateObjects = json
-      // }
-
-      // console.log("stateObjects")
-      // console.log(stateObjects)
       // TODO, use react "set state" properly
       // console.log("setting state")
       // console.log({"objects": JSON.parse(json)})
       // this.setState({"objects": JSON.parse(json)})
-      /*
-      if (typeof(json) == "string") {
-        localStorage.setItem('objects', json)
-        // localStorage.setItem('objects', JSON.parse(json))
-      } else {
-        localStorage.setItem('objects', JSON.stringify(json))
-      }*/
       console.log("json type: ", typeof(json))
       localStorage.setItem('objects', json)
-
-      // }
       // console.log("this.props")
       // console.log(this.props)
       // this.props.objects = json
-      // if (JSON.parse(json)) {
-      //   return JSON.parse(json)
-      // } else {
       return json
-      // }
   }).catch( (err) => {
       console.log("fetch failed")
       console.log(err)
@@ -328,7 +303,7 @@ class App extends Component {
         <SetOriginatorForm> </SetOriginatorForm>
 
         */}
-        <Button size="small" onClick={ this.handleRefresh }>Refresh</Button>
+        <Button size="small" onClick={ this.handleRefresh }>Refresh Ledger</Button>
       </div>
     );
   }

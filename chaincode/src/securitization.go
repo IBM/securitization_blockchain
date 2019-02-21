@@ -316,16 +316,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return value_asset_pool(stub, args)
 	} else if function == "value_asset" {      //create a new marble
 		return value_asset(stub, args)
-	} else if function == "delete" {      //create a new marble
+	} else if function == "delete" {
 		return delete(stub, args)
-
-  // buy / sell securities will have a
-	// } else if function == "buy_securities"{        //create a new marble owner
-	// 	return buy_securities(stub, args)
-	// } else if function == "sell_securities"{        //create a new marble owner
-	// 	return sell_securities(stub, args)
-
-
 	} else if function == "read_everything"{   //read everything, (owners + marbles + companies)
 		return read_everything(stub)
 	// } else if function == "getHistory"{        //read history of a marble (audit)

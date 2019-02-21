@@ -10,6 +10,7 @@ var usersRouter = require('./routes/users');
 var app = express();
 var cors = require('cors')
 
+console.log("Backend Server Started.")
 app.use(cors({credentials: false, origin: true}))
 app.options('*', cors())
 app.use(function(req, res, next) {
@@ -24,22 +25,6 @@ app.use(function(req, res, next) {
   }
   next();
 });
-
-// if (req.method === 'OPTIONS') {
-//       console.log('!OPTIONS');
-//       var headers = {};
-//       // IE8 does not allow domains to be specified, just the *
-//       // headers["Access-Control-Allow-Origin"] = req.headers.origin;
-//       headers["Access-Control-Allow-Origin"] = "*";
-//       headers["Access-Control-Allow-Methods"] = "POST, GET, PUT, DELETE, OPTIONS";
-//       headers["Access-Control-Allow-Credentials"] = false;
-//       headers["Access-Control-Max-Age"] = '86400'; // 24 hours
-//       headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept";
-//       res.writeHead(200, headers);
-//       res.end();
-// } else {
-// //...other requests
-// }
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

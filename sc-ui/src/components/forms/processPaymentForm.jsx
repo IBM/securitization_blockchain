@@ -71,7 +71,7 @@ class ProcessPaymentForm extends React.Component {
       })
     }
     console.log(config.body)
-    fetch(window.location.href.replace('3000', '3001') + 'api/chaincode', config).then ( () => {
+    fetch(window.location.href.replace('30000', '30001') + 'api/chaincode', config).then ( () => {
       refreshState(1)
       setTimeout( () => {
         {
@@ -97,7 +97,7 @@ class ProcessPaymentForm extends React.Component {
           console.log(Date.now())
           console.log("value body")
           console.log(config_value)
-          fetch(window.location.href.replace('3000', '3001') + 'api/chaincode', config_value).then( () => {
+          fetch(window.location.href.replace('30000', '30001') + 'api/chaincode', config_value).then( () => {
             refreshState(2)
           })
         }

@@ -69,7 +69,7 @@ class BuySecurityForm extends React.Component {
         })
       }
       console.log(config.body)
-      fetch(window.location.href.replace('3000', '3001') + 'api/chaincode', config).then( () => {
+      fetch(window.location.href.replace('30000', '30001') + 'api/chaincode', config).then( () => {
         refreshState(2)
       })
     // event.preventDefault();

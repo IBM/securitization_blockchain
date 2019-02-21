@@ -41,12 +41,13 @@ class FetchObject extends React.Component {
          // JSON.stringify( 'read' +  Object.values(this.state))
     }
 
-    fetch(window.location.href.replace('3000', '3001') + 'api/chaincode', config)
+    fetch(window.location.href.replace('30000', '30001') + 'api/chaincode', config)
       .then(response => response.json())
       .then((json) =>{
         console.log(json)
         const element = GenerateCards(JSON.parse(json))
-        ReactDOM.render(element, document.getElementById('test'));
+        // TODO, ??
+        // ReactDOM.render(element, document.getElementById('test'));
 
     }).catch( (err) => {
         console.log("fetch failed")

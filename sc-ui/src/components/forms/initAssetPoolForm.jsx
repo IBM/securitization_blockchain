@@ -51,8 +51,6 @@ class InitAssetPoolForm extends React.Component {
   }
 
   handleSubmit = () =>  {
-    // console.log("event")
-    // console.log(event)
     console.log('creating asset pool with id: ' + JSON.stringify(this.state));
     let config = {
       method: 'POST',
@@ -73,7 +71,7 @@ class InitAssetPoolForm extends React.Component {
       })
     }
     console.log(config.body)
-    fetch(window.location.href.replace('3000', '3001') + 'api/chaincode', config).then( () => {
+    fetch(window.location.href.replace('30000', '30001') + 'api/chaincode', config).then( () => {
       refreshState(2)
     })
     this.setState({ open: false });

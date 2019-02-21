@@ -54,7 +54,7 @@ module.exports = {
     port: process.env.PORT,
     disableHostCheck: true,
     proxy: {
-      '/api/**': { target: 'http://localhost:3001' , secure: false, changeOrigin: true, pathRewrite: {
+      '/api/**': { target: 'http://localhost:30001' , secure: false, changeOrigin: true, pathRewrite: {
         '^/api': ''
         }}
       // "/chaincode": "http://localhost:3001/chaincode",
