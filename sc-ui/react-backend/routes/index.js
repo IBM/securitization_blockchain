@@ -11,7 +11,6 @@ const async = require('async')
 const exec = require('child_process').exec;
 const glob = require("glob")
 const path = require('path');
-const util = require('util');
 const os = require('os');
 
 router.all('*', cors())
@@ -109,9 +108,9 @@ function requestConnectionProfile(req, res) {
 function loadConnectionProfile() {
   if (fs.existsSync('./connection_profile.json')) {
     console.log("Local connection profile loading")
-    client = hfc.loadFromConfig('./connection_profile.json')
+    client = hfc.loadFromConfig('../connection_profile.json')
     var username = "monitoring_admin"
-    client.loadUserFromStateStore("./")
+    client.loadUserFromStateStore("./hfc-key-store/hosted/")
     client.getUserContext(username, true).then((user) => {
       console.log("Loading user context")
       console.log(user)
@@ -140,7 +139,7 @@ function initializeHostedClient(req, res) {
     certificateAuthorityName = Object.keys(certificateAuthorities)[0]
     certificateAuthObj = certificateAuthorities[certificateAuthorityName]
     var mspId = client._network_config._network_config.organizations[org]['mspid']
-    var storePath = './'
+    var storePath = './hfc-key-store/hosted/'
     var client_crypto_suite = hfc.newCryptoSuite()
     var crypto_store = hfc.newCryptoKeyStore({
       path: storePath
@@ -225,13 +224,16 @@ function initializeHostedClient(req, res) {
 var localHFPorts = [7051, 7053, 7054]
 // If Docker listening at each of the above ports, load and enroll local client. Otherwise, wait for an API request at the "init_hfc_client" endpoint
 if (process.env.DEPLOY_TYPE == 'local') {
+  console.log("initializing local hfc client")
   initializeLocalClient()
 }
 
 function initializeLocalClient() {
-  var endpoint = "http://127.0.0.1"
+  // var endpoint = "http://127.0.0.1"
+  var endpoint = "http://ca.example.com"
   console.log("Initializing Local HFC client")
-  client = new hfc();
+  // client = new hfc();
+  client = hfc.loadFromConfig('../local/connection.json')
   ca = new CAClient(endpoint + ":7054", {
     trustedRoots: [],
     verify: false
@@ -244,8 +246,8 @@ function initializeLocalClient() {
   var crypto_suite = hfc.newCryptoSuite()
   var username = "monitoring_admin"
   sec_chaincode = {
-    name: "sec",
-    version: "0"
+    name: "securitization",
+    version: "1.0"
   }
   async.series([
       function(callback) {
@@ -275,19 +277,17 @@ function initializeLocalClient() {
             console.log("Client Loaded From Persistence")
             console.log("Be sure to upload following cert via blockchain UI: \n") //+ req.body.urlRestRoot + "/network/" + req.body.networkId + "/members/certificates")
             console.log(user._signingIdentity._certificate + '\n')
+            channel = client.getChannel()
             callback()
           } else {
-            sec_chaincode = {
-              name: "sec",
-              version: "v1"
-            }
+            channel = client.getChannel()
             ca.enroll({
               enrollmentID: 'admin',
               enrollmentSecret: 'adminpw'
             }).then((enrollment) => {
               console.log('Successfully enrolled admin user "admin"');
-              return fabric_client.createUser({
-                username: 'monitoring_admin',
+              return client.createUser({
+                username: 'admin',
                 mspid: 'Org1MSP',
                 cryptoContent: {
                   privateKeyPEM: enrollment.key.toBytes(),
@@ -295,8 +295,8 @@ function initializeLocalClient() {
                 }
               });
             }).then((user) => {
-              admin_user = user;
-              client.setUserContext(admin_user);
+              client.setUserContext(user)
+
             }).catch((err) => {
               console.error('Failed to enroll and persist admin. Error: ' + err.stack ? err.stack : err);
               throw new Error('Failed to enroll admin');
@@ -316,10 +316,12 @@ function initializeLocalClient() {
 // If the hosted files do not exist, check for local hyperledger. Otherwise,
 var checkHFCConfig = function() {
   var hfc_name = "monitoring_admin"
-  var privKey = fs.readdirSync('./hfc-key-store/hosted/').filter(fn => fn.endsWith('-priv'));
-  var pubKey = fs.readdirSync('./hfc-key-store/hosted/').filter(fn => fn.endsWith('-pub'));
-  if (fs.existsSync('./hfc-key-store/hosted/' + hfc_name)) && (pubKey.length > 0) && (privKey.length > 0) {
-    loadHFC()
+  if (fs.existsSync('./hfc-key-store/hosted/')) {
+    var privKey = fs.readdirSync('./hfc-key-store/hosted/').filter(fn => fn.endsWith('-priv'));
+    var pubKey = fs.readdirSync('./hfc-key-store/hosted/').filter(fn => fn.endsWith('-pub'));
+    if ( (fs.existsSync('./hfc-key-store/hosted/' + hfc_name)) && (pubKey.length > 0) && (privKey.length > 0)) {
+      loadHFC()
+    }
   }
 }
 
@@ -416,6 +418,10 @@ router.post('/api/init_hfc_client', function(req, res) {
   }
 });
 
+router.post('/api/client', function(req, res) {
+  console.log(client)
+});
+
 router.post('/api/chaincode', function(req, res) {
   console.log("chaincode request received")
   console.log(req.body)
@@ -442,7 +448,13 @@ router.post('/api/chaincode', function(req, res) {
         args: req.body.params.ctorMsg.args
       }
       console.log(txRequest)
-      proposeAndSubmitTransaction(txRequest)
+      var txResult = proposeAndSubmitTransaction(txRequest)
+      // console.log(txResult)
+      // if (txResult) {
+        res.send(200)
+      // } else {
+      //   res.send(500)
+      // }
     } else { // query
       console.log("query chaincode with hfc client")
       console.log("req.body.method")
@@ -487,11 +499,16 @@ function submitTransaction(txRequest) {
 }
 
 function proposeAndSubmitTransaction(txRequest) {
+  console.log("sending transaction proposal")
+  console.log("channel")
+  console.log(channel)
   channel.sendTransactionProposal(txRequest).then((proposalRes) => {
-    console.log("sending transaction proposal")
+    console.log("response received")
     var proposalResponses = proposalRes[0];
     var proposal = proposalRes[1];
     let isProposalGood = false;
+    console.log("proposalResponses[0].response")
+    console.log(proposalResponses[0].response)
     if (proposalResponses && proposalResponses[0].response && proposalResponses[0].response.status === 200) {
       console.log('Transaction proposal was accepted');
       // return true;
@@ -499,8 +516,8 @@ function proposeAndSubmitTransaction(txRequest) {
         proposalResponses: proposalResponses,
         proposal: proposal
       }).then((res) => {
-        console.log("Transaction result")
-        console.log(res)
+        console.log("Transaction result was accepted")
+        return true
       })
     } else {
       console.log('Transaction proposal was rejected');

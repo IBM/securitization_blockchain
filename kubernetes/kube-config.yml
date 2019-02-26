@@ -9,13 +9,11 @@ spec:
     srv: api
   type: NodePort
   ports:
-   - port: 30000
+   - name: react
+     port: 30000
      nodePort: 30000
-     name: react
-   # - port: 30000
-   #   nodePort: 80
-   - port: 30001
-     name: express
+   - name: express
+     port: 30001
      nodePort: 30001
 ---
 apiVersion: v1
@@ -33,15 +31,15 @@ spec:
     - name: securitization-blockchain
       image: kkbankol/securitization_blockchain
       imagePullPolicy: Always
-      command: ["bash"]
-      stdin: true 
-      tty: true 
-      #args: ["-c", "cd /root/securitization_blockchain/sc-ui && npm start | PORT=30001 node react-backend/bin/www"]
+      # command: ["bash"]
+      stdin: true
+      tty: true
+      args: ["-c", "cd /root/securitization_blockchain/sc-ui && PORT=30000 npm start | PORT=30001 node react-backend/bin/www"]
       # envFrom:
       #   - secretRef:
       #      name: cloudant-auth
-      env:
-       - name: PORT
-         value: "30000"
+      # env:
+      #  - name: PORT
+      #    value: "30000"
       #  - name: CLOUDANT_PASSWORD
       #    value: ${CLOUDANT_PASSWORD

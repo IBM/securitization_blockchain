@@ -206,42 +206,13 @@ Finally, we'll need to Instantiate the chaincode. This can be done by opening th
 
 ### Hyperledger Network Setup (**local**)
 <!-- If you're planning to make custom changes to the smart contracts, it may be faster to develop and test chaincode locally before pushing to a hosted service.  -->
-As an alternative to the hosted IBM Blockchain service, we can deploy a local Hyperledger network using docker-compose like so
+As an alternative to the hosted IBM Blockchain service, we can deploy a local Hyperledger network using docker-compose in a script like so
 
 ```bash
-git clone https://github.com/hyperledger/fabric-samples.git
-cd fabric-samples/chaincode-docker-devmode
-
-# clear your previous network if it exists
-docker-compose -f docker-compose-simple.yaml down
-
-# start up a new local hyperledger network
-docker-compose -f docker-compose-simple.yaml up
+export COMPOSE_PROJECT_NAME=net
+cd local
+./startFabric.sh
 ```
-By default, this will stay open and aggregate the logs from the container. If you'd prefer it to run in headless mode, please add the `-d` flag to the command
-
-In a separate tab, run the following commands from the *root directory* of this project to copy the chaincode files into the "chaincode" container, build the binary, and start the chaincode service. The last command will run as a daemon, and will not exit
-
-```bash
-docker exec -it chaincode mkdir -p securitization
-docker cp ./chaincode/src/. chaincode:/opt/gopath/src/chaincode/securitization/
-docker exec -it chaincode bash -c 'cd securitization && go build'
-docker exec -it chaincode bash -c 'CORE_PEER_ADDRESS=peer:7052 CORE_CHAINCODE_ID_NAME=sec:0 ./securitization/securitization'
-```
-
-In a third tab, run the following commands to install and instantiate the chaincode
-
-```bash
-docker exec cli peer chaincode install -p chaincodedev/chaincode/securitization -n sec -v 0
-docker exec cli peer chaincode instantiate -n sec  -v 0 -c '{"Args":["101"]}' -C myc
-```
-
-Finally, run an invoke command to ensure the chaincode was installed successfully
-
-```bash
-docker exec cli peer chaincode invoke -n sec -c '{"Args":["read_everything"]}' -C myc
-```
-
 
 <!-- ### Manual installation
 Otherwise, continue by installing [Node.js](https://nodejs.org/en/) runtime and NPM. Currently the Hyperledger Fabric SDK only appears to work with node v8.9.0+, but [is not yet supported](https://github.com/hyperledger/fabric-sdk-node#build-and-test) on node v9.0+. If your system requires newer versions of node for other projects, we'd suggest using [nvm](https://github.com/creationix/nvm) to easily switch between node versions. We did so with the following commands
@@ -340,7 +311,7 @@ Confirm that the Node.js application is up and running by opening the following
 ## 4. Deploy Application Locally (**local**)
 Install the Securitization UI node packages by running `npm install` in the project root directory and in the [react-backend](sc-ui/react-backend) directory. Both `python` and `build-essential` are required for these dependencies to install properly:
 
-```bash
+<!-- ```bash
 # install react dependencies
 cd sc-ui
 npm install
@@ -352,9 +323,9 @@ npm install
 
 # return to the root project directory
 cd ../../
-```
+``` -->
 
-As an alternative to installing these additional dependencies on your system, you can build the application and dependencies in a docker container like so
+Build the application and dependencies in a docker container like so
 
 ```bash
 docker build -t securitization_blockchain .
@@ -377,20 +348,20 @@ docker run -d -p 8081:8081 monitoring_ui
 
 <!-- there are MANY updates necessary here, just screenshots where appropriate -->
 
-Make sure the correct version of node is equipped
+<!-- Make sure the correct version of node is equipped
 ```
 nvm use 8.9.0
-```
+``` -->
 
-Start the app locally
+<!-- Start the app locally
 ```
 cd sc-ui
-npm start | PORT=30001 node react-backend/bin/www
-```
+PORT=30000 npm start | PORT=30001 DEPLOY_TYPE=local node react-backend/bin/www
+``` -->
 
-If you built the application using docker, then simply run
+Then start the docker container with
 ```
-docker run -it -p 30000:30000 -p 30001:30001 -v /var/run/docker.sock:/var/run/docker.sock -v /usr/local/bin/docker:/usr/local/bin/docker securitization_blockchain bash -c 'cd /root/securitization_blockchain/sc-ui ; npm start | PORT=30001 node react-backend/bin/www'
+docker run -it -p 30000:30000 -e DEPLOY_TYPE=local -p 30001:30001 securitization_blockchain bash -c 'cd /root/securitization_blockchain/sc-ui ; PORT=30000 npm start | PORT=30001 node react-backend/bin/www'
 ```
 
 <!-- This method is ideal for a development environment but not suitable for a production environment. TODO, this comment is from the original author, would like to understand why-->
@@ -481,7 +452,7 @@ The securitization flow generally occurs in the following format
 
 5. Each payment is split up and distributed amongst investors who own "securities" associated with the pool. When all mortgages in the pool are paid off, each investor should have received their original investment back plus the agreed "Yield" amount. Each payment will also have a processing fee which will be dispersed to the originator
 
-This securitization process can be replicated with this application by visiting the dashboard and creating Originators, Assets, Pools, Securities, and Investors using the provided forms. Each form requests an unique id format with the name of the object type followed by an integer **asset1**, **pool123**, **security15**
+This securitization process can be replicated with this application by visiting the dashboard and creating Originators, Assets, Pools, Securities, and Investors using the provided forms. Each form requests an unique id, where the format is the name of the object type (asset, investor) followed by an integer. For example, an asset will need an ID like **asset1**, and asset pool needs an ID like **pool123**, and a security needs an ID like **security15**.
 
 First, we'll need to create a loan "Originator", which will require an ID, Processing Fee (percentage), and (optional) Company Name. This form can be loaded by selecting the "Create Originator" button. (Note: There is a known intermittent issue with this Originator creation process, so the initial submission may fail. If this occurs, please try submitting again)
 
