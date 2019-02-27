@@ -38,5 +38,3 @@ echo "chaincode initialized"
 sleep 10
 echo "test chaincode"
 docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n securitization -c '{"Args":["read_everything"]}'
-docker run -itd -e DEPLOY_TYPE=local -p 30000:30000 -p 30001:30001 --name securitization --network net_basic kkbankol/securitization-blockchain bash -c 'cd /root/securitization_blockchain/sc-ui && PORT=30000 npm start | PORT=30001 DEPLOY_TYPE=local node react-backend/bin/www'
-echo "Run \"docker logs -f securitization\" to follow application logs"
