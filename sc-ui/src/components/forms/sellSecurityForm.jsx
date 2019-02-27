@@ -15,23 +15,11 @@ class BuySecurityForm extends React.Component {
       investor_id: '',
       security_id: ''
     };
-
-    // this.handleChange = this.handleChange.bind(this);
     this.handleIdChange = this.handleIdChange.bind(this);
     this.handlePaymentAmountChange = this.handlePaymentAmountChange.bind(this);
 
     this.handleSubmit = this.handleSubmit.bind(this);
   }
-  // handleChange(event) {
-  //   console.log(event.target)
-  //   this.setState({
-  //     id: event.target.id,
-  //     interestrate: event.target.interestrate,
-  //     balance: event.target.balance
-  //   });
-  //   //this.setState(event.target.id)
-  // }
-
   handleIdChange(event) {
     console.log(event.target)
     this.setState({
@@ -47,22 +35,18 @@ class BuySecurityForm extends React.Component {
   }
 
   handleSubmit = () =>  {
-    // console.log("event")
-    // console.log(event)
     console.log('buying security: ' + JSON.stringify(this.state));
       var config = {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
-          //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
         },
         body: JSON.stringify({
           method: "invoke",
           params: {
             ctorMsg: {
               function: 'sell_security',
-              // or set_originator
               args: [this.state.investor_id, this.state.security_id]
             }
           }
@@ -72,18 +56,12 @@ class BuySecurityForm extends React.Component {
       fetch(window.location.href.replace('30000', '30001') + 'api/chaincode', config).then( () => {
         refreshState()
       })
-    // event.preventDefault();
-    // event.preventDefault()
       this.setState({ open: false });
   }
 
   handleClickOpen = () => {
     this.setState({ open: true });
   };
-
-  // onChange = () => {
-  //   this.setState(this.state)
-  // }
 
   handleClose = () => {
     this.setState({ open: false });

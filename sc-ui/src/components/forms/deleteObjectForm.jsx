@@ -15,18 +15,14 @@ class DeleteObjectForm extends React.Component {
     this.state = {
       id: ''
     };
-    // this.handleChange = this.handleChange.bind(this);
   }
   handleSubmit = () =>  {
-    // console.log("event")
-    // console.log(event)
     console.log('deleting object id: ' + JSON.stringify(this.state));
     let config = {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-        //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
       },
       body: JSON.stringify({
         method: "invoke",
@@ -34,16 +30,13 @@ class DeleteObjectForm extends React.Component {
           ctorMsg: {
             function: 'delete',
             args: [this.state.id]
-            //args: Object.values(this.state)
           }
         }
       })
     }
     console.log(config.body)
     fetch(window.location.href.replace('30000', '30001') + 'api/chaincode', config)
-    // fetch(window.location.href.replace('30000', '30001') + 'api/chaincode', config)
     this.setState({ open: false });
-    // event.preventDefault();
   }
 
   handleClickOpen = () => {

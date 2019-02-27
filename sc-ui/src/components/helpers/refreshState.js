@@ -4,7 +4,6 @@ function refreshState(seconds) {
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
-      //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
     },
     body: JSON.stringify({
       method: "query",
@@ -17,7 +16,6 @@ function refreshState(seconds) {
     })
   }
   // TODO, what's the best way to do this? don't want to query for state too often. look into "setEvent" blockchain method
-  // console.log("refreshing state until change detected")
   var ms = 1000 + (1000 * seconds)
   var objects = localStorage.getItem('objects')
   setTimeout( () => {

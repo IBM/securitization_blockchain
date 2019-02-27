@@ -15,17 +15,12 @@ class InitAssetForm extends React.Component {
       id: '',
       interestrate: '',
       balance: '',
-      // monthlypayment: '',
       remainingpayments: ''
-      // underwriting: ''
     };
-
-    // this.handleChange = this.handleChange.bind(this);
     this.handleIdChange = this.handleIdChange.bind(this);
     this.handleInterestRateChange = this.handleInterestRateChange.bind(this);
     this.handleBalanceChange = this.handleBalanceChange.bind(this);
     this.handleUnderwritingChange = this.handleUnderwritingChange.bind(this);
-
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -57,24 +52,19 @@ class InitAssetForm extends React.Component {
   }
 
   handleSubmit = () =>  {
-    // console.log("event")
-    // console.log(event)
     console.log('creating asset with id: ' + JSON.stringify(this.state));
     var config = {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-        //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
       },
       body: JSON.stringify({
         method: "invoke",
         params: {
           ctorMsg: {
             function: "init_asset",
-            // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
             args: [this.state.id, this.state.balance, String(parseFloat(this.state.interestrate) * 0.01) , this.state.remainingpayments]
-            //args: Object.values(this.state)
           }
         }
       })
@@ -85,7 +75,6 @@ class InitAssetForm extends React.Component {
       refreshState(2)
     })
     this.setState({ open: false });
-    // event.preventDefault();
   }
 
   handleClickOpen = () => {
@@ -101,33 +90,6 @@ class InitAssetForm extends React.Component {
       [name]: event.target.value,
     });
   };
-
-  // function generateTextFields(fields) {
-  //
-  //   return
-  // }
-
-  // <form onSubmit={this.handleSubmit}>
-  //   <label>
-  //     Id:
-  //     <input type="text" name="id" value={this.state.id} onChange={this.handleIdChange} />
-  //   </label>
-  //   <label>
-  //     InterestRate:
-  //     <input type="text" name="interestrate" value={this.state.interestrate} onChange={this.handleInterestRateChange}  />
-  //   </label>
-  //   <label>
-  //     Balance:
-  //     <input type="text" name="balance" value={this.state.balance} onChange={this.handleBalanceChange} />
-  //   </label>
-  //   <label>
-  //     Underwriting:
-  //     <input type="text" name="underwriting" value={this.state.underwriting} onChange={this.handleUnderwritingChange} />
-  //   </label> -->
-  //
-  //   <input type="submit" value="Submit" />
-  // </form>
-
 
   render() {
     return (
@@ -176,24 +138,6 @@ class InitAssetForm extends React.Component {
               onChange={this.handleChange('remainingpayments')}
               fullWidth
             />
-          {/*
-            <TextField
-              autoFocus
-              margin="dense"
-              id="monthlypayment"
-              label="Monthly Payment"
-              onChange={this.handleChange('monthlypayment')}
-              fullWidth
-            />
-            <TextField
-              autoFocus
-              margin="dense"
-              id="underwriting"
-              label="Underwriting Information"
-              onChange={this.handleChange('underwriting')}
-              fullWidth
-            />
-            */}
           </DialogContent>
           <DialogActions>
             <Button onClick={this.handleClose} color="primary">

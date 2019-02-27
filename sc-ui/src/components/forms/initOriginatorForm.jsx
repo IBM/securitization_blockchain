@@ -18,18 +18,14 @@ class InitOriginatorForm extends React.Component {
       processingfee: '',
       company: ''
     };
-    // this.handleChange = this.handleChange.bind(this);
   }
   handleSubmit = () =>  {
-    // console.log("event")
-    // console.log(event)
     console.log('creating originator with id: ' + JSON.stringify(this.state));
     let config = {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-        //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
       },
       body: JSON.stringify({
         method: "invoke",
@@ -37,7 +33,6 @@ class InitOriginatorForm extends React.Component {
           ctorMsg: {
             function: 'init_originator',
             args: [this.state.id, this.state.company, String(parseFloat(this.state.processingfee) * 0.01)]
-            //args: Object.values(this.state)
           }
         }
       })
@@ -47,7 +42,6 @@ class InitOriginatorForm extends React.Component {
       refreshState()
     })
     this.setState({ open: false });
-    // event.preventDefault();
   }
 
   handleClickOpen = () => {

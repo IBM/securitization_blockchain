@@ -57,8 +57,6 @@ module.exports = {
       '/api/**': { target: 'http://localhost:30001' , secure: false, changeOrigin: true, pathRewrite: {
         '^/api': ''
         }}
-      // "/chaincode": "http://localhost:3001/chaincode",
-      // "/init_hfc_client": "http://localhost:3001/init_hfc_client"
     }
   },
   plugins:[

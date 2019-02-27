@@ -28,7 +28,6 @@ const styles = theme => ({
 
 let id = 0;
 function createData( id, processingfee, company, assets, balance ) {
-  // id += 1;
   return { id, processingfee, company, assets, balance };
 }
 
@@ -46,7 +45,6 @@ function generateData() {
     console.log(err)
   }
 
-  // console.log(originators)
   var data = []
   if (!originators || originators.length == 0) {
     return data
@@ -58,8 +56,6 @@ function generateData() {
       )
     )
     if (idx == (originators.length -1)) {
-      // console.log("data")
-      // console.log(data)
       return data
     }
   }

@@ -14,7 +14,6 @@ class InitInvestorForm extends React.Component {
     this.state = {
       id: ''
     };
-    // this.handleChange = this.handleChange.bind(this);
     this.handleIdChange = this.handleIdChange.bind(this);
     this.handleInterestRateChange = this.handleInterestRateChange.bind(this);
     this.handleBalanceChange = this.handleBalanceChange.bind(this);
@@ -51,15 +50,12 @@ class InitInvestorForm extends React.Component {
   }
 
   handleSubmit = () =>  {
-    // console.log("event")
-    // console.log(event)
     console.log('creating investor with id: ' + JSON.stringify(this.state));
     let config = {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-        //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
       },
       body: JSON.stringify({
         method: "invoke",
@@ -67,7 +63,6 @@ class InitInvestorForm extends React.Component {
           ctorMsg: {
             function: 'init_investor',
             args: [this.state.id]
-            //args: Object.values(this.state)
           }
         }
       })
@@ -75,8 +70,6 @@ class InitInvestorForm extends React.Component {
     console.log(config.body)
     fetch(window.location.href.replace('30000', '30001') + 'api/chaincode', config)
     this.setState({ open: false });
-
-    // event.preventDefault();
   }
 
   handleClickOpen = () => {
@@ -92,33 +85,6 @@ class InitInvestorForm extends React.Component {
       [name]: event.target.value,
     });
   };
-
-  // function generateTextFields(fields) {
-  //
-  //   return
-  // }
-
-  // <form onSubmit={this.handleSubmit}>
-  //   <label>
-  //     Id:
-  //     <input type="text" name="id" value={this.state.id} onChange={this.handleIdChange} />
-  //   </label>
-  //   <label>
-  //     InterestRate:
-  //     <input type="text" name="interestrate" value={this.state.interestrate} onChange={this.handleInterestRateChange}  />
-  //   </label>
-  //   <label>
-  //     Balance:
-  //     <input type="text" name="balance" value={this.state.balance} onChange={this.handleBalanceChange} />
-  //   </label>
-  //   <label>
-  //     Underwriting:
-  //     <input type="text" name="underwriting" value={this.state.underwriting} onChange={this.handleUnderwritingChange} />
-  //   </label> -->
-  //
-  //   <input type="submit" value="Submit" />
-  // </form>
-
 
   render() {
     return (

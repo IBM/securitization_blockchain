@@ -28,7 +28,6 @@ const styles = theme => ({
 
 let id = 0;
 function createData( id, value, assets, securities, excessspread ) {
-  // id += 1;
   return { id, value, assets, securities, excessspread };
 }
 
@@ -80,8 +79,6 @@ function SimplePoolTable(props) {
             <TableCell>Pool Assets</TableCell>
             <TableCell>Value of Pool Assets (Including Expected Interest)</TableCell>
             <TableCell>Securities</TableCell>
-            {/*<TableCell>Excess Spread</TableCell>*/}
-
           </TableRow>
         </TableHead>
         <TableBody>
@@ -94,7 +91,6 @@ function SimplePoolTable(props) {
                 <TableCell>{  n.assets ? n.assets.join(', ') : '' }</TableCell>
                 <TableCell>{n.value.toFixed(2)}</TableCell>
                 <TableCell>{  n.securities ? n.securities.join(', ') : '' }</TableCell>
-                {/*<TableCell>{n.excessspread}</TableCell>*/}
               </TableRow>
             );
           })}

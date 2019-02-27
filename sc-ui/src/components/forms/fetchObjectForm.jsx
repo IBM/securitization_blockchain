@@ -27,7 +27,6 @@ class FetchObject extends React.Component {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-        //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
       },
       body: JSON.stringify({
         method: "query",
@@ -38,7 +37,6 @@ class FetchObject extends React.Component {
           }
         }
       })
-         // JSON.stringify( 'read' +  Object.values(this.state))
     }
 
     fetch(window.location.href.replace('30000', '30001') + 'api/chaincode', config)
@@ -46,9 +44,6 @@ class FetchObject extends React.Component {
       .then((json) =>{
         console.log(json)
         const element = GenerateCards(JSON.parse(json))
-        // TODO, ??
-        // ReactDOM.render(element, document.getElementById('test'));
-
     }).catch( (err) => {
         console.log("fetch failed")
     });

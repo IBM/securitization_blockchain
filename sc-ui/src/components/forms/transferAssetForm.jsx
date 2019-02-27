@@ -15,23 +15,11 @@ class TransferAssetForm extends React.Component {
       asset_id: '',
       pool_id: ''
     };
-
-    // this.handleChange = this.handleChange.bind(this);
     this.handleIdChange = this.handleIdChange.bind(this);
     this.handlePaymentAmountChange = this.handlePaymentAmountChange.bind(this);
 
     this.handleSubmit = this.handleSubmit.bind(this);
   }
-  // handleChange(event) {
-  //   console.log(event.target)
-  //   this.setState({
-  //     id: event.target.id,
-  //     interestrate: event.target.interestrate,
-  //     balance: event.target.balance
-  //   });
-  //   //this.setState(event.target.id)
-  // }
-
   handleIdChange(event) {
     console.log(event.target)
     this.setState({
@@ -47,8 +35,6 @@ class TransferAssetForm extends React.Component {
   }
 
   handleSubmit = () =>  {
-    // console.log("event")
-    // console.log(event)
     console.log('transferring asset: ' + JSON.stringify(this.state));
     if (this.state.pool_id) {
       var config = {
@@ -56,14 +42,12 @@ class TransferAssetForm extends React.Component {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
-          //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
         },
         body: JSON.stringify({
           method: "invoke",
           params: {
             ctorMsg: {
               function: 'pool_asset',
-              // or set_originator
               args: [this.state.asset_id, this.state.pool_id]
             }
           }
@@ -79,16 +63,13 @@ class TransferAssetForm extends React.Component {
               headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
-                //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
               },
               body: JSON.stringify({
                 method: "invoke",
                 params: {
                   ctorMsg: {
                     function: 'value_asset_pool',
-                    // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
                     args: [this.state.asset_id]
-                    //args: Object.values(this.state)
                   }
                 }
               })
@@ -101,9 +82,7 @@ class TransferAssetForm extends React.Component {
             })
           }
         }, 3000)
-        // refreshState()
       })
-    // event.preventDefault();
     }
 
     if (this.state.originator_id) {
@@ -112,14 +91,12 @@ class TransferAssetForm extends React.Component {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
-          //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
         },
         body: JSON.stringify({
           method: "invoke",
           params: {
             ctorMsg: {
               function: 'set_originator',
-              // or set_originator
               args: [this.state.asset_id, this.state.originator_id]
             }
           }
@@ -132,11 +109,8 @@ class TransferAssetForm extends React.Component {
           refreshState(2)
         }
       ).then( () => {
-        console.log("this.state")
-        console.log(this.state)
         this.setState(this.state)
       })
-    // event.preventDefault();
     }
     this.setState({ open: false });
   }
@@ -144,10 +118,6 @@ class TransferAssetForm extends React.Component {
   handleClickOpen = () => {
     this.setState({ open: true });
   };
-
-  // onChange = () => {
-  //   this.setState(this.state)
-  // }
 
   handleClose = () => {
     this.setState({ open: false });

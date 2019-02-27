@@ -15,22 +15,11 @@ class ProcessPaymentForm extends React.Component {
       asset_id: '',
       paymentamount: ''
     };
-
-    // this.handleChange = this.handleChange.bind(this);
     this.handleIdChange = this.handleIdChange.bind(this);
     this.handlePaymentAmountChange = this.handlePaymentAmountChange.bind(this);
-
     this.handleSubmit = this.handleSubmit.bind(this);
   }
-  // handleChange(event) {
-  //   console.log(event.target)
-  //   this.setState({
-  //     id: event.target.id,
-  //     interestrate: event.target.interestrate,
-  //     balance: event.target.balance
-  //   });
-  //   //this.setState(event.target.id)
-  // }
+
 
   handleIdChange(event) {
     console.log(event.target)
@@ -47,8 +36,6 @@ class ProcessPaymentForm extends React.Component {
   }
 
   handleSubmit = () =>  {
-    // console.log("event")
-    // console.log(event)
     this.setState({ open: false });
     var asset_id = this.state.id
     console.log('processing payment for asset: ' + JSON.stringify(this.state));
@@ -57,7 +44,6 @@ class ProcessPaymentForm extends React.Component {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-        //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
       },
       body: JSON.stringify({
         method: "invoke",
@@ -65,7 +51,6 @@ class ProcessPaymentForm extends React.Component {
           ctorMsg: {
             function: 'process_payment',
             args: [this.state.id, this.state.paymentamount]
-            //args: Object.values(this.state)
           }
         }
       })

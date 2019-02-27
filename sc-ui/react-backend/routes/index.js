@@ -59,11 +59,6 @@ function enrollUser(username, client, networkId, client_crypto_suite) {
   })
 }
 
-// TODO, let user switch between local deployment and starter plan deployment
-// if (fs.existsSync('./connection_profile.json')) {
-//   initializeClient(null)
-// }
-// var client
 function requestConnectionProfile(req, res) {
   return new Promise((resolve, reject) => {
     console.log("requesting connection profile")
@@ -72,8 +67,6 @@ function requestConnectionProfile(req, res) {
     } else {
       var api_endpoint = req.body.api_endpoint
     }
-    // initializeClient()
-    // console.log(req.body)
     var options = {
       url: api_endpoint + '/networks/' + req.body.network_id + '/connection_profile',
       method: 'GET',
@@ -84,7 +77,6 @@ function requestConnectionProfile(req, res) {
         "Authorization": "Basic " + new Buffer(req.body.key + ":" + req.body.secret, "utf8").toString("base64")
       }
     }
-    console.log(options)
     request(options, function(err, res, body) {
       let json = JSON.parse(body);
       console.log("body")
@@ -151,7 +143,6 @@ function initializeHostedClient(req, res) {
         function(callback) {
           console.log("Set CryptoKeyStore")
           crypto_suite.setCryptoKeyStore(crypto_store)
-          // client.setCryptoSuite(crypto_suite)
           callback()
         },
         function(callback) {
@@ -170,16 +161,12 @@ function initializeHostedClient(req, res) {
         },
         function(callback) {
           client.getUserContext(username, true).then((user) => {
-            // res.send("Client Initialized")
             console.log("Loading user context")
             if (user && user.isEnrolled()) {
               console.log("Client Loaded From Persistence")
-              // res.send("Client Loaded From Persistence")
-              console.log("Be sure to upload following cert via blockchain UI: \n") //+ req.body.urlRestRoot + "/network/" + req.body.networkId + "/members/certificates")
+              console.log("Be sure to upload following cert via blockchain UI: \n")
               console.log(user._signingIdentity._certificate + '\n')
-              // res.json({"msg": "Please upload following cert to IBM Blockchain UI", "certificate": user._signingIdentity._certificate}) //{msg: "Please upload following cert to IBM Blockchain UI", cert: user._signingIdentity._certificate})
               callback()
-              // TODO, render this certificate in UI, and only when admin calls fail
             } else {
               enrollUser(username, client, client._network_config._network_config['x-networkId'], client_crypto_suite).then(() => {
                 callback()
@@ -197,17 +184,6 @@ function initializeHostedClient(req, res) {
           }
           fs.writeFile('chaincode_info.json', JSON.stringify(sec_chaincode), 'utf8', function() {})
           console.log("chaincode info, channel, peers set")
-          // client.queryInstalledChaincodes(peer, true).then( (response) => {
-          //   console.log(response)
-          //   chaincodes = response
-          // }).then ( (result) =>  {
-          //   // sec_chaincode = _.where( chaincodes.chaincodes, {name: 'sec', version: 'v7'} )[0]
-          //   sec_chaincode = _.where( chaincodes.chaincodes, {name: req.body.chaincode_id, version: req.body.chaincode_version} )[0]
-          //   console.log(chaincodes)
-          //   // res.sendStatus(200)
-          // }).catch(
-          //   console.log("Error loading chaincode, please confirm admin cert has been uploaded and chaincode id/version is correct")
-          // );
         }
       ],
       function(err) {
@@ -220,19 +196,14 @@ function initializeHostedClient(req, res) {
   }
 }
 
-// Check ports 7051, 7053, 7050
-var localHFPorts = [7051, 7053, 7054]
-// If Docker listening at each of the above ports, load and enroll local client. Otherwise, wait for an API request at the "init_hfc_client" endpoint
 if (process.env.DEPLOY_TYPE == 'local') {
   console.log("initializing local hfc client")
   initializeLocalClient()
 }
 
 function initializeLocalClient() {
-  // var endpoint = "http://127.0.0.1"
   var endpoint = "http://ca.example.com"
   console.log("Initializing Local HFC client")
-  // client = new hfc();
   client = hfc.loadFromConfig('../local/connection.json')
   ca = new CAClient(endpoint + ":7054", {
     trustedRoots: [],
@@ -271,11 +242,10 @@ function initializeLocalClient() {
       },
       function(callback) {
         client.getUserContext(username, true).then((user) => {
-          // res.send("Client Initialized")
           console.log("Loading user context")
           if (user && user.isEnrolled()) {
             console.log("Client Loaded From Persistence")
-            console.log("Be sure to upload following cert via blockchain UI: \n") //+ req.body.urlRestRoot + "/network/" + req.body.networkId + "/members/certificates")
+            console.log("Be sure to upload following cert via blockchain UI: \n")
             console.log(user._signingIdentity._certificate + '\n')
             channel = client.getChannel()
             callback()
@@ -313,7 +283,7 @@ function initializeLocalClient() {
 
 
 // When server first starts up, we'll check for hosted HFC configure files/certs
-// If the hosted files do not exist, check for local hyperledger. Otherwise,
+// If the hosted files do not exist, check for local hyperledger.
 var checkHFCConfig = function() {
   var hfc_name = "monitoring_admin"
   if (fs.existsSync('./hfc-key-store/hosted/')) {
@@ -357,19 +327,16 @@ var loadHFC = function() {
       function(callback) {
         var username = "monitoring_admin"
         client.getUserContext(username, true).then((user) => {
-          // res.send("Client Initialized")
           console.log("Loading user context")
           if (user && user.isEnrolled()) {
             console.log("Client Loaded From Persistence")
-            // res.send("Client Loaded From Persistence")
             console.log("Be sure to upload following cert via blockchain UI: \n") //+ req.body.urlRestRoot + "/network/" + req.body.networkId + "/members/certificates")
             console.log(user._signingIdentity._certificate + '\n')
             res.json({
               "msg": "Please upload following cert to IBM Blockchain UI",
               "certificate": user._signingIdentity._certificate
-            }) //{msg: "Please upload following cert to IBM Blockchain UI", cert: user._signingIdentity._certificate})
+            })
             callback()
-            // TODO, render this certificate in UI, and only when admin calls fail
           } else {
             enrollUser(username, client, client._network_config._network_config['x-networkId'], client_crypto_suite).then(() => {
               callback()
@@ -387,17 +354,6 @@ var loadHFC = function() {
         }
         fs.writeFile('chaincode_info.json', JSON.stringify(sec_chaincode), 'utf8', function() {})
         console.log("chaincode info, channel, peers set")
-        // client.queryInstalledChaincodes(peer, true).then( (response) => {
-        //   console.log(response)
-        //   chaincodes = response
-        // }).then ( (result) =>  {
-        //   // sec_chaincode = _.where( chaincodes.chaincodes, {name: 'sec', version: 'v7'} )[0]
-        //   sec_chaincode = _.where( chaincodes.chaincodes, {name: req.body.chaincode_id, version: req.body.chaincode_version} )[0]
-        //   console.log(chaincodes)
-        //   // res.sendStatus(200)
-        // }).catch(
-        //   console.log("Error loading chaincode, please confirm admin cert has been uploaded and chaincode id/version is correct")
-        // );
       }
     ],
     function(err) {
@@ -429,8 +385,6 @@ router.post('/api/chaincode', function(req, res) {
   var chaincode_query = JSON.stringify({
     "Args": [chaincode.function].concat(chaincode.args)
   })
-  // TODO, add check here for valid hfc client. If client not initialized, use docker
-  // Looks for connection_profile.json and admin_cert
   if (typeof(client) !== 'undefined') {
     console.log("invoking chaincode with hfc client")
     console.log("req")
@@ -449,17 +403,9 @@ router.post('/api/chaincode', function(req, res) {
       }
       console.log(txRequest)
       var txResult = proposeAndSubmitTransaction(txRequest)
-      // console.log(txResult)
-      // if (txResult) {
-        res.send(200)
-      // } else {
-      //   res.send(500)
-      // }
-    } else { // query
-      console.log("query chaincode with hfc client")
-      console.log("req.body.method")
-      console.log(req.body.method)
-      console.log(sec_chaincode)
+      res.send(200)
+    } else {
+      console.log("querying chaincode with hfc client")
       var txRequest = {
         chaincodeId: sec_chaincode.name,
         chaincodeVersion: sec_chaincode.version,
@@ -483,7 +429,6 @@ router.post('/api/chaincode', function(req, res) {
 });
 
 function submitTransaction(txRequest) {
-  // if (isProposalGood) {
   console.log(util.format('Successfully sent Proposal and received ProposalResponse: Status - %s, message - "%s"', proposalResponses[0].response.status, proposalResponses[0].response.message));
   var promises = []
   var sendPromise = channel.sendTransaction({
@@ -495,13 +440,10 @@ function submitTransaction(txRequest) {
     console.log(result)
     res.send(result)
   })
-  // }
 }
 
 function proposeAndSubmitTransaction(txRequest) {
   console.log("sending transaction proposal")
-  console.log("channel")
-  console.log(channel)
   channel.sendTransactionProposal(txRequest).then((proposalRes) => {
     console.log("response received")
     var proposalResponses = proposalRes[0];
@@ -511,7 +453,6 @@ function proposeAndSubmitTransaction(txRequest) {
     console.log(proposalResponses[0].response)
     if (proposalResponses && proposalResponses[0].response && proposalResponses[0].response.status === 200) {
       console.log('Transaction proposal was accepted');
-      // return true;
       channel.sendTransaction({
         proposalResponses: proposalResponses,
         proposal: proposal
@@ -529,8 +470,6 @@ function proposeAndSubmitTransaction(txRequest) {
   });
 }
 
-
-// TODO
 function uploadAdminCert(req, mspId) {
   var uploadAdminCertReq = {
     "msp_id": mspId,
@@ -555,7 +494,6 @@ function uploadAdminCert(req, mspId) {
     },
     body: uploadAdminCertReq
   }
-  // console.log(options)
   console.log("uploading admin cert")
   request(options, function(err, res, body) {
     console.log("res")

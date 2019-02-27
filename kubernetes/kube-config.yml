@@ -19,27 +19,14 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  # srv: api
   labels:
     srv: api
   name: securitization-pod
 spec:
-  # ports:
-  #   - port: 3000
-  #     protocol: TCP
   containers:
     - name: securitization-blockchain
       image: kkbankol/securitization_blockchain
       imagePullPolicy: Always
-      # command: ["bash"]
       stdin: true
       tty: true
       args: ["-c", "cd /root/securitization_blockchain/sc-ui && PORT=30000 npm start | PORT=30001 node react-backend/bin/www"]
-      # envFrom:
-      #   - secretRef:
-      #      name: cloudant-auth
-      # env:
-      #  - name: PORT
-      #    value: "30000"
-      #  - name: CLOUDANT_PASSWORD
-      #    value: ${CLOUDANT_PASSWORD

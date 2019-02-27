@@ -31,7 +31,6 @@ const styles = theme => ({
 
 let id = 0;
 function createData( id, balance, securities ) {
-  // id += 1;
   return { id, balance, securities };
 }
 

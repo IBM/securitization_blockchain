@@ -32,7 +32,6 @@ const styles = theme => ({
 
 let id = 0;
 function createData( id, rating, couponrate, pool, value, remainingpayments, maturity, investor ) {
-  // id += 1;
   return { id, rating, couponrate, pool, value, remainingpayments, maturity, investor };
 }
 
@@ -61,8 +60,6 @@ function generateData() {
       )
     )
     if (idx == (securities.length -1)) {
-      // console.log("data")
-      // console.log(data)
       return data
     }
   }
@@ -81,10 +78,6 @@ function SimpleSecurityTable(props) {
             <TableCell> Pool</TableCell>
             <TableCell> Coupon Rate</TableCell>
             <TableCell> Investor </TableCell>
-            {/*<TableCell> Payments Left </TableCell>
-            <TableCell> Value (Expected Payout)</TableCell>
-            <TableCell> Maturity </TableCell>
-            <TableCell> Rating</TableCell>*/}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -95,11 +88,6 @@ function SimpleSecurityTable(props) {
                 <TableCell>{n.pool}</TableCell>
                 <TableCell>{n.couponrate.toFixed(2) * 100}%</TableCell>
                 <TableCell>{n.investor}</TableCell>
-
-                {/* <TableCell >{n.remainingpayments}</TableCell>
-                  <TableCell>{n.value}</TableCell>
-                 <TableCell>{n.maturity}</TableCell>
-                <TableCell>{n.rating}</TableCell>*/}
               </TableRow>
             );
           })}

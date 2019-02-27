@@ -29,7 +29,6 @@ const styles = theme => ({
 
 let id = 0;
 function createData( id, balance, interest, state, remainingpayments, originator, pool, payoffamount ) {
-  // id += 1;
   return { id, balance, interest, state, remainingpayments, originator, pool, payoffamount };
 }
 
@@ -80,8 +79,6 @@ function SimpleAssetTable(props) {
             <TableCell> State</TableCell>
             <TableCell> Originator </TableCell>
             <TableCell> Pool </TableCell>
-            {/*<TableCell> Monthly Payment </TableCell>
-               <TableCell> Payments until Amortization </TableCell>*/}
             <TableCell> Payments until Amortization </TableCell>
             <TableCell> Expected Amortization Amount </TableCell>
           </TableRow>
@@ -97,8 +94,6 @@ function SimpleAssetTable(props) {
                 <TableCell>{n.state}</TableCell>
                 <TableCell>{n.originator}</TableCell>
                 <TableCell>{n.pool}</TableCell>
-                {/*<TableCell>{n.monthlypayment}</TableCell>
-                 <TableCell>{n.remainingpayments}</TableCell>*/}
                 <TableCell>{n.remainingpayments}</TableCell>
                 <TableCell>$ {n.payoffamount}</TableCell>
               </TableRow>

@@ -37,33 +37,26 @@ class PoolAsset extends React.Component {
   }
 
   handleSubmit = () =>  {
-    // console.log("event")
-    // console.log(event)
     let config = {
       mode: "cors",
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-        //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
       },
       body: JSON.stringify({
         method: "invoke",
         params: {
           ctorMsg: {
             function: 'pool_asset',
-            // or set_originator
             args: Object.values(this.state)
           }
         }
       })
     }
-    // console.log(config.body)
     console.log('transferring asset to pool: ')
     fetch(window.location.href.replace('30000', '30001') + 'api/chaincode', config).then ( () =>  {
-       //+ JSON.stringify(this.state));
       console.log("submitted request to pool asset")
-      // setTimeout( () => {
         console.log("getting values of pool")
         {
           var config_value = {
@@ -71,16 +64,13 @@ class PoolAsset extends React.Component {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json'
-              //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
             },
             body: JSON.stringify({
               method: "invoke",
               params: {
                 ctorMsg: {
                   function: 'value_asset_pool',
-                  // args: [this.state.id, this.state.balance, this.state.interestrate, this.state.monthlypayment, this.state.underwriting]
                   args: [this.state.assetId]
-                  //args: Object.values(this.state)
                 }
               }
             })
@@ -92,11 +82,9 @@ class PoolAsset extends React.Component {
             refreshState(3)
           })
         }
-      // }, 3000)
     }).catch(
       console.log("pool asset request failed")
     )
-    // event.preventDefault();
   }
 
   render() {

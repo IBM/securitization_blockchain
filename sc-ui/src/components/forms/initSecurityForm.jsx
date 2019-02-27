@@ -23,7 +23,6 @@ class InitSecurityForm extends React.Component {
       investor: ''
     };
 
-    // this.handleChange = this.handleChange.bind(this);
     this.handleIdChange = this.handleIdChange.bind(this);
     this.handleInterestRateChange = this.handleInterestRateChange.bind(this);
     this.handleBalanceChange = this.handleBalanceChange.bind(this);
@@ -60,15 +59,12 @@ class InitSecurityForm extends React.Component {
   }
 
   handleSubmit = () =>  {
-    // console.log("event")
-    // console.log(event)
     console.log('creating security with id: ' + JSON.stringify(this.state));
     let config = {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-        //"Authorization": "Basic " + new Buffer(key + ":" + secret, "utf8").toString("base64")
       },
       body: JSON.stringify({
         method: "invoke",
@@ -76,7 +72,6 @@ class InitSecurityForm extends React.Component {
           ctorMsg: {
             function: 'init_security',
             args: [ this.state.id, String(parseFloat(this.state.couponrate) * 0.01), this.state.pool, this.state.monthsuntilmaturity]
-            //args: Object.values(this.state)
           }
         }
       })
@@ -86,7 +81,6 @@ class InitSecurityForm extends React.Component {
       refreshState(2)
     })
     this.setState({ open: false });
-    // event.preventDefault();
   }
 
   handleClickOpen = () => {
@@ -102,33 +96,6 @@ class InitSecurityForm extends React.Component {
       [name]: event.target.value,
     });
   };
-
-  // function generateTextFields(fields) {
-  //
-  //   return
-  // }
-
-  // <form onSubmit={this.handleSubmit}>
-  //   <label>
-  //     Id:
-  //     <input type="text" name="id" value={this.state.id} onChange={this.handleIdChange} />
-  //   </label>
-  //   <label>
-  //     InterestRate:
-  //     <input type="text" name="interestrate" value={this.state.interestrate} onChange={this.handleInterestRateChange}  />
-  //   </label>
-  //   <label>
-  //     Balance:
-  //     <input type="text" name="balance" value={this.state.balance} onChange={this.handleBalanceChange} />
-  //   </label>
-  //   <label>
-  //     Underwriting:
-  //     <input type="text" name="underwriting" value={this.state.underwriting} onChange={this.handleUnderwritingChange} />
-  //   </label> -->
-  //
-  //   <input type="submit" value="Submit" />
-  // </form>
-
 
   render() {
     return (
@@ -184,7 +151,6 @@ class InitSecurityForm extends React.Component {
           </DialogActions>
         </Dialog>
       </div>
-
     );
   }
 }
