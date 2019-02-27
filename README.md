@@ -214,7 +214,7 @@ cd local
 ./startFabric.sh
 ```
 
-<!-- ### Manual installation
+### Manual installation
 Otherwise, continue by installing [Node.js](https://nodejs.org/en/) runtime and NPM. Currently the Hyperledger Fabric SDK only appears to work with node v8.9.0+, but [is not yet supported](https://github.com/hyperledger/fabric-sdk-node#build-and-test) on node v9.0+. If your system requires newer versions of node for other projects, we'd suggest using [nvm](https://github.com/creationix/nvm) to easily switch between node versions. We did so with the following commands
 ```
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
@@ -233,11 +233,12 @@ npm install
 cd react-backend && npm install
 ```
 
-Finally, compile the `bundle.js` file
+<!-- Finally, compile the `bundle.js` file
 ```
 cd public
 npm run build
 ``` -->
+
 <!-- Method	| Command	|Comment
 --- | --- | ---
 Filesystem | `npm run build` | The build command generates the bundle.js file in the public directory. </br>To access the Monitoring UI, go to the `monitoring_ui/public` directory and open the *index.html* file in a browser. -->
@@ -309,9 +310,14 @@ Confirm that the Node.js application is up and running by opening the following
 ```
 
 ## 4. Deploy Application Locally (**local**)
-Install the Securitization UI node packages by running `npm install` in the project root directory and in the [react-backend](sc-ui/react-backend) directory. Both `python` and `build-essential` are required for these dependencies to install properly:
+<!-- Install the Securitization UI node packages by running `npm install` in the project root directory and in the [react-backend](sc-ui/react-backend) directory. Both `python` and `build-essential` are required for these dependencies to install properly: -->
 
-<!-- ```bash
+Make sure the correct version of node is equipped
+```
+nvm use 8.9.0
+```
+
+```bash
 # install react dependencies
 cd sc-ui
 npm install
@@ -323,36 +329,22 @@ npm install
 
 # return to the root project directory
 cd ../../
-``` -->
-
-Build the application and dependencies in a docker container like so
-
-```bash
-docker build -t securitization_blockchain .
 ```
 
-<!-- Finally, run the application
+Finally, run the application
 ```
 cd sc-ui
-npm start | PORT=3001 node react-backend/bin/www
-``` -->
+PORT=30000 npm start | PORT=30001 DEPLOY_TYPE=local node react-backend/bin/www
+```
 
-<!-- ### Docker setup (optional)
+### Docker setup (local alternative)
 If you have Docker installed, you can install these dependencies in a virtual container instead. Run the application with the following commands, and then skip to [Step 5](#5-configure-credentials)
+
+Build the application and dependencies in a docker image like so
+
+```bash
+docker build -t securitization-blockchain .
 ```
-docker build -t monitoring_ui .
-docker run -d -p 8081:8081 monitoring_ui
-``` -->
-
-> NOTE: These steps are only needed when running locally instead of using the ``Deploy to IBM Cloud`` button.
-
-<!-- there are MANY updates necessary here, just screenshots where appropriate -->
-
-<!-- Make sure the correct version of node is equipped
-```
-nvm use 8.9.0
-``` -->
-
 <!-- Start the app locally
 ```
 cd sc-ui
@@ -361,7 +353,12 @@ PORT=30000 npm start | PORT=30001 DEPLOY_TYPE=local node react-backend/bin/www
 
 Then start the docker container with
 ```
-docker run -it -p 30000:30000 -e DEPLOY_TYPE=local -p 30001:30001 securitization_blockchain bash -c 'cd /root/securitization_blockchain/sc-ui ; PORT=30000 npm start | PORT=30001 node react-backend/bin/www'
+docker run -it -p 30000:30000 -e DEPLOY_TYPE=local -p 30001:30001 securitization-blockchain bash -c 'cd /root/securitization_blockchain/sc-ui ; PORT=30000 npm start | PORT=30001 node react-backend/bin/www'
+```
+
+The application can instead be booted from a public image as well if there is no need to build a custom image
+```
+docker run -it -p 30000:30000 -e DEPLOY_TYPE=local -p 30001:30001 kkbankol/securitization-blockchain bash -c 'cd /root/securitization_blockchain/sc-ui ; PORT=30000 npm start | PORT=30001 node react-backend/bin/www'
 ```
 
 <!-- This method is ideal for a development environment but not suitable for a production environment. TODO, this comment is from the original author, would like to understand why-->

@@ -25,7 +25,7 @@ metadata:
 spec:
   containers:
     - name: securitization-blockchain
-      image: kkbankol/securitization_blockchain
+      image: kkbankol/securitization-blockchain
       imagePullPolicy: Always
       stdin: true
       tty: true
