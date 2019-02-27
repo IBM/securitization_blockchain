@@ -32,21 +32,8 @@ type SimpleChaincode struct {
 }
 
 // ============================================================================================================================
-// Asset Definitions - The ledger will store marbles and owners
+// Asset Definitions - The ledger will store assets and owners
 // ============================================================================================================================
-
-// type Underwriting struct {
-// 	Credit, DebtToIncome string
-// }
-
-
-// type Configuration struct {
-//     Val   string
-//     Proxy struct {
-//         Address string
-//         Port    string
-//     }
-// }
 
 type Pool struct {
 	// ObjectType     string      `json:"docType"`     //field for couchdb
@@ -55,20 +42,11 @@ type Pool struct {
 	ExcessSpread   float64     `json:excessspread` // remainder of payments that aren't sent to investors/originator
 	Value          float64     `json:value`				// sum of all mortgage values
 	Assets         []string    `json:"assets"`    // string of asset ids
-	// Assets         []*Asset     `json:"assets"`    // string of asset ids
-	// Investors      []Investor  `json:"investors"` // TODO, array of investor ids,
-	// Securities		 []*Security  `json:"securities"`
 	Securities		 []string 	 `json:"securities"`
-	// Securities		 map[string]Security  `json:"securities"`
-	// Return				    float64    `json:"return"` // maybe this should be the
-	// Assets         map       `json:"assets"`
-	// AssetRelation  []string  `json:"assets"`
 }
 
 type Asset struct {
-	// ObjectType     string                      `json:"docType"` //field for couchdb
 	Id       			 string                      `json:"id"`      //the fieldtags are needed to keep case from bouncing around
-	// Originator     Originator	         				 `json:"originator"`
 	Originator     string   	         				 `json:"originator"`
 	Pool           string	                     `json:"pool"` // TODO, not sure if this is needed
 	State          string                      `json:"state"` // active, deliquent
@@ -80,98 +58,50 @@ type Asset struct {
 	RemainingPayments   string								 `json:"remainingpayments"`
 	ProcessingPayment   string								 `json:"processingpayment"`
 	ExpectedPayoffAmount string							   `json:"payoffamount"`
-
-	// (( InterestRate / 12 ) * Balance * PaymentsLeft) / (1 - (1 + (InterestRate / 12) ) ^ -PaymentsLeft )
-	// (((asset.InterestRate / 12) * asset.balance * asset.PaymentsLeft) / math.Pow( (1 - (1 + (asset.InterestRate / 12)) ), (-1 * asset.PaymentsLeft) ))
-
-	// Investor       InvestorRelation	   `json:"investor"`
-	// Underwriting struct {
-	// 	FICO					 string   `json:"FICO"`
-	// 	// DebtToIncome   float64  `json:"debt_to_income"`
-	// 	// MonthsActive   int  `json:"months_active"`
-	// } `json:"underwriting"`
-	// Pool           *Pool	                     `json:"pool"` // TODO, not sure if this is needed
 }
-
-// Underwriting information is used to determine asset rating, which subsequently determines which security it's associated with
-// type Underwriting struct {
-// 	FICO					 string   `json:"FICO"`
-// 	// DebtToIncome   float64  `json:"debt_to_income"`
-// }
 
 // ----- Participants ----- //
 type Originator struct {
-	// ObjectType     string   `json:"docType"`     //field for couchdb
 	Id             string   `json:"id"`
 	Username       string   `json:"username"`
 	Company        string   `json:"company"`
 	ProcessingFee  string   `json:"processingfee"` // percentage
 	Assets         []string `json:"assets"` // list of asset ids will do
 	Balance        string  `json:"balance"` // originator receives proceeds from security sales
-	// Assets         []Asset `json:"assets"`
-	// AssetRelation  []string `json:"assets"`
 }
 
 type Security struct {
-	// ObjectType     string    `json:"docType"`     //field for couchdb
 	Id                  string      `json:"id"`
-	// Amount				    int			   `json:"amount"`
 	Rating				      string		  `json:"rating"`
 	CouponRate				  float64     `json:"couponrate"` // lets say return is 8% on the year, and each security costs 1k
 																					  // so monthly_payout per security should total (1k * .08) / 12
 																					  // dividing that by number of assets in our pool will determine how much investor gets from each payment
 	Value               string    `json:"value"` // Expected payout
-	// MonthsUntilMaturity int 	     `json:"monthsuntilmaturity"` // number of payments investor will receive
 	Maturity					  bool       `json:"maturity"`
 	MaturityDate        string     `json:"maturitydate"`
-	Investor            string     `json:"investor"` // TODO, array of investor ids, or array of structs?
+	Investor            string     `json:"investor"`
 	Pool				        string			 `json:"pool"`
-	// Expiration     string     `json`
 	AmountPaid          string  `json:"amountpaid"`
 	OriginalValue       string  `json:"originalvalue"`
 	MonthlyPayout				string  `json:"monthlypayout"`
 	RemainingPayments   string  `json:"remainingpayments"`
-	// PercentageSecuritized float64 `json:percentagesecuritized`
-	// AmountDue      float64  `json:"investor"`
-	// 																						 // TODO, investor ids should
 }
-// type Borrower struct {
-// 	ObjectType string `json:"docType"`     //field for couchdb
-// 	Id         string `json:"id"`
-// 	Username   string `json:"username"`
-// 	// Creditworthiness     string `json`
-// }
 
 type Investor struct {
-	// ObjectType     string     `json:"docType"`     //field for couchdb
 	Id             string     `json:"id"`
 	Username       string     `json:"username"`
 	Balance				 float64    `json:"balance"`
 	Securities		 []string    `json:"securities"`
-	// Securities		 []Security `json:"securities"`
-	// Company        string     `json:"company"`
-	// AssetRelation  []string   `json:"assets"`
 }
 
 type Tranche struct {
-	// ObjectType     string    `json:"docType"`     //field for couchdb
 	Id             string    `json:"id"`
 	Amount				 int			  `json:"amount"`
 	Rating				 string		  `json:"rating"`
 	Return				 float64    `json:"return"` // lets say return is 8% on the year, and each security costs 1k
 																					  // so monthly_payout per security should total (1k * .08) / 12
 																					  // dividing that by number of assets in our pool will determine how much investor gets from each payment
-	// Pool				   Pool			 `json:"amount"`
-	// Expiration     string     `json`
-	// Investors      []Investor `json:"investors"` // TODO, array of investor ids, or array of structs?
-	// 																						 // TODO, investor ids should
 }
-
-// type BorrowerRelation struct {
-// 	Id         string `json:"id"`
-// 	Username   string `json:"username"`    //this is mostly cosmetic/handy, the real relation is by Id not Username
-// 	Company    string `json:"company"`     //this is mostly cosmetic/handy, the real relation is by Id not Company
-// }
 
 type AssetRelation struct {
 	Id         string `json:"id"`
@@ -212,7 +142,7 @@ func main() {
 // ============================================================================================================================
 // Init - initialize the chaincode
 //
-// Marbles does not require initialization, so let's run a simple test instead.
+// assets does not require initialization, so let's run a simple test instead.
 //
 // Shows off PutState() and how to pass an input argument to chaincode.
 // Shows off GetFunctionAndParameters() and GetStringArgs()
@@ -266,7 +196,7 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 	fmt.Println("  GetStringArgs() args count:", len(alt))
 	fmt.Println("  GetStringArgs() args found:", alt)
 
-	// store compatible marbles application version
+	// store compatible assets application version
 	err = stub.PutState("securitization_ui", []byte("1.0.0"))
 	if err != nil {
 		return shim.Error(err.Error())
@@ -292,40 +222,34 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return read(stub, args)
 	} else if function == "write" {            //generic writes to ledger
 		return write(stub, args)
-	// } else if function == "delete_marble" {    //deletes a marble from state
-	// 	return delete_marble(stub, args)
-	} else if function == "init_asset" {      //create a new marble
+	// } else if function == "delete_asset" {    //deletes a asset from state
+	// 	return delete_asset(stub, args)
+	} else if function == "init_asset" {      //create a new asset
 		return init_asset(stub, args)
-	} else if function == "init_asset_pool"{        //create a new marble owner
+	} else if function == "init_asset_pool"{        //create a new asset owner
 		return init_asset_pool(stub, args)
-	} else if function == "pool_asset"{        //create a new marble owner
+	} else if function == "pool_asset"{        //create a new asset owner
 		return pool_asset(stub, args)
-	} else if function == "process_payment" {      //create a new marble
+	} else if function == "process_payment" {      //create a new asset
 		return process_payment(stub, args)
-	} else if function == "set_originator" {        //change owner of a marble
+	} else if function == "set_originator" {        //change owner of a asset
 		return set_originator(stub, args)
-	} else if function == "init_originator"{        //create a new marble owner
+	} else if function == "init_originator"{        //create a new asset owner
 		return init_originator(stub, args)
-	} else if function == "init_investor"{        //create a new marble owner
+	} else if function == "init_investor"{        //create a new asset owner
 		return init_investor(stub, args)
-	} else if function == "init_security" {      //create a new marble
+	} else if function == "init_security" {      //create a new asset
 		return init_security(stub, args)
-	} else if function == "buy_security" {      //create a new marble
+	} else if function == "buy_security" {      //create a new asset
 		return buy_security(stub, args)
-	} else if function == "value_asset_pool" {      //create a new marble
+	} else if function == "value_asset_pool" {      //create a new asset
 		return value_asset_pool(stub, args)
-	} else if function == "value_asset" {      //create a new marble
+	} else if function == "value_asset" {      //create a new asset
 		return value_asset(stub, args)
 	} else if function == "delete" {
 		return delete(stub, args)
-	} else if function == "read_everything"{   //read everything, (owners + marbles + companies)
+	} else if function == "read_everything"{   //read everything, (owners + assets + companies)
 		return read_everything(stub)
-	// } else if function == "getHistory"{        //read history of a marble (audit)
-	// 	return getHistory(stub, args)
-	// } else if function == "getMarblesByRange"{ //read a bunch of marbles by start and stop id
-	// 	return getMarblesByRange(stub, args)
-	// } else if function == "disable_owner"{     //disable a marble owner from appearing on the UI
-	// 	return disable_owner(stub, args)
 	}
 
 	// error out

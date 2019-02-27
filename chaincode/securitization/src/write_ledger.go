@@ -1015,37 +1015,30 @@ func value_asset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
 
 
-// func value_security(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-// 	fmt.Println("starting value_security")
-// 	security_id = args[0]
-// 	securityAsBytes, err := stub.GetState(security_id)
-// 	security := Security{}
-// 	err = json.Unmarshal(securityAsBytes, &security)           //un stringify it aka JSON.parse()
-//
-//   // Security value is essentially the expected payout. So, we can get a rough calculation by
-// 	// (PoolValue * SecurityCouponRate) * MonthsUntilMaturity
-//   // TODO, that doesn't take into account the reduced interest amount
-//
-// 	investorAsBytes, _ := json.Marshal(investor)                         //convert to array of bytes
-// 	err = stub.PutState(investor.Id, investorAsBytes)                    //store owner by its Id
-// 	if err != nil {
-// 		fmt.Println("Could not store investor")
-// 		return shim.Error(err.Error())
-// 	}
-//
-// 	fmt.Println("- end init_investor")
-// 	return shim.Success(nil)
-//
-// }
+func value_security(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	fmt.Println("starting value_security")
+	security_id = args[0]
+	securityAsBytes, err := stub.GetState(security_id)
+	security := Security{}
+	err = json.Unmarshal(securityAsBytes, &security)           //un stringify it aka JSON.parse()
+  // Security value is essentially the expected payout. So, we can get a rough calculation by
+	// (PoolValue * SecurityCouponRate) * MonthsUntilMaturity
+  // TODO, that doesn't take into account the reduced interest amount
+	investorAsBytes, _ := json.Marshal(investor)                         //convert to array of bytes
+	err = stub.PutState(investor.Id, investorAsBytes)                    //store owner by its Id
+	if err != nil {
+		fmt.Println("Could not store investor")
+		return shim.Error(err.Error())
+	}
+
+	fmt.Println("- end init_investor")
+	return shim.Success(nil)
+}
 
 // create account number for investor account
 func init_investor(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	var err error
 	fmt.Println("starting init_investor")
-
-	// if len(args) != 3 {
-	// 	return shim.Error("Incorrect number of arguments. Expecting 3")
-	// }
 
 	//input sanitation
 	err = sanitize_arguments(args)
@@ -1054,23 +1047,13 @@ func init_investor(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	}
 
 	var investor Investor
-	// investor.ObjectType = "asset_investor"
 	investor.Id =  args[0]
 	if len(args) > 1 {
 		investor.Username = strings.ToLower(args[1])
 	}
-	// investor.Company = args[2]
-	// originator.Enabled = true
 	fmt.Println(investor)
 
-	//check if user already exists
-	// _, err = get_investor(stub, investor.Id)
-	// if err == nil {
-	// 	fmt.Println("This investor already exists - " + investor.Id)
-	// 	return shim.Error("This investor already exists - " + investor.Id)
-	// }
-
-	//store user
+	//store investor
 	investorAsBytes, _ := json.Marshal(investor)                         //convert to array of bytes
 	err = stub.PutState(investor.Id, investorAsBytes)                    //store owner by its Id
 	if err != nil {
@@ -1086,10 +1069,6 @@ func init_security(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	var err error
 	fmt.Println("starting init_security")
 
-	// if len(args) != 3 {
-	// 	return shim.Error("Incorrect number of arguments. Expecting 3")
-	// }
-
 	//input sanitation
 	err = sanitize_arguments(args)
 	if err != nil {
@@ -1097,26 +1076,15 @@ func init_security(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	}
 
 	var security Security
-	// security.Rating = "asset_investor"
 	fmt.Println(args)
 	security.Id = args[0]
 	security.CouponRate, err = strconv.ParseFloat(args[1], 32)
 	pool_id := args[2]
 	security.RemainingPayments = args[3] // hardcoding security life as 3 years for now
-	security.Maturity = false // TODO, maturity is end of life for a loan, not a security
+	security.Maturity = false
 
 	security.Pool = pool_id
-	// investor.Company = args[2]
-	// originator.Enabled = true
-	//check if user already exists
-	// _, err = get_security(stub, security.Id)
-	// if err == nil {
-	// 	fmt.Println("This security already exists - " + security.Id)
-	// 	return shim.Error("This security already exists - " + security.Id)
-	// }
 
-	//
-	// security.MonthlyPayout =
 	//store user
 	securityAsBytes, _ := json.Marshal(security)                         //convert to array of bytes
 	err = stub.PutState(security.Id, securityAsBytes)                    //store owner by its Id
@@ -1139,8 +1107,6 @@ func init_security(stub shim.ChaincodeStubInterface, args []string) pb.Response 
 	fmt.Println("- end init_security")
 	return shim.Success(nil)
 }
-
-// buy_securities (investor, pool, amount)
 
 func InArray(needle interface{}, haystack interface{}) (exists bool, index int) {
 	exists = false
@@ -1173,14 +1139,6 @@ func buy_security(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	}
 	var investor_id = args[0]
 	var security_id = args[1]
-	// var authed_by_company = args[2]
-	// fmt.Println(marble_id + "->" + new_owner_id + " - |" + authed_by_company)
-
-	// check if user already exists
-	// owner, err := get_originator(stub, new_owner_id)
-	// if err != nil {
-	// 	return shim.Error("This owner does not exist - " + new_owner_id)
-	// }
 
 	// load investor
 	investorAsBytes, err := stub.GetState(investor_id)
@@ -1189,11 +1147,6 @@ func buy_security(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	}
 	investor := Investor{}
 	json.Unmarshal(investorAsBytes, &investor)           //un stringify it aka JSON.parse()
-	// jsonAsBytes, _ := json.Marshal(asset)           //convert to array of bytes
-	// err = stub.PutState(asset_id, jsonAsBytes)     //rewrite the marble with id as key
-	// if err != nil {
-	// 	return shim.Error(err.Error())
-	// }
 
   // load security
 	securityAsBytes, err := stub.GetState(security_id)
@@ -1213,12 +1166,6 @@ func buy_security(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 			return shim.Error(err.Error())
 		}
 	}
-	// securityAsBytes, _ = json.Marshal(security)           //convert to array of bytes
-	// err = stub.PutState(security_id, securityAsBytes)     //rewrite the marble with id as key
-
-	// assetArray := []string{asset_id}  //[]string{pool_id, resPool.Assets}
-	// resPool.Assets = assetArray
-  // updatedAssets := [string]{resPool.Assets, pool_id}
 
 	fmt.Println("setting security investor")
 	fmt.Println("security before")
@@ -1234,53 +1181,3 @@ func buy_security(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	fmt.Println("- end buy_security")
 	return shim.Success(nil)
 }
-
-// ============================================================================================================================
-// Disable Marble Owner
-//
-// Shows off PutState()
-//
-// Inputs - Array of Strings
-//       0     ,        1
-//  owner id       , company that auth the transfer
-// "o9999999999999", "united_mables"
-// ============================================================================================================================
-// func disable_owner(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-// 	var err error
-// 	fmt.Println("starting disable_owner")
-//
-// 	if len(args) != 2 {
-// 		return shim.Error("Incorrect number of arguments. Expecting 2")
-// 	}
-//
-// 	// input sanitation
-// 	err = sanitize_arguments(args)
-// 	if err != nil {
-// 		return shim.Error(err.Error())
-// 	}
-//
-// 	var owner_id = args[0]
-// 	var authed_by_company = args[1]
-//
-// 	// get the marble owner data
-// 	owner, err := get_owner(stub, owner_id)
-// 	if err != nil {
-// 		return shim.Error("This owner does not exist - " + owner_id)
-// 	}
-//
-// 	// check authorizing company
-// 	if owner.Company != authed_by_company {
-// 		return shim.Error("The company '" + authed_by_company + "' cannot change another companies marble owner")
-// 	}
-//
-// 	// disable the owner
-// 	owner.Enabled = false
-// 	jsonAsBytes, _ := json.Marshal(owner)         //convert to array of bytes
-// 	err = stub.PutState(args[0], jsonAsBytes)     //rewrite the owner
-// 	if err != nil {
-// 		return shim.Error(err.Error())
-// 	}
-//
-// 	fmt.Println("- end disable_owner")
-// 	return shim.Success(nil)
-// }

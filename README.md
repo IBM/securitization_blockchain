@@ -133,9 +133,9 @@ To run the Securitization UI locally, we'll need to install a few node libraries
 
 There are two methods we can use to deploy the application, either run everything locally on your development machine, *OR* initialize a hosted blockchain service and run in IBM Cloud. These separate steps are labeled as **local** or **hosted**, respectively
 
-1. [Provision Blockchain+Kubernetes services in IBM Cloud Platform](#1-provision-cloud-services)
-2. [Configure IBM Cloud Services](#2-configure-ibm-cloud-services)
-3. [Clone repository](#3-clone-the-repository)
+1. [Clone repository](#1-clone-the-repository)
+2. [Provision Blockchain + Kubernetes services in IBM Cloud Platform](#2-provision-cloud-services)
+3. [Configure IBM Cloud Services](#3-configure-ibm-cloud-services)
 <!-- 5. [Start the Application](#5-run-the-application) -->
 4. Configure and Deploy application [locally](#4-deploy-application-locally) OR [On IBM Cloud](#4-deploy-application-on-ibm-cloud)
 5. [Import Service Credentials](#5-import-service-credentials)
@@ -143,9 +143,17 @@ There are two methods we can use to deploy the application, either run everythin
 
 <!-- 7. [Configure and run the application](#7-ui-configuration) -->
 
-## 1. Provision Cloud Services (**hosted**)
+## 1. Clone the repository
 
-Next, we'll need to deploy our service instances using the IBM Cloud dashboard. This step is only required if you're not deploying the application locally. If you will be running the app and blockchain cluster locally, please skip ahead to the "Clone Repository" section
+Clone the `securitization_blockchain` project locally. In a terminal, run:
+
+```bash
+git clone https://github.com/IBM/securitization_blockchain.git
+```
+
+## 2. Provision Cloud Services (**hosted**)
+
+Next, we'll need to deploy our service instances using the IBM Cloud dashboard. This step is only required if you're using a hosted Blockchain service instead of a local Hyperledger network. If you will be running the node application and Hyperledger Blockchain network locally, please skip ahead to the "Clone Repository" section
 
 ### Blockchain
 
@@ -153,13 +161,13 @@ The IBM Blockchain service can be found by logging in to the IBM Cloud [dashboar
 
 <img src="https://i.imgur.com/qWQOXq5.png">
 
-After selecting the blockchain icon, a form will be presented for configuring the service name, region, and pricing plan. The default values for these fields can be left as is. Also, be sure that the free pricing tier is selected, which is titled "Starter Membership Plan". If you are using an IBM Cloud Lite account, this plan can be used for free for up to 30 days. After validating that the information in the form is correct, scroll down and click the "Create" button in the lower right corner
+After selecting the blockchain icon, a form will be presented for configuring the service name, region, and pricing plan. The default values for these fields can be left as is. After validating that the information in the form is correct, scroll down and click the "Create" button in the lower right corner
 <img src="https://i.imgur.com/ROAjOzr.png">
 
 ### Kubernetes
 
 Create a Kubernetes cluster [here](https://console.bluemix.net/containers-kubernetes/catalog/cluster/create). The free offering will
-suffice for this demo app. Kubernetes will be used to host a container running the express and react applications
+suffice for this demo app. Kubernetes will be used to deploy a Ubuntu container running the express and react applications
 
 <!-- TODO ADD Photos -->
 <img src="https://i.imgur.com/eEs7kAB.png">
@@ -185,14 +193,14 @@ kubectl get nodes
 * [**IBM Blockchain**](https://console.bluemix.net/catalog/services/blockchain)
 * [**Watson IoT Platform**](https://console.bluemix.net/catalog/services/internet-of-things-platform) -->
 
-## 2. Configure IBM Cloud Services
+## 3. Configure IBM Cloud Services
 
 In this section, we'll be uploading our securitization logic to the Blockchain service.
 
 "Smart contracts", commonly referred to as "Chaincode", can be used to execute business logic and validate incoming requests. In this context, the contracts are used to initialize all participants of the securitization process, define their relationships, and verify transactions. These contracts can be hosted either on IBM Cloud or on a local Hyperledger network managed by Docker.
 
 ### IBM Cloud Hosted Hyperledger (**hosted**)
-To begin the process of uploading the smart contracts to the hosted blockchain service, we can start by opening the IBM Cloud dashboard, selecting your provisioned Blockchain service, and accessing the blockchain network monitor by clicking "Enter Monitor"
+To begin the process of uploading the smart contracts (also referred to as "chaincode") to the hosted blockchain service, we can start by opening the IBM Cloud dashboard, selecting your provisioned Blockchain service, and accessing the blockchain network monitor by clicking "Enter Monitor"
 <img src="https://i.imgur.com/BpUjPhe.png">
 
 Next, click the "Install code" option on the left hand menu, and then the "Install Chaincode" button on the right of the page
@@ -201,7 +209,7 @@ Next, click the "Install code" option on the left hand menu, and then the "Insta
 Enter an id and a version (here we'll use "sec" and "v1"). Then, select the "Choose Files" button to upload the smart contracts, which are titled [lib.go](chaincode/src/lib.go), [read_ledger.go](chaincode/src/read_ledger.go), [write_ledger.go](chaincode/src/write_ledger.go), and [securitization.go](chaincode/src/securitization.go). These files are located in the `chaincode/src` directory of this project
 <img src="https://i.imgur.com/NJgMwPm.png">
 
-Finally, we'll need to Instantiate the chaincode. This can be done by opening the chaincode "Actions" menu and selecting "Instantiate". This will present a form where arguments can be provided to the chaincode `init` function. In this case, we'll just need to provide an integer (we used `"101"`) to the Arguments section, then click "Next" and then "Submit"
+Finally, we'll need to "instantiate" the chaincode. This can be done by opening the chaincode "Actions" menu and selecting "Instantiate". This will present a form where arguments can be provided to the chaincode `init` function. In this case, we'll just need to provide an integer (we used `"101"`) to the Arguments section, then click "Next" and then "Submit"
 <img src="https://i.imgur.com/eh1Djmj.png">
 
 ### Hyperledger Network Setup (**local**)
@@ -214,8 +222,11 @@ cd local
 ./startFabric.sh
 ```
 
-### Manual installation
-Otherwise, continue by installing [Node.js](https://nodejs.org/en/) runtime and NPM. Currently the Hyperledger Fabric SDK only appears to work with node v8.9.0+, but [is not yet supported](https://github.com/hyperledger/fabric-sdk-node#build-and-test) on node v9.0+. If your system requires newer versions of node for other projects, we'd suggest using [nvm](https://github.com/creationix/nvm) to easily switch between node versions. We did so with the following commands
+The network can be deleted at any time by running `./stopFabric.sh`
+
+
+### Install dependencies for local application deployment
+Continue by installing [Node.js](https://nodejs.org/en/) runtime and NPM. Currently the Hyperledger Fabric SDK only appears to work with node v8.9.0+, but [is not yet supported](https://github.com/hyperledger/fabric-sdk-node#build-and-test) on node v9.0+. If your system requires newer versions of node for other projects, we'd suggest using [nvm](https://github.com/creationix/nvm) to easily switch between node versions. We  can install nvm and node v8.9.0 with the following commands
 ```
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
 # Place next three lines in ~/.bash_profile
@@ -224,39 +235,6 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 nvm install v8.9.0
 nvm use 8.9.0
-```
-
-Install the Monitoring UI node packages by running `npm install` in the project root directory and in the [react-backend](react-backend) directory. Both `python` and `build-essential` are required for these dependencies to install properly:
-
-```
-npm install
-cd react-backend && npm install
-```
-
-<!-- Finally, compile the `bundle.js` file
-```
-cd public
-npm run build
-``` -->
-
-<!-- Method	| Command	|Comment
---- | --- | ---
-Filesystem | `npm run build` | The build command generates the bundle.js file in the public directory. </br>To access the Monitoring UI, go to the `monitoring_ui/public` directory and open the *index.html* file in a browser. -->
-
-<!-- Launch the **Watson Conversation** tool. Use the **import** icon button on the right
-
-Find the local version of [`data/conversation/workspaces/banking.json`](data/conversation/workspaces/banking.json) and select
-**Import**. Find the **Workspace ID** by clicking on the context menu of the new
-workspace and select **View details**. Save this ID for later.
-
-*Optionally*, to view the conversation dialog select the workspace and choose the
-**Dialog** tab, here's a snippet of the dialog: -->
-## 3. Clone the repository
-
-Clone the `securitization_blockchain` project locally. In a terminal, run:
-
-```bash
-git clone https://github.com/IBM/securitization_blockchain.git
 ```
 
 ## 4. Deploy Application on IBM Cloud (**hosted**)
@@ -310,18 +288,19 @@ Confirm that the Node.js application is up and running by opening the following
 ```
 
 ## 4. Deploy Application Locally (**local**)
-<!-- Install the Securitization UI node packages by running `npm install` in the project root directory and in the [react-backend](sc-ui/react-backend) directory. Both `python` and `build-essential` are required for these dependencies to install properly: -->
+Both `python2.7` and `build-essential` are required for these dependencies to install properly. Please refer to the `install_deps.sh` script if installing on a new system.
 
 Make sure the correct version of node is equipped
 ```
 nvm use 8.9.0
 ```
 
+Install the required node packages by running `npm install` in the `sc-ui` directory and in the `sc-ui/react-backend` directory. Both `python` and `build-essential` are required for these dependencies to install properly:
+
 ```bash
 # install react dependencies
 cd sc-ui
 npm install
-npm run build
 
 # install express/hyperledger dependencies
 cd react-backend
@@ -329,6 +308,13 @@ npm install
 
 # return to the root project directory
 cd ../../
+```
+
+Add the following entries to the /etc/hosts file. This is only necessary when running the app locally, and routes the url for each hyperledger component to localhost
+```
+127.0.0.1 peer0.org1.example.com
+127.0.0.1 ca.example.com
+127.0.0.1 orderer.example.com
 ```
 
 Finally, run the application
@@ -345,20 +331,15 @@ Build the application and dependencies in a docker image like so
 ```bash
 docker build -t securitization-blockchain .
 ```
-<!-- Start the app locally
-```
-cd sc-ui
-PORT=30000 npm start | PORT=30001 DEPLOY_TYPE=local node react-backend/bin/www
-``` -->
 
 Then start the docker container with
 ```
-docker run -it -p 30000:30000 -p 30001:30001 -e DEPLOY_TYPE=local  --network net_basic securitization-blockchain bash -c 'cd /root/securitization_blockchain/sc-ui ; PORT=30000 npm start | PORT=30001 node react-backend/bin/www'
+docker run -it -p 30000:30000 -p 30001:30001 --name securitization -e DEPLOY_TYPE=local  --network net_basic securitization-blockchain bash -c 'cd /root/securitization_blockchain/sc-ui ; PORT=30000 npm start | PORT=30001 node react-backend/bin/www'
 ```
 
 The application can instead be booted from a public image as well if there is no need to build a custom image
 ```
-docker run -it -p 30000:30000 -p 30001:30001 -e DEPLOY_TYPE=local  --network net_basic kkbankol/securitization-blockchain bash -c 'cd /root/securitization_blockchain/sc-ui ; PORT=30000 npm start | PORT=30001 node react-backend/bin/www'
+docker run -it -p 30000:30000 -p 30001:30001 --name securitization -e DEPLOY_TYPE=local  --network net_basic kkbankol/securitization-blockchain bash -c 'cd /root/securitization_blockchain/sc-ui ; PORT=30000 npm start | PORT=30001 node react-backend/bin/www'
 ```
 
 <!-- This method is ideal for a development environment but not suitable for a production environment. TODO, this comment is from the original author, would like to understand why-->
