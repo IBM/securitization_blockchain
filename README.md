@@ -353,12 +353,12 @@ PORT=30000 npm start | PORT=30001 DEPLOY_TYPE=local node react-backend/bin/www
 
 Then start the docker container with
 ```
-docker run -it -p 30000:30000 -e DEPLOY_TYPE=local -p 30001:30001 securitization-blockchain bash -c 'cd /root/securitization_blockchain/sc-ui ; PORT=30000 npm start | PORT=30001 node react-backend/bin/www'
+docker run -it -p 30000:30000 -p 30001:30001 -e DEPLOY_TYPE=local  --network net_basic securitization-blockchain bash -c 'cd /root/securitization_blockchain/sc-ui ; PORT=30000 npm start | PORT=30001 node react-backend/bin/www'
 ```
 
 The application can instead be booted from a public image as well if there is no need to build a custom image
 ```
-docker run -it -p 30000:30000 -e DEPLOY_TYPE=local -p 30001:30001 kkbankol/securitization-blockchain bash -c 'cd /root/securitization_blockchain/sc-ui ; PORT=30000 npm start | PORT=30001 node react-backend/bin/www'
+docker run -it -p 30000:30000 -p 30001:30001 -e DEPLOY_TYPE=local  --network net_basic kkbankol/securitization-blockchain bash -c 'cd /root/securitization_blockchain/sc-ui ; PORT=30000 npm start | PORT=30001 node react-backend/bin/www'
 ```
 
 <!-- This method is ideal for a development environment but not suitable for a production environment. TODO, this comment is from the original author, would like to understand why-->
