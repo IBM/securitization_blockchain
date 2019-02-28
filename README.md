@@ -7,7 +7,7 @@ Securitization is a financial process that can be used to consolidate a set of i
 When the reader has completed this Code Pattern, they will understand how to:
 
 * Deploy a Hyperledger Blockchain network on IBM Cloud
-* Create and enroll a administrative client using the Hyperledger Node SDK
+* Create and enroll an administrative client using the Hyperledger Node SDK
 * Deploy and Instantiate a set of smart contracts to handle transactions and pool assets
 
 ![](readme-images/arch-flow-securitization.png)
@@ -157,11 +157,11 @@ Next, we'll need to deploy our service instances using the IBM Cloud dashboard. 
 
 ### Blockchain
 
-The IBM Blockchain service can be found by logging in to the IBM Cloud [dashboard](https://console.bluemix.net/), selecting the "Catalog" button, searching for "Blockchain", and clicking on the resulting icon. Or click this [*link*](https://console.bluemix.net/catalog/services/blockchain).
+The IBM Blockchain service can be found by logging in to the IBM Cloud [dashboard](https://console.bluemix.net/), selecting the `Catalog` button, searching for "Blockchain", and clicking on the resulting icon. Or click this [*link*](https://console.bluemix.net/catalog/services/blockchain).
 
 <img src="https://i.imgur.com/qWQOXq5.png">
 
-After selecting the blockchain icon, a form will be presented for configuring the service name, region, and pricing plan. The default values for these fields can be left as is. After validating that the information in the form is correct, scroll down and click the "Create" button in the lower right corner
+After selecting the blockchain icon, a form will be presented for configuring the service name, region, and pricing plan. The default values for these fields can be left as is. After validating that the information in the form is correct, scroll down and click the `Create` button in the lower right corner
 <img src="https://i.imgur.com/ROAjOzr.png">
 
 ### Kubernetes
