@@ -153,7 +153,7 @@ git clone https://github.com/IBM/securitization_blockchain.git
 
 ## 2. Provision Cloud Services (**hosted**)
 
-Next, we'll need to deploy our service instances using the IBM Cloud dashboard. This step is only required if you're using a hosted Blockchain service instead of a local Hyperledger network. If you will be running the node application and Hyperledger Blockchain network locally, please skip ahead to the "Clone Repository" section
+Next, we'll need to deploy our service instances using the IBM Cloud dashboard. This step is only required if you're using a hosted Blockchain service instead of a local Hyperledger network.
 
 ### Blockchain
 
