@@ -214,28 +214,56 @@ Finally, we'll need to "instantiate" the chaincode. This can be done by opening 
 
 ### Hyperledger Network Setup (**local**)
 <!-- If you're planning to make custom changes to the smart contracts, it may be faster to develop and test chaincode locally before pushing to a hosted service.  -->
-As an alternative to the hosted IBM Blockchain service, we can deploy a local Hyperledger network using docker-compose in a script like so
+As an alternative to the hosted IBM Blockchain service, we can deploy a local Hyperledger network using docker-compose in a script like so.
 
+Enter the `local` directory
+```bash
+cd local
+```
+
+Run the "stopFabric" script to clean up by removing any residual Hyperledger containers. This will also remove the `securitization` container if it exists.
+```bash
+./stopFabric.sh
+```
+
+Start a new Hyperledger network
 ```bash
 export COMPOSE_PROJECT_NAME=net
-cd local
 ./startFabric.sh
 ```
 
 The network can be deleted at any time by running `./stopFabric.sh`
 
+<!-- Next, run the the [installChaincode.sh](local/installChaincode.sh) script, which will installs and instantiates the smart contracts on the Hyperledger network.
+```
+./installChaincode.sh
+``` -->
 
-### Install dependencies for local application deployment
-Continue by installing [Node.js](https://nodejs.org/en/) runtime and NPM. Currently the Hyperledger Fabric SDK only appears to work with node v8.9.0+, but [is not yet supported](https://github.com/hyperledger/fabric-sdk-node#build-and-test) on node v9.0+. If your system requires newer versions of node for other projects, we'd suggest using [nvm](https://github.com/creationix/nvm) to easily switch between node versions. We  can install nvm and node v8.9.0 with the following commands
+Next, copy the chaincode artifacts to the docker cli container
 ```
-curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
-# Place next three lines in ~/.bash_profile
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-nvm install v8.9.0
-nvm use 8.9.0
+docker cp ../chaincode/src/ cli:/opt/gopath/src/github.com/securitization
 ```
+
+Now we can run a series of docker commands to install and instantiate the chaincode from the `cli` container.
+
+First, we'll install the chaincode
+
+`
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode install -n securitization -v 1.0 -p github.com/securitization
+`
+
+And instantiate the chaincode
+
+`
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n securitization -v 1.0 -c '{"Args":["101"]}'
+`
+
+Once this is complete, we can invoke smart contracts using `docker exec` like below. this invoke call runs the `read_everything` function, which prints all assets, securities, etc.
+
+`
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp" cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n securitization -c '{"Args":["read_everything"]}'
+`
+
 
 ## 4. Deploy Application on IBM Cloud (**hosted**)
 
@@ -290,8 +318,15 @@ Confirm that the Node.js application is up and running by opening the following
 ## 4. Deploy Application Locally (**local**)
 Both `python2.7` and `build-essential` are required for these dependencies to install properly. Please refer to the `install_deps.sh` script if installing on a new system.
 
-Make sure the correct version of node is equipped
+### Install dependencies for local application deployment
+Continue by installing [Node.js](https://nodejs.org/en/) runtime and NPM. Currently the Hyperledger Fabric SDK only appears to work with node v8.9.0+, but [is not yet supported](https://github.com/hyperledger/fabric-sdk-node#build-and-test) on node v9.0+. If your system requires newer versions of node for other projects, we'd suggest using [nvm](https://github.com/creationix/nvm) to easily switch between node versions. We  can install nvm and node v8.9.0 with the following commands
 ```
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+# Place next three lines in ~/.bash_profile
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+nvm install v8.9.0
 nvm use 8.9.0
 ```
 
