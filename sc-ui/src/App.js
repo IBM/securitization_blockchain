@@ -27,8 +27,8 @@ import DeleteObjectForm from './components/forms/deleteObjectForm.jsx'
 import FormDialog from './components/forms/FormDialog.js'
 
 
-import { Card, ListItem, Button, Icon } from 'react-native-elements'
-import { View, Text, Image } from 'react-native'
+// import { Card, ListItem, Button, Icon } from 'react-native-elements'
+// import { View, Text, Image } from 'react-native'
 import Button from '@material-ui/core/Button';
 import Text from '@material-ui/core/TextField'
 import Card from '@material-ui/core/Card'
