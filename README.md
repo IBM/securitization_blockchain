@@ -166,8 +166,7 @@ After selecting the blockchain icon, a form will be presented for configuring th
 
 ### Kubernetes
 
-Create a Kubernetes cluster [here](https://console.bluemix.net/containers-kubernetes/catalog/cluster/create). The free offering will
-suffice for this demo app. Kubernetes will be used to deploy a Ubuntu container running the express and react applications
+Create a Kubernetes cluster [here](https://console.bluemix.net/containers-kubernetes/catalog/cluster/create). The free offering will suffice for this demo app. Kubernetes will be used to deploy a Ubuntu container running the express and react applications
 
 <!-- TODO ADD Photos -->
 <img src="https://i.imgur.com/eEs7kAB.png">
