@@ -1014,26 +1014,27 @@ func value_asset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
 
 
-
+/*
 func value_security(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	fmt.Println("starting value_security")
-	security_id = args[0]
+	security_id := args[0]
 	securityAsBytes, err := stub.GetState(security_id)
 	security := Security{}
 	err = json.Unmarshal(securityAsBytes, &security)           //un stringify it aka JSON.parse()
   // Security value is essentially the expected payout. So, we can get a rough calculation by
 	// (PoolValue * SecurityCouponRate) * MonthsUntilMaturity
   // TODO, that doesn't take into account the reduced interest amount
-	investorAsBytes, _ := json.Marshal(investor)                         //convert to array of bytes
-	err = stub.PutState(investor.Id, investorAsBytes)                    //store owner by its Id
-	if err != nil {
-		fmt.Println("Could not store investor")
-		return shim.Error(err.Error())
-	}
+	// investorAsBytes, _ := json.Marshal(investor)                         //convert to array of bytes
+	// err = stub.PutState(investor.Id, investorAsBytes)                    //store owner by its Id
+	// if err != nil {
+	// 	fmt.Println("Could not store investor")
+	// 	return shim.Error(err.Error())
+	// }
 
 	fmt.Println("- end init_investor")
 	return shim.Success(nil)
 }
+*/
 
 // create account number for investor account
 func init_investor(stub shim.ChaincodeStubInterface, args []string) pb.Response {
